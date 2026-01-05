@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,16 +23,25 @@ export default function LoginPage() {
     setError("")
     setIsLoading(true)
 
-    // Mock login validation
-    setTimeout(() => {
-      if (email === "admin@sst.com" && password === "admin123") {
-        localStorage.setItem("sst-user", JSON.stringify({ email, name: "Administrador", role: "admin" }))
-        router.push("/dashboard")
-      } else {
-        setError("Credenciais inválidas. Use: admin@sst.com / admin123")
-        setIsLoading(false)
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        throw error
       }
-    }, 800)
+
+      if (data.user) {
+        router.push("/dashboard")
+      }
+    } catch (err: any) {
+      console.error("Login error:", err)
+      setError(err.message || "Falha na autenticação. Verifique suas credenciais.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -99,8 +109,6 @@ export default function LoginPage() {
                 "Entrar"
               )}
             </Button>
-
-            <div className="text-xs text-center text-slate-500 pt-4">Demo: admin@sst.com / admin123</div>
           </form>
         </CardContent>
       </Card>

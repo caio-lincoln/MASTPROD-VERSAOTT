@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,34 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Building2, User } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { supabase } from "@/lib/supabaseClient"
 
 interface TrainingModalProps {
   open: boolean
   onClose: () => void
 }
 
-const mockCompanies = [
-  { id: 1, name: "Empresa Alpha Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Beta Indústria S.A.", cnpj: "23.456.789/0001-01" },
-  { id: 3, name: "Gamma Serviços", cnpj: "34.567.890/0001-12" },
-  { id: 4, name: "Delta Construções", cnpj: "45.678.901/0001-23" },
-  { id: 5, name: "Epsilon Tecnologia", cnpj: "56.789.012/0001-34" },
-]
-
-const mockEmployees = [
-  { id: 1, name: "João Silva", position: "Eletricista", department: "Manutenção", companyId: 1 },
-  { id: 2, name: "Maria Santos", position: "Supervisora", department: "Segurança", companyId: 1 },
-  { id: 3, name: "Carlos Oliveira", position: "Operador", department: "Produção", companyId: 2 },
-  { id: 4, name: "Ana Paula", position: "Técnica", department: "Qualidade", companyId: 2 },
-  { id: 5, name: "Pedro Costa", position: "Soldador", department: "Produção", companyId: 3 },
-  { id: 6, name: "Juliana Lima", position: "Analista", department: "RH", companyId: 3 },
-  { id: 7, name: "Roberto Alves", position: "Motorista", department: "Logística", companyId: 4 },
-  { id: 8, name: "Fernanda Souza", position: "Engenheira", department: "Projetos", companyId: 4 },
-  { id: 9, name: "Ricardo Santos", position: "Operador", department: "Produção", companyId: 5 },
-  { id: 10, name: "Camila Rocha", position: "Auxiliar", department: "Administrativo", companyId: 5 },
-  { id: 11, name: "Marcos Ferreira", position: "Técnico", department: "Manutenção", companyId: 1 },
-  { id: 12, name: "Patrícia Dias", position: "Coordenadora", department: "Qualidade", companyId: 2 },
-]
+type CompanyRow = { id: string; razao_social: string; cnpj: string }
+type EmployeeRow = { id: string; nome: string; cargo: string | null; departamento: string | null; empresa_id: string }
 
 export function TrainingModal({ open, onClose }: TrainingModalProps) {
   const [formData, setFormData] = useState({
@@ -52,12 +33,32 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
   const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
   const [employeeSearch, setEmployeeSearch] = useState("")
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string; cnpj: string }>>([])
+  const [employees, setEmployees] = useState<Array<{ id: string; name: string; position: string; department: string; companyId: string }>>([])
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: empresas } = await supabase.from("empresas").select("id, razao_social, cnpj")
+      setCompanies((empresas as CompanyRow[]).map((c) => ({ id: c.id, name: c.razao_social, cnpj: c.cnpj })))
+      const { data: funcs } = await supabase.from("funcionarios").select("id, nome, cargo, departamento, empresa_id")
+      setEmployees(
+        (funcs as EmployeeRow[]).map((f) => ({
+          id: f.id,
+          name: f.nome,
+          position: f.cargo || "",
+          department: f.departamento || "",
+          companyId: f.empresa_id,
+        })),
+      )
+    }
+    if (open) load()
+  }, [open])
 
   const filteredEmployees = useMemo(() => {
     if (!formData.companyId) return []
 
-    return mockEmployees
-      .filter((emp) => emp.companyId === Number.parseInt(formData.companyId))
+    return employees
+      .filter((emp) => emp.companyId === formData.companyId)
       .filter(
         (emp) =>
           emp.name.toLowerCase().includes(employeeSearch.toLowerCase()) ||
@@ -68,8 +69,21 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Training data:", { ...formData, employees: selectedEmployees })
-    onClose()
+    const run = async () => {
+      for (const empId of selectedEmployees) {
+        await supabase.from("treinamentos").insert({
+          titulo: formData.name,
+          descricao: formData.description,
+          status: "agendado",
+          data_inicio: formData.date,
+          empresa_id: formData.companyId,
+          funcionario_id: empId,
+          tipo_acao: "novo",
+        })
+      }
+      onClose()
+    }
+    run()
   }
 
   const toggleAllEmployees = () => {
@@ -184,8 +198,8 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
-                    {mockCompanies.map((company) => (
-                      <SelectItem key={company.id} value={company.id.toString()} className="text-white">
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id} className="text-white">
                         <div className="flex items-center gap-2">
                           <Building2 className="w-4 h-4 text-emerald-400" />
                           <div>
@@ -241,8 +255,8 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                             >
                               <Checkbox
                                 id={`employee-${employee.id}`}
-                                checked={selectedEmployees.includes(employee.id)}
-                                onCheckedChange={() => toggleEmployee(employee.id)}
+                                checked={selectedEmployees.includes(Number(employee.id))}
+                                onCheckedChange={() => toggleEmployee(Number(employee.id))}
                                 className="border-slate-600 data-[state=checked]:bg-emerald-500"
                               />
                               <Label

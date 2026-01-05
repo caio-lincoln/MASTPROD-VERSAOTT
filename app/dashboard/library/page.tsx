@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,187 +9,70 @@ import { Pagination } from "@/components/pagination"
 import { DocumentUploadModal } from "@/components/document-upload-modal"
 import { DocumentDetailsModal } from "@/components/document-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockDocuments = [
-  {
-    id: 1,
-    name: "NR-35 Trabalho em Altura.pdf",
-    type: "Norma",
-    size: "2.4 MB",
-    date: "2024-01-10",
-    category: "Legislação",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Norma regulamentadora sobre trabalho em altura - requisitos mínimos e medidas de proteção",
-    uploadedBy: "Carlos Silva",
-    version: "1.0",
-    tags: ["NR-35", "Altura", "Segurança"],
-  },
-  {
-    id: 2,
-    name: "Manual EPI - Luvas.pdf",
-    type: "Manual",
-    size: "1.8 MB",
-    date: "2024-01-08",
-    category: "Manuais",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Manual técnico de uso e conservação de luvas de proteção",
-    uploadedBy: "Maria Santos",
-    version: "2.1",
-    tags: ["EPI", "Luvas", "Manual"],
-  },
-  {
-    id: 3,
-    name: "PPRA 2024.pdf",
-    type: "Programa",
-    size: "5.2 MB",
-    date: "2024-01-05",
-    category: "Programas",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Programa de Prevenção de Riscos Ambientais - Análise completa dos riscos",
-    uploadedBy: "Carlos Silva",
-    version: "3.0",
-    tags: ["PPRA", "Riscos", "2024"],
-  },
-  {
-    id: 4,
-    name: "Checklist Inspeção.xlsx",
-    type: "Formulário",
-    size: "156 KB",
-    date: "2024-01-03",
-    category: "Formulários",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Formulário de inspeção de segurança para ambientes de trabalho",
-    uploadedBy: "João Oliveira",
-    version: "1.5",
-    tags: ["Checklist", "Inspeção", "Formulário"],
-  },
-  {
-    id: 5,
-    name: "NR-10 Eletricidade.pdf",
-    type: "Norma",
-    size: "3.1 MB",
-    date: "2024-01-09",
-    category: "Legislação",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Norma regulamentadora sobre segurança em instalações e serviços em eletricidade",
-    uploadedBy: "Maria Santos",
-    version: "1.0",
-    tags: ["NR-10", "Eletricidade", "Segurança"],
-  },
-  {
-    id: 6,
-    name: "Procedimento Espaço Confinado.pdf",
-    type: "Procedimento",
-    size: "1.2 MB",
-    date: "2024-01-07",
-    category: "Procedimentos",
-    companyId: 4,
-    companyName: "Delta Construções",
-    description: "Procedimento operacional padrão para trabalho em espaços confinados",
-    uploadedBy: "Pedro Costa",
-    version: "2.0",
-    tags: ["Espaço Confinado", "Procedimento", "NR-33"],
-  },
-  {
-    id: 7,
-    name: "PCMSO 2024.pdf",
-    type: "Programa",
-    size: "4.8 MB",
-    date: "2024-01-06",
-    category: "Programas",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Programa de Controle Médico de Saúde Ocupacional",
-    uploadedBy: "Carlos Silva",
-    version: "3.0",
-    tags: ["PCMSO", "Saúde", "2024"],
-  },
-  {
-    id: 8,
-    name: "Manual Capacete.pdf",
-    type: "Manual",
-    size: "890 KB",
-    date: "2024-01-04",
-    category: "Manuais",
-    companyId: 5,
-    companyName: "Epsilon Tecnologia",
-    description: "Manual de uso e manutenção de capacetes de segurança",
-    uploadedBy: "Ana Lima",
-    version: "1.2",
-    tags: ["EPI", "Capacete", "Manual"],
-  },
-  {
-    id: 9,
-    name: "NR-06 EPIs.pdf",
-    type: "Norma",
-    size: "2.7 MB",
-    date: "2024-01-11",
-    category: "Legislação",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Norma regulamentadora sobre Equipamentos de Proteção Individual",
-    uploadedBy: "João Oliveira",
-    version: "1.0",
-    tags: ["NR-06", "EPI", "Legislação"],
-  },
-  {
-    id: 10,
-    name: "Ficha Emergência.xlsx",
-    type: "Formulário",
-    size: "128 KB",
-    date: "2024-01-02",
-    category: "Formulários",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Ficha de registro para situações de emergência",
-    uploadedBy: "Maria Santos",
-    version: "1.0",
-    tags: ["Emergência", "Formulário", "Segurança"],
-  },
-  {
-    id: 11,
-    name: "PGR - Programa Gerenciamento Riscos.pdf",
-    type: "Programa",
-    size: "6.5 MB",
-    date: "2024-01-12",
-    category: "Programas",
-    companyId: 4,
-    companyName: "Delta Construções",
-    description: "Programa de Gerenciamento de Riscos - Identificação e controle de riscos ocupacionais",
-    uploadedBy: "Pedro Costa",
-    version: "1.0",
-    tags: ["PGR", "Riscos", "Gerenciamento"],
-  },
-]
-
-const mockCompanies = [
-  { id: 1, name: "Empresa Alpha Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Beta Indústria S.A.", cnpj: "23.456.789/0001-01" },
-  { id: 3, name: "Gamma Serviços", cnpj: "34.567.890/0001-12" },
-  { id: 4, name: "Delta Construções", cnpj: "45.678.901/0001-23" },
-  { id: 5, name: "Epsilon Tecnologia", cnpj: "56.789.012/0001-34" },
-]
+type CompanyRow = { id: string; razao_social: string }
+type DocumentRow = {
+  id: string
+  nome_arquivo: string
+  tipo: string | null
+  categoria: string | null
+  versao: string | null
+  descricao: string | null
+  empresa_id: string
+  tamanho: number | null
+  data_upload: string
+  enviado_por: string | null
+  tags: string[] | null
+  caminho_storage: string
+}
 
 const ITEMS_PER_PAGE = 10
 
 export default function LibraryPage() {
   const [search, setSearch] = useState("")
-  const [documents, setDocuments] = useState(mockDocuments)
+  const [documents, setDocuments] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
-  const [viewingDocument, setViewingDocument] = useState<(typeof mockDocuments)[0] | null>(null)
+  const [viewingDocument, setViewingDocument] = useState<any | null>(null)
   const [selectedCompany, setSelectedCompany] = useState<string>("all")
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
+      const { data: docs } = await supabase.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
+      const mapped = (docs as DocumentRow[]).map((d) => ({
+        id: d.id,
+        name: d.nome_arquivo,
+        type: d.tipo || "",
+        size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(1)} MB` : "",
+        date: d.data_upload?.substring(0, 10),
+        category: d.categoria || "",
+        companyId: d.empresa_id,
+        companyName: "",
+        description: d.descricao || "",
+        uploadedBy: "",
+        version: d.versao || "",
+        tags: d.tags || [],
+        caminho_storage: d.caminho_storage,
+      }))
+      setDocuments(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredDocuments = useMemo(() => {
     return documents.filter((d) => {
       const matchesSearch =
         d.name.toLowerCase().includes(search.toLowerCase()) || d.category.toLowerCase().includes(search.toLowerCase())
-      const matchesCompany = selectedCompany === "all" || d.companyId === Number.parseInt(selectedCompany)
+      const matchesCompany = selectedCompany === "all" || d.companyId === selectedCompany
       return matchesSearch && matchesCompany
     })
   }, [documents, search, selectedCompany])
@@ -211,18 +94,49 @@ export default function LibraryPage() {
     setCurrentPage(1)
   }
 
-  const handleUploadDocument = (data: any) => {
-    const newDocument = {
-      ...data,
-      id: documents.length + 1,
-      date: new Date().toISOString().split("T")[0],
-    }
-    setDocuments([newDocument, ...documents])
+  const handleUploadDocument = async (data: any) => {
+    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
+    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
+    const resp = await fetch(`${base}/upload-document`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        empresa_id: data.companyId,
+        file_name: data.name,
+        content_base64: data.content_base64,
+        content_type: data.content_type,
+        tipo: data.type,
+        categoria: data.category,
+        versao: data.version,
+        descricao: data.description,
+        tags: data.tags,
+      }),
+    })
+    if (!resp.ok) return
     setUploadModalOpen(false)
+    const { data: docs } = await supabase.from("documentos").select("*").order("data_upload", { ascending: false })
+    const mapped = (docs as DocumentRow[]).map((d) => ({
+      id: d.id,
+      name: d.nome_arquivo,
+      type: d.tipo || "",
+      size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(1)} MB` : "",
+      date: d.data_upload?.substring(0, 10),
+      category: d.categoria || "",
+      companyId: d.empresa_id,
+      companyName: "",
+      description: d.descricao || "",
+      uploadedBy: "",
+      version: d.versao || "",
+      tags: d.tags || [],
+      caminho_storage: d.caminho_storage,
+    }))
+    setDocuments(mapped)
   }
 
-  const handleDownload = (doc: (typeof mockDocuments)[0]) => {
-    alert(`Baixando: ${doc.name}`)
+  const handleDownload = async (doc: any) => {
+    const { data, error } = await supabase.storage.from("documentos").createSignedUrl(doc.caminho_storage, 60)
+    if (error || !data) return
+    window.open(data.signedUrl, "_blank")
   }
 
   return (
@@ -270,8 +184,8 @@ export default function LibraryPage() {
                     <SelectItem value="all" className="text-white">
                       Todas as empresas
                     </SelectItem>
-                    {mockCompanies.map((company) => (
-                      <SelectItem key={company.id} value={company.id.toString()} className="text-white">
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id} className="text-white">
                         {company.name}
                       </SelectItem>
                     ))}
@@ -284,13 +198,15 @@ export default function LibraryPage() {
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <span>Exibindo documentos de:</span>
                 <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">
-                  {mockCompanies.find((c) => c.id === Number.parseInt(selectedCompany))?.name}
+                  {companies.find((c) => c.id === selectedCompany)?.name}
                 </span>
               </div>
             )}
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="space-y-3">
             {paginatedDocuments.map((doc) => (
               <div
@@ -313,7 +229,7 @@ export default function LibraryPage() {
                         <span className="px-2 py-0.5 rounded bg-slate-700 text-slate-300">{doc.category}</span>
                         <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
                           <Building2 className="w-3 h-3" />
-                          {doc.companyName}
+                          {companies.find((c) => c.id === doc.companyId)?.name || ""}
                         </span>
                       </div>
                     </div>
@@ -365,7 +281,7 @@ export default function LibraryPage() {
         open={uploadModalOpen}
         onOpenChange={setUploadModalOpen}
         onSubmit={handleUploadDocument}
-        companies={mockCompanies}
+        companies={companies.map((c) => ({ id: c.id, name: c.name, cnpj: "" }))}
       />
 
       <DocumentDetailsModal

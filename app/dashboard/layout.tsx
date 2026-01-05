@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
 import { Sidebar } from "@/components/sidebar"
 import { LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,19 +16,57 @@ export default function DashboardLayout({
 }) {
   const router = useRouter()
   const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const userData = localStorage.getItem("sst-user")
-    if (!userData) {
-      router.push("/login")
-    } else {
-      setUser(JSON.parse(userData))
+    const checkUser = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error || !session) {
+          router.push("/login")
+          return
+        }
+
+        setUser({
+          name: session.user.user_metadata?.name || "Usuário",
+          email: session.user.email || "",
+        })
+      } catch (error) {
+        console.error("Error checking session:", error)
+        router.push("/login")
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    checkUser()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        router.push("/login")
+      } else {
+        setUser({
+          name: session.user.user_metadata?.name || "Usuário",
+          email: session.user.email || "",
+        })
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [router])
 
-  const handleLogout = () => {
-    localStorage.removeItem("sst-user")
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
     router.push("/login")
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-white">
+        Carregando...
+      </div>
+    )
   }
 
   if (!user) return null

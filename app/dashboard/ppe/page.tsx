@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,193 +10,65 @@ import { PPEModal } from "@/components/ppe-modal"
 import { PPEDetailsModal } from "@/components/ppe-details-modal"
 import { PPECancelModal } from "@/components/ppe-cancel-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockPPE = [
-  {
-    id: 1,
-    name: "Capacete de Segurança",
-    ca: "12345",
-    type: "Proteção da Cabeça",
-    manufacturer: "SafetyPro",
-    quantity: 150,
-    minQuantity: 50,
-    status: "Adequado",
-    validity: "2025-06-30",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Capacete classe A para proteção contra impactos",
-    isCancelled: false,
-  },
-  {
-    id: 2,
-    name: "Óculos de Proteção",
-    ca: "23456",
-    type: "Proteção dos Olhos",
-    manufacturer: "VisionSafe",
-    quantity: 200,
-    minQuantity: 100,
-    status: "Adequado",
-    validity: "2025-08-15",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Óculos com lentes antirrisco e proteção UV",
-    isCancelled: false,
-  },
-  {
-    id: 3,
-    name: "Luvas de Borracha",
-    ca: "34567",
-    type: "Proteção das Mãos",
-    manufacturer: "GloveTech",
-    quantity: 45,
-    minQuantity: 80,
-    status: "Crítico",
-    validity: "2024-12-31",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Luvas de borracha natural isolante elétrico",
-    isCancelled: false,
-  },
-  {
-    id: 4,
-    name: "Botina de Segurança",
-    ca: "45678",
-    type: "Proteção dos Pés",
-    manufacturer: "BootSafe",
-    quantity: 120,
-    minQuantity: 60,
-    status: "Adequado",
-    validity: "2025-04-20",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Botina com biqueira de aço e solado antiderrapante",
-    isCancelled: false,
-  },
-  {
-    id: 5,
-    name: "Protetor Auricular",
-    ca: "56789",
-    type: "Proteção Auditiva",
-    manufacturer: "HearGuard",
-    quantity: 180,
-    minQuantity: 70,
-    status: "Adequado",
-    validity: "2025-09-10",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Protetor tipo plug com cordão",
-    isCancelled: false,
-  },
-  {
-    id: 6,
-    name: "Máscara PFF2",
-    ca: "67890",
-    type: "Proteção Respiratória",
-    manufacturer: "RespireTech",
-    quantity: 35,
-    minQuantity: 100,
-    status: "Crítico",
-    validity: "2024-11-30",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Máscara descartável com válvula de exalação",
-    isCancelled: false,
-  },
-  {
-    id: 7,
-    name: "Cinto de Segurança",
-    ca: "78901",
-    type: "Proteção Contra Quedas",
-    manufacturer: "HeightSafe",
-    quantity: 90,
-    minQuantity: 40,
-    status: "Adequado",
-    validity: "2025-05-15",
-    companyId: 4,
-    companyName: "Delta Construções",
-    description: "Cinto paraquedista com talabarte duplo",
-    isCancelled: false,
-  },
-  {
-    id: 8,
-    name: "Luvas de Vaqueta",
-    ca: "89012",
-    type: "Proteção das Mãos",
-    manufacturer: "GloveTech",
-    quantity: 160,
-    minQuantity: 80,
-    status: "Adequado",
-    validity: "2025-07-20",
-    companyId: 4,
-    companyName: "Delta Construções",
-    description: "Luvas em couro vaqueta reforçada",
-    isCancelled: false,
-  },
-  {
-    id: 9,
-    name: "Avental de Raspa",
-    ca: "90123",
-    type: "Proteção do Tronco",
-    manufacturer: "BodyGuard",
-    quantity: 55,
-    minQuantity: 30,
-    status: "Adequado",
-    validity: "2025-03-25",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Avental em raspa de couro para soldador",
-    isCancelled: false,
-  },
-  {
-    id: 10,
-    name: "Mangote de Proteção",
-    ca: "01234",
-    type: "Proteção dos Braços",
-    manufacturer: "ArmSafe",
-    quantity: 70,
-    minQuantity: 40,
-    status: "Adequado",
-    validity: "2025-06-18",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Mangote em raspa para proteção térmica",
-    isCancelled: false,
-  },
-  {
-    id: 11,
-    name: "Respirador Semi-Facial",
-    ca: "11223",
-    type: "Proteção Respiratória",
-    manufacturer: "RespireTech",
-    quantity: 42,
-    minQuantity: 50,
-    status: "Crítico",
-    validity: "2024-12-15",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Respirador com filtro químico P2",
-    isCancelled: false,
-  },
-]
-
-const mockCompanies = [
-  { id: 1, name: "Empresa Alpha Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Beta Indústria S.A.", cnpj: "23.456.789/0001-01" },
-  { id: 3, name: "Gamma Serviços", cnpj: "34.567.890/0001-12" },
-  { id: 4, name: "Delta Construções", cnpj: "45.678.901/0001-23" },
-]
+type EpiRow = {
+  id: string
+  nome: string
+  certificado_aprovacao: string | null
+  tipo_protecao: string | null
+  fabricante: string | null
+  empresa_id: string
+  qtd_estoque: number
+  qtd_minima: number
+  validade: string | null
+  descricao: string | null
+  status: "ativo" | "inativo" | "cancelado"
+}
+type CompanyRow = { id: string; razao_social: string }
 
 const ITEMS_PER_PAGE = 10
 
 export default function PPEPage() {
   const [search, setSearch] = useState("")
-  const [ppe, setPPE] = useState(mockPPE)
+  const [ppe, setPPE] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingPPE, setEditingPPE] = useState<(typeof mockPPE)[0] | null>(null)
-  const [detailsPPE, setDetailsPPE] = useState<(typeof mockPPE)[0] | null>(null)
-  const [cancelPPE, setCancelPPE] = useState<(typeof mockPPE)[0] | null>(null)
+  const [editingPPE, setEditingPPE] = useState<any | null>(null)
+  const [detailsPPE, setDetailsPPE] = useState<any | null>(null)
+  const [cancelPPE, setCancelPPE] = useState<any | null>(null)
   const [selectedCompany, setSelectedCompany] = useState<string>("all")
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
+      const { data: epis } = await supabase.from("epis").select("*")
+      const mapped = (epis as EpiRow[]).map((e) => ({
+        id: e.id,
+        name: e.nome,
+        ca: e.certificado_aprovacao || "",
+        type: e.tipo_protecao || "",
+        manufacturer: e.fabricante || "",
+        quantity: e.qtd_estoque,
+        minQuantity: e.qtd_minima,
+        status: e.status === "ativo" ? "Adequado" : e.status === "cancelado" ? "Cancelado" : "Inativo",
+        validity: e.validade || "",
+        companyId: e.empresa_id,
+        companyName: "",
+        description: e.descricao || "",
+        isCancelled: e.status === "cancelado",
+      }))
+      setPPE(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredPPE = useMemo(() => {
     return ppe.filter((item) => {
@@ -204,7 +76,7 @@ export default function PPEPage() {
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.ca.includes(search) ||
         item.type.toLowerCase().includes(search.toLowerCase())
-      const matchesCompany = selectedCompany === "all" || item.companyId.toString() === selectedCompany
+      const matchesCompany = selectedCompany === "all" || item.companyId === selectedCompany
       return matchesSearch && matchesCompany
     })
   }, [ppe, search, selectedCompany])
@@ -222,29 +94,82 @@ export default function PPEPage() {
   }
 
   const handleSavePPE = (ppeData: any) => {
-    if (editingPPE) {
-      setPPE(ppe.map((p) => (p.id === editingPPE.id ? { ...ppeData, id: p.id } : p)))
-    } else {
-      setPPE([...ppe, { ...ppeData, id: ppe.length + 1 }])
+    const run = async () => {
+      if (editingPPE) {
+        await supabase
+          .from("epis")
+          .update({
+            nome: ppeData.name,
+            certificado_aprovacao: ppeData.ca,
+            tipo_protecao: ppeData.type,
+            fabricante: ppeData.manufacturer,
+            empresa_id: ppeData.companyId,
+            qtd_estoque: ppeData.quantity,
+            qtd_minima: ppeData.minQuantity,
+            validade: ppeData.validity,
+            descricao: ppeData.description,
+          })
+          .eq("id", editingPPE.id)
+      } else {
+        await supabase.from("epis").insert({
+          nome: ppeData.name,
+          certificado_aprovacao: ppeData.ca,
+          tipo_protecao: ppeData.type,
+          fabricante: ppeData.manufacturer,
+          empresa_id: ppeData.companyId,
+          qtd_estoque: ppeData.quantity,
+          qtd_minima: ppeData.minQuantity,
+          validade: ppeData.validity,
+          descricao: ppeData.description,
+          status: "ativo",
+        })
+      }
+      setIsModalOpen(false)
+      setEditingPPE(null)
+      const { data: epis } = await supabase.from("epis").select("*")
+      const mapped = (epis as EpiRow[]).map((e) => ({
+        id: e.id,
+        name: e.nome,
+        ca: e.certificado_aprovacao || "",
+        type: e.tipo_protecao || "",
+        manufacturer: e.fabricante || "",
+        quantity: e.qtd_estoque,
+        minQuantity: e.qtd_minima,
+        status: e.status === "ativo" ? "Adequado" : e.status === "cancelado" ? "Cancelado" : "Inativo",
+        validity: e.validade || "",
+        companyId: e.empresa_id,
+        companyName: "",
+        description: e.descricao || "",
+        isCancelled: e.status === "cancelado",
+      }))
+      setPPE(mapped)
     }
-    setIsModalOpen(false)
-    setEditingPPE(null)
+    run()
   }
 
   const handleCancelPPE = (id: number, reason: string) => {
-    setPPE(
-      ppe.map((p) =>
-        p.id === id
-          ? {
-              ...p,
-              isCancelled: true,
-              cancelReason: reason,
-              status: "Cancelado",
-            }
-          : p,
-      ),
-    )
-    setCancelPPE(null)
+    const run = async () => {
+      await supabase.from("epis").update({ status: "cancelado" }).eq("id", id)
+      setCancelPPE(null)
+      const { data: epis } = await supabase.from("epis").select("*")
+      const mapped = (epis as EpiRow[]).map((e) => ({
+        id: e.id,
+        name: e.nome,
+        ca: e.certificado_aprovacao || "",
+        type: e.tipo_protecao || "",
+        manufacturer: e.fabricante || "",
+        quantity: e.qtd_estoque,
+        minQuantity: e.qtd_minima,
+        status: e.status === "ativo" ? "Adequado" : e.status === "cancelado" ? "Cancelado" : "Inativo",
+        validity: e.validade || "",
+        companyId: e.empresa_id,
+        companyName: "",
+        description: e.descricao || "",
+        isCancelled: e.status === "cancelado",
+      }))
+      setPPE(mapped)
+    }
+    run()
   }
 
   return (
@@ -286,8 +211,8 @@ export default function PPEPage() {
                     <SelectItem value="all" className="text-white">
                       Todas as empresas
                     </SelectItem>
-                    {mockCompanies.map((company) => (
-                      <SelectItem key={company.id} value={company.id.toString()} className="text-white">
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id} className="text-white">
                         {company.name}
                       </SelectItem>
                     ))}
@@ -308,6 +233,8 @@ export default function PPEPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="space-y-3">
             {paginatedPPE.map((item) => (
               <div
@@ -322,7 +249,7 @@ export default function PPEPage() {
                     </p>
                     <div className="flex items-center gap-2 text-sm text-slate-500">
                       <Building2 className="w-3 h-3" />
-                      <span>{item.companyName}</span>
+                      <span>{companies.find((c) => c.id === item.companyId)?.name || ""}</span>
                     </div>
                   </div>
                   <span
@@ -417,7 +344,7 @@ export default function PPEPage() {
         onOpenChange={setIsModalOpen}
         onSave={handleSavePPE}
         editingPPE={editingPPE}
-        companies={mockCompanies}
+        companies={companies.map((c) => ({ id: c.id, name: c.name, cnpj: "" }))}
       />
 
       <PPEDetailsModal ppe={detailsPPE} onClose={() => setDetailsPPE(null)} />

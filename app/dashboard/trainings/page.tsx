@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,113 +9,66 @@ import { TrainingModal } from "@/components/training-modal"
 import { Pagination } from "@/components/pagination"
 import { TrainingDetailsModal } from "@/components/training-details-modal"
 import { TrainingCancelModal } from "@/components/training-cancel-modal"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockTrainings = [
-  {
-    id: 1,
-    name: "NR-35 - Trabalho em Altura",
-    duration: "8h",
-    employees: 15,
-    status: "Em andamento",
-    date: "2024-01-15",
-    instructor: "João Silva",
-    description: "Treinamento completo sobre trabalho em altura, uso de EPIs e procedimentos de segurança.",
-    linkedEmployees: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-    linkedCompanies: [1, 2],
-    cancelReason: null,
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 2,
-    name: "NR-10 - Eletricidade",
-    duration: "40h",
-    employees: 22,
-    status: "Concluído",
-    date: "2024-01-10",
-    instructor: "Maria Santos",
-    description: "Segurança em instalações e serviços em eletricidade.",
-    linkedEmployees: [1, 3, 5, 7, 9, 11],
-    linkedCompanies: [1],
-    cancelReason: null,
-    createdAt: "2024-01-05",
-  },
-  {
-    id: 3,
-    name: "CIPA - Prevenção de Acidentes",
-    duration: "20h",
-    employees: 8,
-    status: "Agendado",
-    date: "2024-01-20",
-    instructor: "Carlos Oliveira",
-    description: "Formação de membros da CIPA.",
-    linkedEmployees: [2, 4, 6, 8],
-    linkedCompanies: [2, 3],
-    cancelReason: null,
-    createdAt: "2024-01-08",
-  },
-  {
-    id: 4,
-    name: "NR-33 - Espaços Confinados",
-    duration: "16h",
-    employees: 12,
-    status: "Cancelado",
-    date: "2024-01-18",
-    instructor: "Ana Paula",
-    description: "Segurança e saúde nos trabalhos em espaços confinados.",
-    linkedEmployees: [1, 5, 9],
-    linkedCompanies: [1],
-    cancelReason: "Falta de quórum mínimo de participantes",
-    createdAt: "2024-01-12",
-  },
-  {
-    id: 5,
-    name: "Primeiros Socorros",
-    duration: "8h",
-    employees: 30,
-    status: "Concluído",
-    date: "2024-01-05",
-    instructor: "Dr. Fernando",
-    description: "Técnicas básicas de primeiros socorros.",
-    linkedEmployees: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-    linkedCompanies: [1, 2, 3],
-    cancelReason: null,
-    createdAt: "2023-12-28",
-  },
-]
+type TrainingRow = {
+  id: string
+  titulo: string
+  descricao: string | null
+  status: "agendado" | "em_andamento" | "concluido" | "cancelado"
+  data_inicio: string | null
+  data_fim: string | null
+  empresa_id: string
+  funcionario_id: string | null
+  created_at: string
+}
 
-const mockEmployees = [
-  { id: 1, name: "João Silva", position: "Eletricista", department: "Manutenção" },
-  { id: 2, name: "Maria Santos", position: "Supervisora", department: "Segurança" },
-  { id: 3, name: "Carlos Oliveira", position: "Operador", department: "Produção" },
-  { id: 4, name: "Ana Paula", position: "Técnica", department: "Qualidade" },
-  { id: 5, name: "Pedro Costa", position: "Soldador", department: "Produção" },
-  { id: 6, name: "Juliana Lima", position: "Analista", department: "RH" },
-  { id: 7, name: "Roberto Alves", position: "Motorista", department: "Logística" },
-  { id: 8, name: "Fernanda Souza", position: "Engenheira", department: "Projetos" },
-  { id: 9, name: "Ricardo Santos", position: "Operador", department: "Produção" },
-  { id: 10, name: "Camila Rocha", position: "Auxiliar", department: "Administrativo" },
-  { id: 11, name: "Marcos Ferreira", position: "Técnico", department: "Manutenção" },
-  { id: 12, name: "Patrícia Dias", position: "Coordenadora", department: "Qualidade" },
-  { id: 13, name: "André Martins", position: "Operador", department: "Produção" },
-  { id: 14, name: "Beatriz Costa", position: "Auxiliar", department: "Limpeza" },
-  { id: 15, name: "Lucas Pereira", position: "Ajudante", department: "Manutenção" },
-]
-
-const mockCompanies = [
-  { id: 1, name: "Tech Solutions Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Industrial Brasil S.A.", cnpj: "98.765.432/0001-10" },
-  { id: 3, name: "Serviços Gerais ME", cnpj: "45.678.901/0001-23" },
-]
+type CompanyRow = { id: string; razao_social: string; cnpj: string }
+type EmployeeRow = { id: string; nome: string; cargo: string | null; departamento: string | null; empresa_id: string }
 
 const ITEMS_PER_PAGE = 10
 
 export default function TrainingsPage() {
   const [search, setSearch] = useState("")
   const [modalOpen, setModalOpen] = useState(false)
-  const [trainings, setTrainings] = useState(mockTrainings)
+  const [trainings, setTrainings] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [detailsModal, setDetailsModal] = useState<number | null>(null)
   const [cancelModal, setCancelModal] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      const mapped = (data as TrainingRow[]).map((t) => ({
+        id: t.id,
+        name: t.titulo,
+        duration: "",
+        employees: t.funcionario_id ? 1 : 0,
+        status:
+          t.status === "concluido"
+            ? "Concluído"
+            : t.status === "em_andamento"
+              ? "Em andamento"
+              : t.status === "agendado"
+                ? "Agendado"
+                : "Cancelado",
+        date: (t.data_inicio || t.created_at || "").substring(0, 10),
+        instructor: "",
+        description: t.descricao || "",
+        empresaId: t.empresa_id,
+        funcionarioId: t.funcionario_id,
+        cancelReason: null,
+        createdAt: t.created_at,
+      }))
+      setTrainings(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredTrainings = useMemo(() => {
     return trainings.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()))
@@ -134,23 +87,76 @@ export default function TrainingsPage() {
   }
 
   const handleStatusChange = (id: number, newStatus: string) => {
-    setTrainings((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)))
+    const run = async () => {
+      const row = trainings.find((t) => t.id === id)
+      if (!row) return
+      const dbStatus =
+        newStatus === "Concluído" ? "concluido" : newStatus === "Em andamento" ? "em_andamento" : newStatus === "Agendado" ? "agendado" : "cancelado"
+      await supabase.from("treinamentos").update({ status: dbStatus }).eq("id", row.id)
+      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      const mapped = (data as TrainingRow[]).map((t) => ({
+        id: t.id,
+        name: t.titulo,
+        duration: "",
+        employees: t.funcionario_id ? 1 : 0,
+        status:
+          t.status === "concluido"
+            ? "Concluído"
+            : t.status === "em_andamento"
+              ? "Em andamento"
+              : t.status === "agendado"
+                ? "Agendado"
+                : "Cancelado",
+        date: (t.data_inicio || t.created_at || "").substring(0, 10),
+        instructor: "",
+        description: t.descricao || "",
+        empresaId: t.empresa_id,
+        funcionarioId: t.funcionario_id,
+        cancelReason: null,
+        createdAt: t.created_at,
+      }))
+      setTrainings(mapped)
+    }
+    run()
   }
 
   const handleCancel = (id: number, reason: string) => {
-    setTrainings((prev) => prev.map((t) => (t.id === id ? { ...t, status: "Cancelado", cancelReason: reason } : t)))
-    setCancelModal(null)
+    const run = async () => {
+      const row = trainings.find((t) => t.id === id)
+      if (!row) return
+      await supabase.from("treinamentos").update({ status: "cancelado" }).eq("id", row.id)
+      setCancelModal(null)
+      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      const mapped = (data as TrainingRow[]).map((t) => ({
+        id: t.id,
+        name: t.titulo,
+        duration: "",
+        employees: t.funcionario_id ? 1 : 0,
+        status:
+          t.status === "concluido"
+            ? "Concluído"
+            : t.status === "em_andamento"
+              ? "Em andamento"
+              : t.status === "agendado"
+                ? "Agendado"
+                : "Cancelado",
+        date: (t.data_inicio || t.created_at || "").substring(0, 10),
+        instructor: "",
+        description: t.descricao || "",
+        empresaId: t.empresa_id,
+        funcionarioId: t.funcionario_id,
+        cancelReason: null,
+        createdAt: t.created_at,
+      }))
+      setTrainings(mapped)
+    }
+    run()
   }
 
   const getTrainingDetails = (id: number) => {
     const training = trainings.find((t) => t.id === id)
     if (!training) return null
-
-    return {
-      ...training,
-      employees: mockEmployees.filter((e) => training.linkedEmployees.includes(e.id)),
-      companies: mockCompanies.filter((c) => training.linkedCompanies.includes(c.id)),
-    }
+    return training
   }
 
   return (
@@ -184,6 +190,8 @@ export default function TrainingsPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="space-y-3">
             {paginatedTrainings.map((training) => (
               <div

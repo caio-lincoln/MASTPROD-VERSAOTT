@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,223 +10,75 @@ import { RiskModal } from "@/components/risk-modal"
 import { RiskDetailsModal } from "@/components/risk-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockRisks = [
-  {
-    id: 1,
-    name: "Ruído excessivo",
-    type: "Físico",
-    severity: "Alto",
-    sector: "Produção",
-    measures: "Uso de protetores auriculares",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Nível de ruído acima de 85 dB(A) identificado na linha de produção",
-    source: "Máquinas industriais em operação contínua",
-    consequences: "Perda auditiva induzida por ruído (PAIR)",
-    probability: "Alta",
-    identifiedDate: "2024-01-15",
-    responsibleName: "João Silva",
-    status: "Ativo",
-  },
-  {
-    id: 2,
-    name: "Produtos químicos",
-    type: "Químico",
-    severity: "Médio",
-    sector: "Laboratório",
-    measures: "EPI adequado e ventilação",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Exposição a solventes orgânicos durante processos de limpeza",
-    source: "Manuseio de produtos químicos",
-    consequences: "Intoxicação, irritação de vias respiratórias",
-    probability: "Média",
-    identifiedDate: "2024-01-20",
-    responsibleName: "Maria Santos",
-    status: "Ativo",
-  },
-  {
-    id: 3,
-    name: "Trabalho em altura",
-    type: "Acidente",
-    severity: "Crítico",
-    sector: "Manutenção",
-    measures: "Cinto de segurança e treinamento NR-35",
-    companyId: 4,
-    companyName: "Delta Construções",
-    description: "Trabalho em alturas superiores a 2 metros sem proteção adequada",
-    source: "Manutenção de estruturas e instalações",
-    consequences: "Quedas com lesões graves ou fatais",
-    probability: "Média",
-    identifiedDate: "2024-02-01",
-    responsibleName: "Pedro Costa",
-    status: "Ativo",
-  },
-  {
-    id: 4,
-    name: "Postura inadequada",
-    type: "Ergonômico",
-    severity: "Baixo",
-    sector: "Administrativo",
-    measures: "Ginástica laboral",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Má postura durante jornada de trabalho em escritório",
-    source: "Mobiliário inadequado e ausência de pausas",
-    consequences: "Dores musculares, LER/DORT",
-    probability: "Alta",
-    identifiedDate: "2024-02-10",
-    responsibleName: "Carlos Silva",
-    status: "Ativo",
-  },
-  {
-    id: 5,
-    name: "Radiação não ionizante",
-    type: "Físico",
-    severity: "Médio",
-    sector: "Soldagem",
-    measures: "Proteção facial e EPIs",
-    companyId: 10,
-    companyName: "Kappa Metalúrgica",
-    description: "Exposição a radiação UV durante processos de soldagem",
-    source: "Operações de soldagem elétrica",
-    consequences: "Queimaduras, lesões oculares",
-    probability: "Alta",
-    identifiedDate: "2024-02-15",
-    responsibleName: "Roberto Nunes",
-    status: "Ativo",
-  },
-  {
-    id: 6,
-    name: "Poeira de sílica",
-    type: "Químico",
-    severity: "Alto",
-    sector: "Corte",
-    measures: "Máscara PFF2 e ventilação local",
-    companyId: 10,
-    companyName: "Kappa Metalúrgica",
-    description: "Poeira de sílica cristalina respirável no ambiente de trabalho",
-    source: "Corte e polimento de materiais",
-    consequences: "Silicose pulmonar",
-    probability: "Alta",
-    identifiedDate: "2024-02-20",
-    responsibleName: "Roberto Nunes",
-    status: "Ativo",
-  },
-  {
-    id: 7,
-    name: "Máquinas sem proteção",
-    type: "Acidente",
-    severity: "Crítico",
-    sector: "Produção",
-    measures: "Instalação de grades de proteção",
-    companyId: 2,
-    companyName: "Beta Indústria S.A.",
-    description: "Equipamentos sem dispositivos de proteção adequados",
-    source: "Máquinas e equipamentos industriais",
-    consequences: "Amputações, esmagamentos",
-    probability: "Média",
-    identifiedDate: "2024-03-01",
-    responsibleName: "Maria Santos",
-    status: "Ativo",
-  },
-  {
-    id: 8,
-    name: "Levantamento de peso",
-    type: "Ergonômico",
-    severity: "Médio",
-    sector: "Logística",
-    measures: "Treinamento e equipamentos auxiliares",
-    companyId: 6,
-    companyName: "Zeta Logística",
-    description: "Movimentação manual de cargas pesadas sem auxílio mecânico",
-    source: "Operações de carga e descarga",
-    consequences: "Lesões na coluna, hérnias",
-    probability: "Alta",
-    identifiedDate: "2024-03-05",
-    responsibleName: "Ricardo Alves",
-    status: "Ativo",
-  },
-  {
-    id: 9,
-    name: "Calor excessivo",
-    type: "Físico",
-    severity: "Alto",
-    sector: "Fundição",
-    measures: "Hidratação e pausas regulares",
-    companyId: 10,
-    companyName: "Kappa Metalúrgica",
-    description: "Temperatura elevada em ambiente de trabalho",
-    source: "Fornos e processos de fundição",
-    consequences: "Desidratação, intermação",
-    probability: "Alta",
-    identifiedDate: "2024-03-10",
-    responsibleName: "Roberto Nunes",
-    status: "Ativo",
-  },
-  {
-    id: 10,
-    name: "Agentes biológicos",
-    type: "Biológico",
-    severity: "Médio",
-    sector: "Limpeza",
-    measures: "Luvas e higienização constante",
-    companyId: 3,
-    companyName: "Gamma Serviços",
-    description: "Exposição a vírus, bactérias e fungos",
-    source: "Limpeza de ambientes contaminados",
-    consequences: "Infecções diversas",
-    probability: "Média",
-    identifiedDate: "2024-03-15",
-    responsibleName: "João Oliveira",
-    status: "Ativo",
-  },
-  {
-    id: 11,
-    name: "Eletricidade",
-    type: "Acidente",
-    severity: "Crítico",
-    sector: "Elétrica",
-    measures: "NR-10 e bloqueio de energia",
-    companyId: 1,
-    companyName: "Empresa Alpha Ltda",
-    description: "Risco de choque elétrico em instalações energizadas",
-    source: "Manutenção elétrica e operações em painéis",
-    consequences: "Choque elétrico, queimaduras, morte",
-    probability: "Baixa",
-    identifiedDate: "2024-03-20",
-    responsibleName: "Carlos Silva",
-    status: "Ativo",
-  },
-]
-
-const mockCompanies = [
-  { id: 1, name: "Empresa Alpha Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Beta Indústria S.A.", cnpj: "23.456.789/0001-01" },
-  { id: 3, name: "Gamma Serviços", cnpj: "34.567.890/0001-12" },
-  { id: 4, name: "Delta Construções", cnpj: "45.678.901/0001-23" },
-  { id: 5, name: "Epsilon Tecnologia", cnpj: "56.789.012/0001-34" },
-  { id: 6, name: "Zeta Logística", cnpj: "67.890.123/0001-45" },
-  { id: 10, name: "Kappa Metalúrgica", cnpj: "01.234.567/0001-89" },
-]
+type CompanyRow = { id: string; razao_social: string }
+type RiskRow = {
+  id: string
+  nome_risco: string
+  severidade: string | null
+  tipo: string | null
+  probabilidade: string | null
+  descricao: string | null
+  fonte_geradora: string | null
+  consequencias: string | null
+  setor: string | null
+  medidas_controle: string | null
+  data_identificacao: string | null
+  responsavel: string | null
+  empresa_id: string
+  status: "ativo" | "inativo" | "cancelado"
+}
 
 const ITEMS_PER_PAGE = 10
 
 export default function RisksPage() {
   const [search, setSearch] = useState("")
   const [selectedCompany, setSelectedCompany] = useState<string>("all")
-  const [risks, setRisks] = useState(mockRisks)
+  const [risks, setRisks] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [editingRisk, setEditingRisk] = useState<(typeof mockRisks)[0] | null>(null)
-  const [viewingRisk, setViewingRisk] = useState<(typeof mockRisks)[0] | null>(null)
+  const [editingRisk, setEditingRisk] = useState<any | null>(null)
+  const [viewingRisk, setViewingRisk] = useState<any | null>(null)
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
+      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const mapped = (riscos as RiskRow[]).map((r) => ({
+        id: r.id,
+        name: r.nome_risco,
+        type: r.tipo || "",
+        severity: r.severidade || "",
+        sector: r.setor || "",
+        measures: r.medidas_controle || "",
+        companyId: r.empresa_id,
+        companyName: "",
+        description: r.descricao || "",
+        source: r.fonte_geradora || "",
+        consequences: r.consequencias || "",
+        probability: r.probabilidade || "",
+        identifiedDate: r.data_identificacao || "",
+        responsibleName: r.responsavel || "",
+        status: r.status === "ativo" ? "Ativo" : r.status === "inativo" ? "Inativo" : "Cancelado",
+      }))
+      setRisks(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredRisks = useMemo(() => {
     return risks.filter((r) => {
       const matchesSearch =
         r.name.toLowerCase().includes(search.toLowerCase()) || r.type.toLowerCase().includes(search.toLowerCase())
-      const matchesCompany = selectedCompany === "all" || r.companyId.toString() === selectedCompany
+      const matchesCompany = selectedCompany === "all" || r.companyId === selectedCompany
       return matchesSearch && matchesCompany
     })
   }, [risks, search, selectedCompany])
@@ -249,24 +101,115 @@ export default function RisksPage() {
   }
 
   const handleCreateRisk = (data: any) => {
-    const newRisk = {
-      ...data,
-      id: risks.length + 1,
-      status: "Ativo",
+    const run = async () => {
+      await supabase.from("riscos_ocupacionais").insert({
+        nome_risco: data.name,
+        tipo: data.type,
+        severidade: data.severity,
+        setor: data.sector,
+        medidas_controle: data.measures,
+        empresa_id: data.companyId,
+        descricao: data.description,
+        fonte_geradora: data.source,
+        consequencias: data.consequences,
+        probabilidade: data.probability,
+        data_identificacao: data.identifiedDate,
+        responsavel: data.responsibleName,
+        status: "ativo",
+      })
+      setCreateModalOpen(false)
+      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const mapped = (riscos as RiskRow[]).map((r) => ({
+        id: r.id,
+        name: r.nome_risco,
+        type: r.tipo || "",
+        severity: r.severidade || "",
+        sector: r.setor || "",
+        measures: r.medidas_controle || "",
+        companyId: r.empresa_id,
+        companyName: "",
+        description: r.descricao || "",
+        source: r.fonte_geradora || "",
+        consequences: r.consequencias || "",
+        probability: r.probabilidade || "",
+        identifiedDate: r.data_identificacao || "",
+        responsibleName: r.responsavel || "",
+        status: r.status === "ativo" ? "Ativo" : r.status === "inativo" ? "Inativo" : "Cancelado",
+      }))
+      setRisks(mapped)
     }
-    setRisks([...risks, newRisk])
-    setCreateModalOpen(false)
+    run()
   }
 
   const handleEditRisk = (data: any) => {
-    setRisks(risks.map((r) => (r.id === editingRisk?.id ? { ...r, ...data } : r)))
-    setEditingRisk(null)
+    const run = async () => {
+      if (!editingRisk) return
+      await supabase
+        .from("riscos_ocupacionais")
+        .update({
+          nome_risco: data.name,
+          tipo: data.type,
+          severidade: data.severity,
+          setor: data.sector,
+          medidas_controle: data.measures,
+          empresa_id: data.companyId,
+          descricao: data.description,
+          fonte_geradora: data.source,
+          consequencias: data.consequences,
+          probabilidade: data.probability,
+          data_identificacao: data.identifiedDate,
+          responsavel: data.responsibleName,
+        })
+        .eq("id", editingRisk.id)
+      setEditingRisk(null)
+      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const mapped = (riscos as RiskRow[]).map((r) => ({
+        id: r.id,
+        name: r.nome_risco,
+        type: r.tipo || "",
+        severity: r.severidade || "",
+        sector: r.setor || "",
+        measures: r.medidas_controle || "",
+        companyId: r.empresa_id,
+        companyName: "",
+        description: r.descricao || "",
+        source: r.fonte_geradora || "",
+        consequences: r.consequencias || "",
+        probability: r.probabilidade || "",
+        identifiedDate: r.data_identificacao || "",
+        responsibleName: r.responsavel || "",
+        status: r.status === "ativo" ? "Ativo" : r.status === "inativo" ? "Inativo" : "Cancelado",
+      }))
+      setRisks(mapped)
+    }
+    run()
   }
 
   const handleDeleteRisk = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir este risco?")) {
-      setRisks(risks.filter((r) => r.id !== id))
+    const run = async () => {
+      if (!confirm("Tem certeza que deseja excluir este risco?")) return
+      await supabase.from("riscos_ocupacionais").delete().eq("id", id)
+      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const mapped = (riscos as RiskRow[]).map((r) => ({
+        id: r.id,
+        name: r.nome_risco,
+        type: r.tipo || "",
+        severity: r.severidade || "",
+        sector: r.setor || "",
+        measures: r.medidas_controle || "",
+        companyId: r.empresa_id,
+        companyName: "",
+        description: r.descricao || "",
+        source: r.fonte_geradora || "",
+        consequences: r.consequencias || "",
+        probability: r.probabilidade || "",
+        identifiedDate: r.data_identificacao || "",
+        responsibleName: r.responsavel || "",
+        status: r.status === "ativo" ? "Ativo" : r.status === "inativo" ? "Inativo" : "Cancelado",
+      }))
+      setRisks(mapped)
     }
+    run()
   }
 
   const getSeverityColor = (severity: string) => {
@@ -313,10 +256,10 @@ export default function RisksPage() {
                   <SelectItem value="all" className="text-white hover:bg-slate-700">
                     Todas as empresas
                   </SelectItem>
-                  {mockCompanies.map((company) => (
+                  {companies.map((company) => (
                     <SelectItem
                       key={company.id}
-                      value={company.id.toString()}
+                      value={company.id}
                       className="text-white hover:bg-slate-700"
                     >
                       <div className="flex items-center gap-2">
@@ -340,6 +283,8 @@ export default function RisksPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="space-y-3">
             {paginatedRisks.map((risk) => (
               <div
@@ -355,7 +300,9 @@ export default function RisksPage() {
                       <h3 className="text-lg font-semibold text-white mb-1">{risk.name}</h3>
                       <div className="flex items-center gap-2 mb-2">
                         <Building2 className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-400">{risk.companyName}</span>
+                        <span className="text-sm text-slate-400">
+                          {companies.find((c) => c.id === risk.companyId)?.name || ""}
+                        </span>
                       </div>
                       <p className="text-sm text-slate-400 mb-2">Setor: {risk.sector}</p>
                       <p className="text-sm text-slate-300">Medidas: {risk.measures}</p>
@@ -429,7 +376,7 @@ export default function RisksPage() {
         onSubmit={editingRisk ? handleEditRisk : handleCreateRisk}
         initialData={editingRisk}
         mode={editingRisk ? "edit" : "create"}
-        companies={mockCompanies}
+        companies={companies.map((c) => ({ id: c.id, name: c.name, cnpj: "" }))}
       />
 
       <RiskDetailsModal

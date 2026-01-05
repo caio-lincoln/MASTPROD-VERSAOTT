@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,196 +8,79 @@ import { Plus, Search, Building2, Users, MapPin, Eye, Edit, Trash2, Shield } fro
 import { Pagination } from "@/components/pagination"
 import { CompanyModal } from "@/components/company-modal"
 import { CompanyDetailsModal } from "@/components/company-details-modal"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockCompanies = [
-  {
-    id: 1,
-    name: "Empresa Alpha Ltda",
-    cnpj: "12.345.678/0001-90",
-    employees: 120,
-    city: "São Paulo",
-    state: "SP",
-    status: "Ativa",
-    fromESocial: true,
-    address: "Av. Paulista, 1000",
-    phone: "(11) 3000-0000",
-    email: "contato@alpha.com.br",
-    responsible: "Carlos Silva",
-    cnae: "6201-5/00",
-    activityDescription: "Desenvolvimento de programas de computador sob encomenda",
-  },
-  {
-    id: 2,
-    name: "Beta Indústria S.A.",
-    cnpj: "23.456.789/0001-01",
-    employees: 85,
-    city: "Rio de Janeiro",
-    state: "RJ",
-    status: "Ativa",
-    fromESocial: true,
-    address: "Rua Industrial, 500",
-    phone: "(21) 3100-0000",
-    email: "contato@beta.com.br",
-    responsible: "Maria Santos",
-    cnae: "2511-0/00",
-    activityDescription: "Fabricação de estruturas metálicas",
-  },
-  {
-    id: 3,
-    name: "Gamma Serviços",
-    cnpj: "34.567.890/0001-12",
-    employees: 43,
-    city: "Belo Horizonte",
-    state: "MG",
-    status: "Ativa",
-    fromESocial: false,
-    address: "Rua dos Serviços, 200",
-    phone: "(31) 3200-0000",
-    email: "contato@gamma.com.br",
-    responsible: "João Oliveira",
-    cnae: "8121-4/00",
-    activityDescription: "Limpeza em prédios e em domicílios",
-  },
-  {
-    id: 4,
-    name: "Delta Construções",
-    cnpj: "45.678.901/0001-23",
-    employees: 95,
-    city: "Curitiba",
-    state: "PR",
-    status: "Ativa",
-    fromESocial: false,
-    address: "Av. das Construções, 800",
-    phone: "(41) 3300-0000",
-    email: "contato@delta.com.br",
-    responsible: "Pedro Costa",
-    cnae: "4120-4/00",
-    activityDescription: "Construção de edifícios",
-  },
-  {
-    id: 5,
-    name: "Epsilon Tecnologia",
-    cnpj: "56.789.012/0001-34",
-    employees: 67,
-    city: "Porto Alegre",
-    state: "RS",
-    status: "Ativa",
-    fromESocial: true,
-    address: "Rua Tech, 300",
-    phone: "(51) 3400-0000",
-    email: "contato@epsilon.com.br",
-    responsible: "Ana Lima",
-    cnae: "6202-3/00",
-    activityDescription: "Desenvolvimento e licenciamento de programas de computador customizáveis",
-  },
-  {
-    id: 6,
-    name: "Zeta Logística",
-    cnpj: "67.890.123/0001-45",
-    employees: 54,
-    city: "Salvador",
-    state: "BA",
-    status: "Ativa",
-    fromESocial: false,
-    address: "Av. Logística, 600",
-    phone: "(71) 3500-0000",
-    email: "contato@zeta.com.br",
-    responsible: "Ricardo Alves",
-    cnae: "5250-8/05",
-    activityDescription: "Operador de transporte multimodal - OTM",
-  },
-  {
-    id: 7,
-    name: "Eta Alimentos",
-    cnpj: "78.901.234/0001-56",
-    employees: 112,
-    city: "Fortaleza",
-    state: "CE",
-    status: "Ativa",
-    fromESocial: false,
-    address: "Rua das Indústrias, 900",
-    phone: "(85) 3600-0000",
-    email: "contato@eta.com.br",
-    responsible: "Fernanda Rocha",
-    cnae: "1033-3/01",
-    activityDescription: "Fabricação de sucos de frutas, hortaliças e legumes, exceto concentrados",
-  },
-  {
-    id: 8,
-    name: "Theta Consultoria",
-    cnpj: "89.012.345/0001-67",
-    employees: 38,
-    city: "Brasília",
-    state: "DF",
-    status: "Ativa",
-    fromESocial: false,
-    address: "SCS Quadra 1, Bloco A",
-    phone: "(61) 3700-0000",
-    email: "contato@theta.com.br",
-    responsible: "Lucas Martins",
-    cnae: "7020-4/00",
-    activityDescription: "Atividades de consultoria em gestão empresarial",
-  },
-  {
-    id: 9,
-    name: "Iota Química",
-    cnpj: "90.123.456/0001-78",
-    employees: 78,
-    city: "Recife",
-    state: "PE",
-    status: "Ativa",
-    fromESocial: true,
-    address: "Distrito Industrial, 1500",
-    phone: "(81) 3800-0000",
-    email: "contato@iota.com.br",
-    responsible: "Paula Ferreira",
-    cnae: "2013-4/00",
-    activityDescription: "Fabricação de gases industriais",
-  },
-  {
-    id: 10,
-    name: "Kappa Metalúrgica",
-    cnpj: "01.234.567/0001-89",
-    employees: 145,
-    city: "Campinas",
-    state: "SP",
-    status: "Ativa",
-    fromESocial: true,
-    address: "Rodovia dos Bandeirantes, Km 80",
-    phone: "(19) 3900-0000",
-    email: "contato@kappa.com.br",
-    responsible: "Roberto Nunes",
-    cnae: "2441-5/01",
-    activityDescription: "Produção de ferro-gusa",
-  },
-  {
-    id: 11,
-    name: "Lambda Transportes",
-    cnpj: "12.345.678/0002-90",
-    employees: 62,
-    city: "Goiânia",
-    state: "GO",
-    status: "Ativa",
-    fromESocial: false,
-    address: "Av. Goiás, 2000",
-    phone: "(62) 4000-0000",
-    email: "contato@lambda.com.br",
-    responsible: "Juliana Souza",
-    cnae: "4930-2/02",
-    activityDescription:
-      "Transporte rodoviário de carga, exceto produtos perigosos e mudanças, intermunicipal, interestadual e internacional",
-  },
-]
+type CompanyRow = {
+  id: string
+  razao_social: string
+  cnpj: string
+  cnae: string | null
+  status: "ativo" | "inativo" | "cancelado"
+  atividade_principal: string | null
+  endereco: string | null
+  cidade: string | null
+  estado: string | null
+  telefone: string | null
+  email: string | null
+  responsavel: string | null
+  origem: "manual" | "esocial"
+  importada: boolean
+}
+
+type MetricsRow = {
+  empresa_id: string
+  total_funcionarios: number
+  total_treinamentos_ativos: number
+  total_epis_cadastrados: number
+  total_riscos_identificados: number
+}
 
 const ITEMS_PER_PAGE = 10
 
 export default function CompaniesPage() {
   const [search, setSearch] = useState("")
-  const [companies, setCompanies] = useState(mockCompanies)
+  const [companies, setCompanies] = useState<Array<any>>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [createModalOpen, setCreateModalOpen] = useState(false)
-  const [editingCompany, setEditingCompany] = useState<(typeof mockCompanies)[0] | null>(null)
-  const [viewingCompany, setViewingCompany] = useState<(typeof mockCompanies)[0] | null>(null)
+  const [editingCompany, setEditingCompany] = useState<any | null>(null)
+  const [viewingCompany, setViewingCompany] = useState<any | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: empresas, error: errEmp } = await supabase.from("empresas").select("*")
+      if (errEmp) {
+        setError("Erro ao carregar empresas")
+        setLoading(false)
+        return
+      }
+      const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const metricsMap = new Map<string, MetricsRow>()
+      metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
+      const mapped = (empresas as CompanyRow[]).map((e) => ({
+        id: e.id,
+        name: e.razao_social,
+        cnpj: e.cnpj,
+        city: e.cidade || "",
+        state: e.estado || "",
+        status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
+        fromESocial: e.origem === "esocial" || e.importada === true,
+        address: e.endereco || "",
+        phone: e.telefone || "",
+        email: e.email || "",
+        responsible: e.responsavel || "",
+        cnae: e.cnae || "",
+        activityDescription: e.atividade_principal || "",
+        employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
+      }))
+      setCompanies(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredCompanies = useMemo(() => {
     return companies.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()) || c.cnpj.includes(search))
@@ -215,26 +98,122 @@ export default function CompaniesPage() {
     setCurrentPage(1)
   }
 
-  const handleCreateCompany = (data: any) => {
-    const newCompany = {
-      ...data,
-      id: companies.length + 1,
-      fromESocial: false,
-      status: "Ativa",
-    }
-    setCompanies([...companies, newCompany])
+  const handleCreateCompany = async (data: any) => {
+    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
+    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
+    const resp = await fetch(`${base}/create-company`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        razao_social: data.name,
+        cnpj: data.cnpj,
+        cnae: data.cnae,
+        atividade_principal: data.activityDescription,
+        endereco: data.address,
+        cidade: data.city,
+        estado: data.state,
+        telefone: data.phone,
+        email: data.email,
+        responsavel: data.responsible,
+      }),
+    })
+    if (!resp.ok) return
     setCreateModalOpen(false)
+    const { data: empresas } = await supabase.from("empresas").select("*")
+    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+    const metricsMap = new Map<string, MetricsRow>()
+    metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
+    const mapped = (empresas as CompanyRow[]).map((e) => ({
+      id: e.id,
+      name: e.razao_social,
+      cnpj: e.cnpj,
+      city: e.cidade || "",
+      state: e.estado || "",
+      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
+      fromESocial: e.origem === "esocial" || e.importada === true,
+      address: e.endereco || "",
+      phone: e.telefone || "",
+      email: e.email || "",
+      responsible: e.responsavel || "",
+      cnae: e.cnae || "",
+      activityDescription: e.atividade_principal || "",
+      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
+    }))
+    setCompanies(mapped)
   }
 
-  const handleEditCompany = (data: any) => {
-    setCompanies(companies.map((c) => (c.id === editingCompany?.id ? { ...c, ...data } : c)))
+  const handleEditCompany = async (data: any) => {
+    if (!editingCompany) return
+    await supabase
+      .from("empresas")
+      .update({
+        razao_social: data.name,
+        cnpj: data.cnpj,
+        cnae: data.cnae,
+        atividade_principal: data.activityDescription,
+        endereco: data.address,
+        cidade: data.city,
+        estado: data.state,
+        telefone: data.phone,
+        email: data.email,
+        responsavel: data.responsible,
+      })
+      .eq("id", editingCompany.id)
     setEditingCompany(null)
+    const { data: empresas } = await supabase.from("empresas").select("*")
+    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+    const metricsMap = new Map<string, MetricsRow>()
+    metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
+    const mapped = (empresas as CompanyRow[]).map((e) => ({
+      id: e.id,
+      name: e.razao_social,
+      cnpj: e.cnpj,
+      city: e.cidade || "",
+      state: e.estado || "",
+      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
+      fromESocial: e.origem === "esocial" || e.importada === true,
+      address: e.endereco || "",
+      phone: e.telefone || "",
+      email: e.email || "",
+      responsible: e.responsavel || "",
+      cnae: e.cnae || "",
+      activityDescription: e.atividade_principal || "",
+      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
+    }))
+    setCompanies(mapped)
   }
 
-  const handleDeleteCompany = (id: number) => {
-    if (confirm("Tem certeza que deseja excluir esta empresa?")) {
-      setCompanies(companies.filter((c) => c.id !== id))
-    }
+  const handleDeleteCompany = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta empresa?")) return
+    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
+    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
+    const resp = await fetch(`${base}/delete-company`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ empresa_id: id }),
+    })
+    if (!resp.ok) return
+    const { data: empresas } = await supabase.from("empresas").select("*")
+    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+    const metricsMap = new Map<string, MetricsRow>()
+    metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
+    const mapped = (empresas as CompanyRow[]).map((e) => ({
+      id: e.id,
+      name: e.razao_social,
+      cnpj: e.cnpj,
+      city: e.cidade || "",
+      state: e.estado || "",
+      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
+      fromESocial: e.origem === "esocial" || e.importada === true,
+      address: e.endereco || "",
+      phone: e.telefone || "",
+      email: e.email || "",
+      responsible: e.responsavel || "",
+      cnae: e.cnae || "",
+      activityDescription: e.atividade_principal || "",
+      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
+    }))
+    setCompanies(mapped)
   }
 
   return (
@@ -266,6 +245,8 @@ export default function CompaniesPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="space-y-3">
             {paginatedCompanies.map((company) => (
               <div

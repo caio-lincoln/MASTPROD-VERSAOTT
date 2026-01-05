@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,211 +10,24 @@ import { EmployeeDetailsModal } from "@/components/employee-details-modal"
 import { EmployeeCancelModal } from "@/components/employee-cancel-modal"
 import { Pagination } from "@/components/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/lib/supabaseClient"
 
-const mockEmployees = [
-  {
-    id: 1,
-    name: "João Silva",
-    email: "joao@empresa.com",
-    phone: "(11) 98765-4321",
-    position: "Eletricista",
-    department: "Manutenção",
-    status: "Ativo",
-    companyId: 1,
-    cpf: "123.456.789-01",
-    admission: "2020-01-15",
-    birthDate: "1985-05-20",
-    address: "Rua das Flores, 100",
-    city: "São Paulo",
-    state: "SP",
-  },
-  {
-    id: 2,
-    name: "Maria Santos",
-    email: "maria@empresa.com",
-    phone: "(11) 98765-4322",
-    position: "Supervisora",
-    department: "Segurança",
-    status: "Ativo",
-    companyId: 1,
-    cpf: "234.567.890-12",
-    admission: "2019-03-10",
-    birthDate: "1982-08-15",
-    address: "Av. Paulista, 500",
-    city: "São Paulo",
-    state: "SP",
-  },
-  {
-    id: 3,
-    name: "Carlos Oliveira",
-    email: "carlos@empresa.com",
-    phone: "(11) 98765-4323",
-    position: "Operador",
-    department: "Produção",
-    status: "Ativo",
-    companyId: 2,
-    cpf: "345.678.901-23",
-    admission: "2021-06-20",
-    birthDate: "1990-11-30",
-    address: "Rua Industrial, 200",
-    city: "Rio de Janeiro",
-    state: "RJ",
-  },
-  {
-    id: 4,
-    name: "Ana Paula",
-    email: "ana@empresa.com",
-    phone: "(11) 98765-4324",
-    position: "Técnica",
-    department: "Qualidade",
-    status: "Férias",
-    companyId: 2,
-    cpf: "456.789.012-34",
-    admission: "2018-09-05",
-    birthDate: "1987-02-14",
-    address: "Rua do Comércio, 300",
-    city: "Rio de Janeiro",
-    state: "RJ",
-  },
-  {
-    id: 5,
-    name: "Pedro Costa",
-    email: "pedro@empresa.com",
-    phone: "(11) 98765-4325",
-    position: "Soldador",
-    department: "Produção",
-    status: "Ativo",
-    companyId: 3,
-    cpf: "567.890.123-45",
-    admission: "2022-01-10",
-    birthDate: "1992-07-25",
-    address: "Av. das Nações, 400",
-    city: "Belo Horizonte",
-    state: "MG",
-  },
-  {
-    id: 6,
-    name: "Juliana Lima",
-    email: "juliana@empresa.com",
-    phone: "(11) 98765-4326",
-    position: "Analista",
-    department: "RH",
-    status: "Ativo",
-    companyId: 3,
-    cpf: "678.901.234-56",
-    admission: "2020-11-15",
-    birthDate: "1988-04-10",
-    address: "Rua dos Serviços, 150",
-    city: "Belo Horizonte",
-    state: "MG",
-  },
-  {
-    id: 7,
-    name: "Roberto Alves",
-    email: "roberto@empresa.com",
-    phone: "(11) 98765-4327",
-    position: "Motorista",
-    department: "Logística",
-    status: "Ativo",
-    companyId: 4,
-    cpf: "789.012.345-67",
-    admission: "2019-07-20",
-    birthDate: "1983-12-05",
-    address: "Av. das Construções, 600",
-    city: "Curitiba",
-    state: "PR",
-  },
-  {
-    id: 8,
-    name: "Fernanda Souza",
-    email: "fernanda@empresa.com",
-    phone: "(11) 98765-4328",
-    position: "Engenheira",
-    department: "Projetos",
-    status: "Ativo",
-    companyId: 5,
-    cpf: "890.123.456-78",
-    admission: "2021-02-01",
-    birthDate: "1991-09-18",
-    address: "Rua Tech, 250",
-    city: "Porto Alegre",
-    state: "RS",
-  },
-  {
-    id: 9,
-    name: "Ricardo Santos",
-    email: "ricardo@empresa.com",
-    phone: "(11) 98765-4329",
-    position: "Operador",
-    department: "Produção",
-    status: "Ativo",
-    companyId: 6,
-    cpf: "901.234.567-89",
-    admission: "2020-05-15",
-    birthDate: "1989-03-22",
-    address: "Av. Logística, 500",
-    city: "Salvador",
-    state: "BA",
-  },
-  {
-    id: 10,
-    name: "Camila Rocha",
-    email: "camila@empresa.com",
-    phone: "(11) 98765-4330",
-    position: "Auxiliar",
-    department: "Administrativo",
-    status: "Ativo",
-    companyId: 7,
-    cpf: "012.345.678-90",
-    admission: "2022-03-10",
-    birthDate: "1994-06-30",
-    address: "Rua das Indústrias, 800",
-    city: "Fortaleza",
-    state: "CE",
-  },
-  {
-    id: 11,
-    name: "Marcos Ferreira",
-    email: "marcos@empresa.com",
-    phone: "(11) 98765-4331",
-    position: "Técnico",
-    department: "Manutenção",
-    status: "Ativo",
-    companyId: 1,
-    cpf: "123.456.789-02",
-    admission: "2021-08-20",
-    birthDate: "1986-10-12",
-    address: "Rua das Flores, 200",
-    city: "São Paulo",
-    state: "SP",
-  },
-  {
-    id: 12,
-    name: "Patrícia Dias",
-    email: "patricia@empresa.com",
-    phone: "(11) 98765-4332",
-    position: "Coordenadora",
-    department: "Qualidade",
-    status: "Férias",
-    companyId: 2,
-    cpf: "234.567.890-13",
-    admission: "2018-12-01",
-    birthDate: "1984-01-25",
-    address: "Av. Industrial, 350",
-    city: "Rio de Janeiro",
-    state: "RJ",
-  },
-]
+type EmployeeRow = {
+  id: string
+  nome: string
+  email: string | null
+  telefone: string | null
+  cargo: string | null
+  departamento: string | null
+  status: "ativo" | "inativo" | "cancelado"
+  empresa_id: string
+  cpf: string
+  data_admissao: string | null
+  data_nascimento: string | null
+  endereco: string | null
+}
 
-const mockCompanies = [
-  { id: 1, name: "Empresa Alpha Ltda", cnpj: "12.345.678/0001-90" },
-  { id: 2, name: "Beta Indústria S.A.", cnpj: "23.456.789/0001-01" },
-  { id: 3, name: "Gamma Serviços", cnpj: "34.567.890/0001-12" },
-  { id: 4, name: "Delta Construções", cnpj: "45.678.901/0001-23" },
-  { id: 5, name: "Epsilon Tecnologia", cnpj: "56.789.012/0001-34" },
-  { id: 6, name: "Zeta Logística", cnpj: "67.890.123/0001-45" },
-  { id: 7, name: "Eta Alimentos", cnpj: "78.901.234/0001-56" },
-]
+type CompanyRow = { id: string; razao_social: string }
 
 const ITEMS_PER_PAGE = 10
 
@@ -222,11 +35,41 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("")
   const [companyFilter, setCompanyFilter] = useState<string>("all")
   const [modalOpen, setModalOpen] = useState(false)
-  const [employees, setEmployees] = useState(mockEmployees)
+  const [employees, setEmployees] = useState<any[]>([])
   const [currentPage, setCurrentPage] = useState(1)
-  const [viewingEmployee, setViewingEmployee] = useState<(typeof mockEmployees)[0] | null>(null)
-  const [editingEmployee, setEditingEmployee] = useState<(typeof mockEmployees)[0] | null>(null)
-  const [cancelingEmployee, setCancelingEmployee] = useState<(typeof mockEmployees)[0] | null>(null)
+  const [viewingEmployee, setViewingEmployee] = useState<any | null>(null)
+  const [editingEmployee, setEditingEmployee] = useState<any | null>(null)
+  const [cancelingEmployee, setCancelingEmployee] = useState<any | null>(null)
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
+      const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+      const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
+        id: f.id,
+        name: f.nome,
+        email: f.email || "",
+        phone: f.telefone || "",
+        position: f.cargo || "",
+        department: f.departamento || "",
+        status: f.status === "ativo" ? "Ativo" : f.status === "inativo" ? "Inativo" : "Cancelado",
+        companyId: f.empresa_id,
+        cpf: f.cpf,
+        admission: f.data_admissao || "",
+        birthDate: f.data_nascimento || "",
+        address: f.endereco || "",
+      }))
+      setEmployees(mapped)
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((e) => {
@@ -235,7 +78,7 @@ export default function EmployeesPage() {
         e.email.toLowerCase().includes(search.toLowerCase()) ||
         e.position.toLowerCase().includes(search.toLowerCase())
 
-      const matchesCompany = companyFilter === "all" || e.companyId === Number.parseInt(companyFilter)
+      const matchesCompany = companyFilter === "all" || e.companyId === companyFilter
 
       return matchesSearch && matchesCompany
     })
@@ -258,35 +101,99 @@ export default function EmployeesPage() {
     setCurrentPage(1)
   }
 
-  const handleCreateEmployee = (data: any) => {
-    const newEmployee = {
-      ...data,
-      id: employees.length + 1,
-    }
-    setEmployees([...employees, newEmployee])
+  const handleCreateEmployee = async (data: any) => {
+    await supabase.from("funcionarios").insert({
+      nome: data.name,
+      email: data.email,
+      telefone: data.phone,
+      cargo: data.position,
+      departamento: data.department,
+      status: "ativo",
+      empresa_id: data.companyId,
+      cpf: data.cpf,
+      data_admissao: data.admission,
+      data_nascimento: data.birthDate,
+      endereco: data.address,
+    })
     setModalOpen(false)
+    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
+      id: f.id,
+      name: f.nome,
+      email: f.email || "",
+      phone: f.telefone || "",
+      position: f.cargo || "",
+      department: f.departamento || "",
+      status: f.status === "ativo" ? "Ativo" : f.status === "inativo" ? "Inativo" : "Cancelado",
+      companyId: f.empresa_id,
+      cpf: f.cpf,
+      admission: f.data_admissao || "",
+      birthDate: f.data_nascimento || "",
+      address: f.endereco || "",
+    }))
+    setEmployees(mapped)
   }
 
-  const handleEditEmployee = (data: any) => {
-    setEmployees(employees.map((e) => (e.id === editingEmployee?.id ? { ...e, ...data } : e)))
+  const handleEditEmployee = async (data: any) => {
+    if (!editingEmployee) return
+    await supabase
+      .from("funcionarios")
+      .update({
+        nome: data.name,
+        email: data.email,
+        telefone: data.phone,
+        cargo: data.position,
+        departamento: data.department,
+        empresa_id: data.companyId,
+        cpf: data.cpf,
+        data_admissao: data.admission,
+        data_nascimento: data.birthDate,
+        endereco: data.address,
+      })
+      .eq("id", editingEmployee.id)
     setEditingEmployee(null)
+    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
+      id: f.id,
+      name: f.nome,
+      email: f.email || "",
+      phone: f.telefone || "",
+      position: f.cargo || "",
+      department: f.departamento || "",
+      status: f.status === "ativo" ? "Ativo" : f.status === "inativo" ? "Inativo" : "Cancelado",
+      companyId: f.empresa_id,
+      cpf: f.cpf,
+      admission: f.data_admissao || "",
+      birthDate: f.data_nascimento || "",
+      address: f.endereco || "",
+    }))
+    setEmployees(mapped)
   }
 
-  const handleCancelEmployee = (reason: string) => {
-    if (cancelingEmployee) {
-      setEmployees(
-        employees.map((e) =>
-          e.id === cancelingEmployee.id
-            ? { ...e, status: "Cancelado", cancelReason: reason, cancelDate: new Date().toISOString() }
-            : e,
-        ),
-      )
-      setCancelingEmployee(null)
-    }
+  const handleCancelEmployee = async (reason: string) => {
+    if (!cancelingEmployee) return
+    await supabase.from("funcionarios").update({ status: "cancelado" }).eq("id", cancelingEmployee.id)
+    setCancelingEmployee(null)
+    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
+      id: f.id,
+      name: f.nome,
+      email: f.email || "",
+      phone: f.telefone || "",
+      position: f.cargo || "",
+      department: f.departamento || "",
+      status: f.status === "ativo" ? "Ativo" : f.status === "inativo" ? "Inativo" : "Cancelado",
+      companyId: f.empresa_id,
+      cpf: f.cpf,
+      admission: f.data_admissao || "",
+      birthDate: f.data_nascimento || "",
+      address: f.endereco || "",
+    }))
+    setEmployees(mapped)
   }
 
-  const getCompanyName = (companyId: number) => {
-    return mockCompanies.find((c) => c.id === companyId)?.name || "N/A"
+  const getCompanyName = (companyId: string) => {
+    return companies.find((c) => c.id === companyId)?.name || "N/A"
   }
 
   return (
@@ -316,8 +223,8 @@ export default function EmployeesPage() {
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
                   <SelectItem value="all">Todas as Empresas</SelectItem>
-                  {mockCompanies.map((company) => (
-                    <SelectItem key={company.id} value={company.id.toString()}>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
                       {company.name}
                     </SelectItem>
                   ))}
@@ -336,6 +243,8 @@ export default function EmployeesPage() {
           </div>
         </CardHeader>
         <CardContent>
+          {loading && <div className="text-slate-400">Carregando...</div>}
+          {error && <div className="text-red-400">{error}</div>}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {paginatedEmployees.map((employee) => (
               <div
@@ -446,7 +355,7 @@ export default function EmployeesPage() {
         onSubmit={editingEmployee ? handleEditEmployee : handleCreateEmployee}
         initialData={editingEmployee}
         mode={editingEmployee ? "edit" : "create"}
-        companies={mockCompanies}
+        companies={companies.map((c) => ({ id: c.id, name: c.name, cnpj: "" }))}
       />
 
       <EmployeeDetailsModal

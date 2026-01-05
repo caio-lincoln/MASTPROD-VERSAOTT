@@ -1,48 +1,71 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Users, GraduationCap, HardHat, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react"
-
-const stats = [
-  {
-    title: "Funcionários",
-    value: "248",
-    change: "+12%",
-    trend: "up",
-    icon: Users,
-    color: "from-blue-500 to-blue-600",
-  },
-  {
-    title: "Treinamentos Ativos",
-    value: "36",
-    change: "+8%",
-    trend: "up",
-    icon: GraduationCap,
-    color: "from-emerald-500 to-emerald-600",
-  },
-  {
-    title: "EPIs Cadastrados",
-    value: "142",
-    change: "-3%",
-    trend: "down",
-    icon: HardHat,
-    color: "from-amber-500 to-amber-600",
-  },
-  {
-    title: "Riscos Identificados",
-    value: "28",
-    change: "+5%",
-    trend: "up",
-    icon: AlertTriangle,
-    color: "from-red-500 to-red-600",
-  },
-]
-
-const recentTrainings = [
-  { name: "NR-35 - Trabalho em Altura", employees: 15, status: "Em andamento", date: "2024-01-15" },
-  { name: "NR-10 - Eletricidade", employees: 22, status: "Concluído", date: "2024-01-10" },
-  { name: "CIPA - Prevenção de Acidentes", employees: 8, status: "Agendado", date: "2024-01-20" },
-]
+import { useEffect, useState } from "react"
+import { supabase } from "@/lib/supabaseClient"
 
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState({
+    funcionarios: 0,
+    treinamentos_ativos: 0,
+    epis: 0,
+    riscos: 0,
+  })
+  const [recentTrainings, setRecentTrainings] = useState<Array<{ name: string; employees: number; status: string; date: string }>>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      const { data: view } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const agg = (view || []).reduce(
+        (acc, v: any) => {
+          acc.funcionarios += v.total_funcionarios || 0
+          acc.treinamentos_ativos += v.total_treinamentos_ativos || 0
+          acc.epis += v.total_epis_cadastrados || 0
+          acc.riscos += v.total_riscos_identificados || 0
+          return acc
+        },
+        { funcionarios: 0, treinamentos_ativos: 0, epis: 0, riscos: 0 },
+      )
+      setMetrics(agg)
+      const { data: trainings } = await supabase
+        .from("treinamentos")
+        .select("titulo, status, created_at, funcionario_id")
+        .order("created_at", { ascending: false })
+        .limit(5)
+      setRecentTrainings(
+        (trainings || []).map((t: any) => ({
+          name: t.titulo,
+          employees: t.funcionario_id ? 1 : 0,
+          status:
+            t.status === "concluido"
+              ? "Concluído"
+              : t.status === "em_andamento"
+                ? "Em andamento"
+                : t.status === "agendado"
+                  ? "Agendado"
+                  : t.status === "cancelado"
+                    ? "Cancelado"
+                    : "Agendado",
+          date: (t.created_at || "").substring(0, 10),
+        })),
+      )
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const stats = [
+    { title: "Funcionários", value: String(metrics.funcionarios), change: "", trend: "up", icon: Users, color: "from-blue-500 to-blue-600" },
+    { title: "Treinamentos Ativos", value: String(metrics.treinamentos_ativos), change: "", trend: "up", icon: GraduationCap, color: "from-emerald-500 to-emerald-600" },
+    { title: "EPIs Cadastrados", value: String(metrics.epis), change: "", trend: "up", icon: HardHat, color: "from-amber-500 to-amber-600" },
+    { title: "Riscos Identificados", value: String(metrics.riscos), change: "", trend: "up", icon: AlertTriangle, color: "from-red-500 to-red-600" },
+  ]
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
