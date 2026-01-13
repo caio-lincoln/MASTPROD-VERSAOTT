@@ -185,14 +185,35 @@ export default function CompaniesPage() {
 
   const handleDeleteCompany = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta empresa?")) return
-    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
-    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
-    const resp = await fetch(`${base}/delete-company`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ empresa_id: id }),
-    })
-    if (!resp.ok) return
+
+    // Tentativa de exclusão direta via Client (aproveitando RLS policies)
+    const { error: deleteError } = await supabase.from("empresas").delete().eq("id", id)
+
+    if (deleteError) {
+      console.error("Erro ao excluir empresa:", deleteError)
+      alert(`Erro ao excluir empresa: ${deleteError.message}`)
+      
+      // Fallback para Edge Function se falhar por permissão (caso RLS não esteja propagado ou usuário seja service_role simulado)
+      // Mas como configuramos RLS, o delete direto deve funcionar.
+      // Se quiser manter a Edge Function como fallback:
+      /*
+      const token = (await supabase.auth.getSession()).data.session?.access_token || ""
+      const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
+      const resp = await fetch(`${base}/delete-company`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ empresa_id: id }),
+      })
+      if (!resp.ok) {
+        const errText = await resp.text()
+        alert(`Falha na exclusão via servidor: ${errText}`)
+        return
+      }
+      */
+      return
+    }
+
+    // Sucesso - Recarregar dados
     const { data: empresas } = await supabase.from("empresas").select("*")
     const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
     const metricsMap = new Map<string, MetricsRow>()

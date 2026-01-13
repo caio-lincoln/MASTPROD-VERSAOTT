@@ -25,11 +25,8 @@ import { Search } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-
-// Assume these modal components are defined elsewhere and imported
-// import EventS2240Modal from './EventS2240Modal';
-// import EventS2220Modal from './EventS2220Modal';
-// import EventS2210Modal from './EventS2210Modal';
+import { useESocialEvents, useESocialCompanies, ESocialEvent } from "@/hooks/use-esocial"
+import { supabase } from "@/lib/supabaseClient"
 
 // Mock modal components for demonstration purposes if actual components are not provided
 const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
@@ -42,7 +39,6 @@ const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2240.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Placeholder for form fields */}
             <p className="text-slate-400">Formulário de criação de evento S-2240 aqui...</p>
           </div>
           <div className="p-6 border-t border-slate-800">
@@ -69,7 +65,6 @@ const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2220.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Placeholder for form fields */}
             <p className="text-slate-400">Formulário de criação de evento S-2220 aqui...</p>
           </div>
           <div className="p-6 border-t border-slate-800">
@@ -96,7 +91,6 @@ const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2210.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            {/* Placeholder for form fields */}
             <p className="text-slate-400">Formulário de criação de evento S-2210 aqui...</p>
           </div>
           <div className="p-6 border-t border-slate-800">
@@ -114,299 +108,6 @@ const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   </>
 )
 
-const mockEvents = {
-  s2240: [
-    {
-      id: 1,
-      employee: "João Silva",
-      date: "2024-01-15",
-      status: "Enviado",
-      risk: "Ruído excessivo",
-      company: "Empresa Alpha Ltda",
-      protocol: "1.1.2024.000001",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtExpRisco><ideEvento>...</ideEvento></evtExpRisco></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 2,
-      employee: "Maria Santos",
-      date: "2024-01-14",
-      status: "Pendente",
-      risk: "Produtos químicos",
-      company: "Beta Indústria S.A.",
-      protocol: null,
-      xml: null,
-      errorMessage: null,
-    },
-    {
-      id: 3,
-      employee: "Carlos Oliveira",
-      date: "2024-01-13",
-      status: "Enviado",
-      risk: "Radiação não ionizante",
-      company: "Empresa Alpha Ltda",
-      protocol: "1.1.2024.000002",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtExpRisco><ideEvento>...</ideEvento></evtExpRisco></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 4,
-      employee: "Ana Paula",
-      date: "2024-01-12",
-      status: "Enviado",
-      risk: "Calor excessivo",
-      company: "Gamma Serviços",
-      protocol: "1.1.2024.000003",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtExpRisco><ideEvento>...</ideEvento></evtExpRisco></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 5,
-      employee: "Pedro Costa",
-      date: "2024-01-11",
-      status: "Erro",
-      risk: "Poeira de sílica",
-      company: "Beta Indústria S.A.",
-      protocol: null,
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtExpRisco><ideEvento>...</ideEvento></evtExpRisco></eSocial>`,
-      errorMessage: "Erro na validação: Campo CPF do trabalhador é obrigatório. Código: REGRA_VALIDA_CPF_TRABALHADOR",
-    },
-    {
-      id: 6,
-      employee: "Juliana Lima",
-      date: "2024-01-10",
-      status: "Enviado",
-      risk: "Vibrações",
-      company: "Empresa Alpha Ltda",
-      protocol: "1.1.2024.000004",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 7,
-      employee: "Carlos Oliveira",
-      date: "2024-01-16",
-      status: "Enviado",
-      exam: "Admissional",
-      company: "Empresa Alpha Ltda",
-      protocol: "2.2.2024.000001",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 8,
-      employee: "Ana Paula",
-      date: "2024-01-12",
-      status: "Erro",
-      exam: "Periódico",
-      company: "Gamma Serviços",
-      protocol: null,
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: "Erro na validação: Data do exame posterior à data de envio. Código: REGRA_VALIDA_DATA_EXAME",
-    },
-    {
-      id: 9,
-      employee: "Pedro Costa",
-      date: "2024-01-11",
-      status: "Enviado",
-      exam: "Retorno ao trabalho",
-      company: "Beta Indústria S.A.",
-      protocol: "2.2.2024.000002",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 10,
-      employee: "Juliana Lima",
-      date: "2024-01-09",
-      status: "Enviado",
-      exam: "Periódico",
-      company: "Gamma Serviços",
-      protocol: "2.2.2024.000003",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 11,
-      employee: "Roberto Alves",
-      date: "2024-01-07",
-      status: "Pendente",
-      exam: "Demissional",
-      company: "Empresa Alpha Ltda",
-      protocol: null,
-      xml: null,
-      errorMessage: null,
-    },
-    {
-      id: 12,
-      employee: "Fernanda Souza",
-      date: "2024-01-06",
-      status: "Enviado",
-      exam: "Admissional",
-      company: "Beta Indústria S.A.",
-      protocol: "2.2.2024.000004",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 13,
-      employee: "Ricardo Santos",
-      date: "2024-01-05",
-      status: "Enviado",
-      exam: "Retorno ao trabalho",
-      company: "Gamma Serviços",
-      protocol: "2.2.2024.000005",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 14,
-      employee: "Patrícia Dias",
-      date: "2024-01-04",
-      status: "Erro",
-      exam: "Mudança de função",
-      company: "Empresa Alpha Ltda",
-      protocol: null,
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: "Erro na validação: CRM do médico inválido. Código: REGRA_VALIDA_CRM_MEDICO",
-    },
-    {
-      id: 15,
-      employee: "Lucas Martins",
-      date: "2024-01-03",
-      status: "Enviado",
-      exam: "Admissional",
-      company: "Gamma Serviços",
-      protocol: "2.2.2024.000007",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtMonit><ideEvento>...</ideEvento></evtMonit></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 16,
-      employee: "Pedro Costa",
-      date: "2024-01-10",
-      status: "Enviado",
-      type: "Acidente típico",
-      company: "Beta Indústria S.A.",
-      protocol: "3.1.2024.000001",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 17,
-      employee: "Juliana Lima",
-      date: "2024-01-09",
-      status: "Pendente",
-      type: "Acidente de trajeto",
-      company: "Empresa Alpha Ltda",
-      protocol: null,
-      xml: null,
-      errorMessage: null,
-    },
-    {
-      id: 18,
-      employee: "Roberto Alves",
-      date: "2024-01-08",
-      status: "Enviado",
-      type: "Doença ocupacional",
-      company: "Gamma Serviços",
-      protocol: "3.1.2024.000002",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 19,
-      employee: "Fernanda Souza",
-      date: "2024-01-07",
-      status: "Enviado",
-      type: "Acidente típico",
-      company: "Beta Indústria S.A.",
-      protocol: "3.1.2024.000003",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 20,
-      employee: "Ricardo Santos",
-      date: "2024-01-06",
-      status: "Erro",
-      type: "Acidente de trajeto",
-      company: "Empresa Alpha Ltda",
-      protocol: null,
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: "Erro na validação: Descrição do acidente é obrigatória. Código: REGRA_VALIDA_DESC_ACIDENTE",
-    },
-    {
-      id: 21,
-      employee: "Camila Rocha",
-      date: "2024-01-05",
-      status: "Enviado",
-      type: "Acidente típico",
-      company: "Gamma Serviços",
-      protocol: "3.1.2024.000004",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 22,
-      employee: "Marcos Ferreira",
-      date: "2024-01-04",
-      status: "Pendente",
-      type: "Doença ocupacional",
-      company: "Beta Indústria S.A.",
-      protocol: null,
-      xml: null,
-      errorMessage: null,
-    },
-    {
-      id: 23,
-      employee: "Patrícia Dias",
-      date: "2024-01-03",
-      status: "Enviado",
-      type: "Acidente típico",
-      company: "Empresa Alpha Ltda",
-      protocol: "3.1.2024.000005",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 24,
-      employee: "Lucas Martins",
-      date: "2024-01-02",
-      status: "Enviado",
-      type: "Acidente de trajeto",
-      company: "Gamma Serviços",
-      protocol: "3.1.2024.000006",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 25,
-      employee: "Beatriz Silva",
-      date: "2024-01-01",
-      status: "Enviado",
-      type: "Doença ocupacional",
-      company: "Beta Indústria S.A.",
-      protocol: "3.1.2024.000007",
-      xml: `<?xml version="1.0" encoding="UTF-8"?><eSocial><evtCAT><ideEvento>...</ideEvento></evtCAT></eSocial>`,
-      errorMessage: null,
-    },
-    {
-      id: 26,
-      employee: "Thiago Costa",
-      date: "2023-12-30",
-      status: "Pendente",
-      type: "Acidente típico",
-      company: "Empresa Alpha Ltda",
-      protocol: null,
-      xml: null,
-      errorMessage: null,
-    },
-  ],
-  s2220: [],
-  s2210: [],
-}
-
 const ITEMS_PER_PAGE = 10
 const COMPANIES_PER_PAGE = 5
 
@@ -420,8 +121,6 @@ export default function ESocialContent() {
   const [currentPageS2210, setCurrentPageS2210] = useState(1)
 
   const [detailsModal, setDetailsModal] = useState<any>(null)
-  const [errorModal, setErrorModal] = useState<any>(null)
-  const [linkedCompanyIds, setLinkedCompanyIds] = useState<number[]>([1, 2, 3])
   const [showLinkCompanyModal, setShowLinkCompanyModal] = useState(false)
   const [companySearch, setCompanySearch] = useState("")
   const [companyPage, setCompanyPage] = useState(1)
@@ -430,91 +129,37 @@ export default function ESocialContent() {
   const [showCreateS2220Modal, setShowCreateS2220Modal] = useState(false)
   const [showCreateS2210Modal, setShowCreateS2210Modal] = useState(false)
 
-  const allCompanies = useMemo(
-    () => [
-      {
-        id: 1,
-        name: "Empresa Alpha Ltda",
-        cnpj: "12.345.678/0001-90",
-        employees: 120,
-        city: "São Paulo",
-        state: "SP",
-        status: "Ativa",
-      },
-      {
-        id: 2,
-        name: "Beta Indústria S.A.",
-        cnpj: "23.456.789/0001-01",
-        employees: 85,
-        city: "Rio de Janeiro",
-        state: "RJ",
-        status: "Ativa",
-      },
-      {
-        id: 3,
-        name: "Gamma Serviços",
-        cnpj: "34.567.890/0001-12",
-        employees: 43,
-        city: "Belo Horizonte",
-        state: "MG",
-        status: "Ativa",
-      },
-      {
-        id: 4,
-        name: "Delta Construções",
-        cnpj: "45.678.901/0001-23",
-        employees: 95,
-        city: "Curitiba",
-        state: "PR",
-        status: "Ativa",
-      },
-      {
-        id: 5,
-        name: "Epsilon Tecnologia",
-        cnpj: "56.789.012/0001-34",
-        employees: 67,
-        city: "Porto Alegre",
-        state: "RS",
-        status: "Ativa",
-      },
-      {
-        id: 6,
-        name: "Zeta Logística",
-        cnpj: "67.890.123/0001-45",
-        employees: 54,
-        city: "Salvador",
-        state: "BA",
-        status: "Ativa",
-      },
-      {
-        id: 7,
-        name: "Eta Alimentos",
-        cnpj: "78.901.234/0001-56",
-        employees: 112,
-        city: "Fortaleza",
-        state: "CE",
-        status: "Ativa",
-      },
-      {
-        id: 8,
-        name: "Theta Consultoria",
-        cnpj: "89.012.345/0001-67",
-        employees: 38,
-        city: "Brasília",
-        state: "DF",
-        status: "Ativa",
-      },
-    ],
-    [],
-  )
+  // Hooks para dados reais
+  const { events, loading: loadingEvents, refresh: refreshEvents } = useESocialEvents()
+  const { companies: allCompanies, loading: loadingCompanies, refresh: refreshCompanies } = useESocialCompanies()
 
+  // Mapeamento de dados para o formato esperado pela UI
+  const mapEvent = (e: ESocialEvent) => ({
+    id: e.id,
+    employee: e.funcionario?.nome || "Desconhecido",
+    date: new Date(e.created_at).toLocaleDateString("pt-BR"),
+    status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
+    company: e.empresa?.razao_social || "Desconhecida",
+    protocol: e.protocolo,
+    xml: e.xml_envio,
+    errorMessage: e.mensagem_erro,
+    // Placeholders pois essas infos estariam no XML
+    risk: "Ver detalhes",
+    exam: "Ver detalhes",
+    type: "Ver detalhes"
+  })
+
+  const s2240Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2240').map(mapEvent), [events])
+  const s2220Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2220').map(mapEvent), [events])
+  const s2210Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2210').map(mapEvent), [events])
+
+  // Filtragem e Paginação S-2240
   const filteredS2240 = useMemo(() => {
-    return mockEvents.s2240.filter(
+    return s2240Events.filter(
       (e) =>
-        e.employee.toLowerCase().includes(searchS2240.toLowerCase()) ||
-        e.risk.toLowerCase().includes(searchS2240.toLowerCase()),
+        e.employee.toLowerCase().includes(searchS2240.toLowerCase())
     )
-  }, [searchS2240])
+  }, [searchS2240, s2240Events])
 
   const totalPagesS2240 = Math.ceil(filteredS2240.length / ITEMS_PER_PAGE)
   const paginatedS2240 = useMemo(() => {
@@ -522,13 +167,13 @@ export default function ESocialContent() {
     return filteredS2240.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredS2240, currentPageS2240])
 
+  // Filtragem e Paginação S-2220
   const filteredS2220 = useMemo(() => {
-    return mockEvents.s2220.filter(
+    return s2220Events.filter(
       (e) =>
-        e.employee.toLowerCase().includes(searchS2220.toLowerCase()) ||
-        e.exam.toLowerCase().includes(searchS2220.toLowerCase()),
+        e.employee.toLowerCase().includes(searchS2220.toLowerCase())
     )
-  }, [searchS2220])
+  }, [searchS2220, s2220Events])
 
   const totalPagesS2220 = Math.ceil(filteredS2220.length / ITEMS_PER_PAGE)
   const paginatedS2220 = useMemo(() => {
@@ -536,13 +181,13 @@ export default function ESocialContent() {
     return filteredS2220.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredS2220, currentPageS2220])
 
+  // Filtragem e Paginação S-2210
   const filteredS2210 = useMemo(() => {
-    return mockEvents.s2210.filter(
+    return s2210Events.filter(
       (e) =>
-        e.employee.toLowerCase().includes(searchS2210.toLowerCase()) ||
-        e.type.toLowerCase().includes(searchS2210.toLowerCase()),
+        e.employee.toLowerCase().includes(searchS2210.toLowerCase())
     )
-  }, [searchS2210])
+  }, [searchS2210, s2210Events])
 
   const totalPagesS2210 = Math.ceil(filteredS2210.length / ITEMS_PER_PAGE)
   const paginatedS2210 = useMemo(() => {
@@ -550,13 +195,14 @@ export default function ESocialContent() {
     return filteredS2210.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredS2210, currentPageS2210])
 
+  // Empresas Vinculadas
   const linkedCompanies = useMemo(() => {
-    return allCompanies.filter((c) => linkedCompanyIds.includes(c.id))
-  }, [linkedCompanyIds])
+    return allCompanies.filter(c => c.origem === 'esocial' || c.esocial_status !== 'NAO_REGISTRADO')
+  }, [allCompanies])
 
   const filteredLinkedCompanies = useMemo(() => {
     return linkedCompanies.filter(
-      (c) => c.name.toLowerCase().includes(companySearch.toLowerCase()) || c.cnpj.includes(companySearch),
+      (c) => c.razao_social.toLowerCase().includes(companySearch.toLowerCase()) || c.cnpj.includes(companySearch),
     )
   }, [linkedCompanies, companySearch])
 
@@ -566,9 +212,11 @@ export default function ESocialContent() {
     return filteredLinkedCompanies.slice(startIndex, startIndex + COMPANIES_PER_PAGE)
   }, [filteredLinkedCompanies, companyPage])
 
+  // Empresas Disponíveis para Vínculo
   const availableCompanies = useMemo(() => {
-    return allCompanies.filter((c) => !linkedCompanyIds.includes(c.id))
-  }, [linkedCompanyIds])
+    return allCompanies.filter(c => c.origem !== 'esocial' && (!c.esocial_status || c.esocial_status === 'NAO_REGISTRADO'))
+  }, [allCompanies])
+
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -624,13 +272,36 @@ export default function ESocialContent() {
     }
   }
 
-  const handleLinkCompany = (companyId: number) => {
-    setLinkedCompanyIds([...linkedCompanyIds, companyId])
-    setShowLinkCompanyModal(false)
+  const handleLinkCompany = async (companyId: string) => {
+    try {
+      const { error } = await supabase
+        .from('empresas')
+        .update({ origem: 'esocial', esocial_status: 'REGISTRADO' })
+        .eq('id', companyId)
+
+      if (error) throw error
+      refreshCompanies()
+      setShowLinkCompanyModal(false)
+    } catch (error) {
+      console.error('Erro ao vincular empresa:', error)
+      alert('Erro ao vincular empresa')
+    }
   }
 
-  const handleUnlinkCompany = (companyId: number) => {
-    setLinkedCompanyIds(linkedCompanyIds.filter((id) => id !== companyId))
+  const handleUnlinkCompany = async (companyId: string) => {
+    if (!confirm('Deseja realmente desvincular esta empresa?')) return
+    try {
+      const { error } = await supabase
+        .from('empresas')
+        .update({ esocial_status: 'NAO_REGISTRADO' })
+        .eq('id', companyId)
+
+      if (error) throw error
+      refreshCompanies()
+    } catch (error) {
+      console.error('Erro ao desvincular empresa:', error)
+      alert('Erro ao desvincular empresa')
+    }
   }
 
   const handleCompanySearch = (value: string) => {
@@ -755,10 +426,6 @@ export default function ESocialContent() {
           <h2 className="text-3xl font-bold text-white mb-2">e-Social</h2>
           <p className="text-slate-400">Gestão de eventos do e-Social</p>
         </div>
-        <Button className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700">
-          <Send className="w-4 h-4 mr-2" />
-          Enviar Eventos em Lote
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -813,9 +480,9 @@ export default function ESocialContent() {
                         <Building2 className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white">{company.name}</h4>
+                        <h4 className="font-semibold text-white">{company.razao_social}</h4>
                         <p className="text-sm text-slate-400">
-                          CNPJ: {company.cnpj} • {company.employees} funcionários • {company.city}/{company.state}
+                          CNPJ: {company.cnpj} • {company.total_funcionarios || 0} funcionários • {company.cidade || 'N/A'}/{company.estado || 'UF'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -863,13 +530,13 @@ export default function ESocialContent() {
                 <CardTitle className="text-sm text-slate-400">S-2240 - Exposição a Riscos</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{mockEvents.s2240.length}</div>
+                <div className="text-3xl font-bold text-white mb-2">{s2240Events.length}</div>
                 <div className="flex gap-4 text-sm">
                   <span className="text-emerald-400">
-                    {mockEvents.s2240.filter((e) => e.status === "Enviado").length} enviados
+                    {s2240Events.filter((e) => e.status === "Enviado").length} enviados
                   </span>
                   <span className="text-red-400">
-                    {mockEvents.s2240.filter((e) => e.status === "Erro").length} erros
+                    {s2240Events.filter((e) => e.status === "Erro").length} erros
                   </span>
                 </div>
               </CardContent>
@@ -880,13 +547,13 @@ export default function ESocialContent() {
                 <CardTitle className="text-sm text-slate-400">S-2220 - Exames Médicos</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{mockEvents.s2220.length}</div>
+                <div className="text-3xl font-bold text-white mb-2">{s2220Events.length}</div>
                 <div className="flex gap-4 text-sm">
                   <span className="text-emerald-400">
-                    {mockEvents.s2220.filter((e) => e.status === "Enviado").length} enviados
+                    {s2220Events.filter((e) => e.status === "Enviado").length} enviados
                   </span>
                   <span className="text-red-400">
-                    {mockEvents.s2220.filter((e) => e.status === "Erro").length} erros
+                    {s2220Events.filter((e) => e.status === "Erro").length} erros
                   </span>
                 </div>
               </CardContent>
@@ -897,13 +564,13 @@ export default function ESocialContent() {
                 <CardTitle className="text-sm text-slate-400">S-2210 - Acidentes</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{mockEvents.s2210.length}</div>
+                <div className="text-3xl font-bold text-white mb-2">{s2210Events.length}</div>
                 <div className="flex gap-4 text-sm">
                   <span className="text-emerald-400">
-                    {mockEvents.s2210.filter((e) => e.status === "Enviado").length} enviados
+                    {s2210Events.filter((e) => e.status === "Enviado").length} enviados
                   </span>
                   <span className="text-red-400">
-                    {mockEvents.s2210.filter((e) => e.status === "Erro").length} erros
+                    {s2210Events.filter((e) => e.status === "Erro").length} erros
                   </span>
                 </div>
               </CardContent>
@@ -1095,9 +762,9 @@ export default function ESocialContent() {
                         <Building2 className="w-5 h-5 text-emerald-400" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white">{company.name}</h4>
+                        <h4 className="font-semibold text-white">{company.razao_social}</h4>
                         <p className="text-sm text-slate-400">
-                          CNPJ: {company.cnpj} • {company.employees} funcionários • {company.city}/{company.state}
+                          CNPJ: {company.cnpj} • {company.total_funcionarios || 0} funcionários • {company.cidade || 'N/A'}/{company.estado || 'UF'}
                         </p>
                       </div>
                       <Button
