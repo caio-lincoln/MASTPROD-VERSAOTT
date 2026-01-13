@@ -116,12 +116,13 @@ async function createCompany(req: Request) {
   const token = getBearer(req);
   const { userClient, serviceClient } = getClients(token);
   const body = await req.json();
-  const { razao_social, cnpj, cnae, atividade_principal, endereco, cidade, estado, telefone, email, responsavel } = body;
+  const { razao_social, cnpj, cnae, atividade_principal, endereco, cidade, estado, telefone, email, responsavel, classificacao_tributaria, natureza_juridica, inicio_validade } = body;
   if (!razao_social || !cnpj) return bad("razao_social e cnpj são obrigatórios");
   const requesterId = await getRequesterId(userClient);
   if (!requesterId) return bad("Usuário não autenticado", 401);
   const { error } = await serviceClient.from("empresas").insert({
     razao_social, cnpj, cnae, atividade_principal, endereco, cidade, estado, telefone, email, responsavel,
+    classificacao_tributaria, natureza_juridica, inicio_validade,
     origem: "manual", importada: false
   });
   if (error) return bad(error.message, 500);

@@ -9,6 +9,7 @@ import { Pagination } from "@/components/pagination"
 import { CompanyModal } from "@/components/company-modal"
 import { CompanyDetailsModal } from "@/components/company-details-modal"
 import { supabase } from "@/lib/supabaseClient"
+import { toast } from "sonner"
 
 type CompanyRow = {
   id: string
@@ -25,6 +26,9 @@ type CompanyRow = {
   responsavel: string | null
   origem: "manual" | "esocial"
   importada: boolean
+  natureza_juridica: string | null
+  classificacao_tributaria: string | null
+  inicio_validade: string | null
 }
 
 type MetricsRow = {
@@ -36,6 +40,28 @@ type MetricsRow = {
 }
 
 const ITEMS_PER_PAGE = 10
+
+const mapCompanies = (empresas: CompanyRow[], metricsMap: Map<string, MetricsRow>) => {
+  return empresas.map((e) => ({
+    id: e.id,
+    name: e.razao_social,
+    cnpj: e.cnpj,
+    city: e.cidade || "",
+    state: e.estado || "",
+    status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
+    fromESocial: e.origem === "esocial" || e.importada === true,
+    address: e.endereco || "",
+    phone: e.telefone || "",
+    email: e.email || "",
+    responsible: e.responsavel || "",
+    cnae: e.cnae || "",
+    activityDescription: e.atividade_principal || "",
+    employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
+    legalNature: e.natureza_juridica || "",
+    taxClassification: e.classificacao_tributaria || "",
+    validityStartDate: e.inicio_validade ? e.inicio_validade.substring(0, 7) : "",
+  }))
+}
 
 export default function CompaniesPage() {
   const [search, setSearch] = useState("")
@@ -60,22 +86,7 @@ export default function CompaniesPage() {
       const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
       const metricsMap = new Map<string, MetricsRow>()
       metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
-      const mapped = (empresas as CompanyRow[]).map((e) => ({
-        id: e.id,
-        name: e.razao_social,
-        cnpj: e.cnpj,
-        city: e.cidade || "",
-        state: e.estado || "",
-        status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
-        fromESocial: e.origem === "esocial" || e.importada === true,
-        address: e.endereco || "",
-        phone: e.telefone || "",
-        email: e.email || "",
-        responsible: e.responsavel || "",
-        cnae: e.cnae || "",
-        activityDescription: e.atividade_principal || "",
-        employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
-      }))
+      const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
       setCompanies(mapped)
       setLoading(false)
     }
@@ -99,47 +110,107 @@ export default function CompaniesPage() {
   }
 
   const handleCreateCompany = async (data: any) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
-    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
-    const resp = await fetch(`${base}/create-company`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        razao_social: data.name,
-        cnpj: data.cnpj,
-        cnae: data.cnae,
-        atividade_principal: data.activityDescription,
-        endereco: data.address,
-        cidade: data.city,
-        estado: data.state,
-        telefone: data.phone,
-        email: data.email,
-        responsavel: data.responsible,
-      }),
-    })
-    if (!resp.ok) return
-    setCreateModalOpen(false)
-    const { data: empresas } = await supabase.from("empresas").select("*")
-    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
-    const metricsMap = new Map<string, MetricsRow>()
-    metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
-    const mapped = (empresas as CompanyRow[]).map((e) => ({
-      id: e.id,
-      name: e.razao_social,
-      cnpj: e.cnpj,
-      city: e.cidade || "",
-      state: e.estado || "",
-      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
-      fromESocial: e.origem === "esocial" || e.importada === true,
-      address: e.endereco || "",
-      phone: e.telefone || "",
-      email: e.email || "",
-      responsible: e.responsavel || "",
-      cnae: e.cnae || "",
-      activityDescription: e.atividade_principal || "",
-      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
-    }))
-    setCompanies(mapped)
+    try {
+      setLoading(true)
+      console.log("Criando empresa com dados:", data)
+
+      // Verificar sessão antes de prosseguir
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError || !sessionData.session) {
+        console.error("Erro de sessão:", sessionError)
+        toast.error("Sessão inválida ou expirada. Faça login novamente.")
+        setLoading(false)
+        return
+      }
+
+      // Tenta refresh se o token estiver prestes a expirar (opcional, mas seguro)
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+      
+      const session = refreshData.session || sessionData.session
+      const user = session?.user
+
+      if (refreshError) {
+         console.warn("Erro ao atualizar sessão:", refreshError)
+      }
+
+      if (!user) {
+        toast.error("Usuário não autenticado.")
+        setLoading(false)
+        return
+      }
+
+      // Inserção direta no banco de dados (bypass Edge Function por solicitação do usuário)
+      // 1. Inserir empresa
+      const { data: newCompany, error: createError } = await supabase
+        .from("empresas")
+        .insert({
+          razao_social: data.name,
+          cnpj: data.cnpj,
+          cnae: data.cnae,
+          atividade_principal: data.activityDescription,
+          endereco: data.address,
+          cidade: data.city,
+          estado: data.state,
+          telefone: data.phone,
+          email: data.email,
+          responsavel: data.responsible,
+          classificacao_tributaria: data.taxClassification,
+          natureza_juridica: data.legalNature,
+          inicio_validade: data.validityStartDate ? `${data.validityStartDate}-01` : null,
+          origem: 'manual',
+          importada: false,
+          status: 'ativo',
+          user_id: user.id
+        })
+        .select()
+        .single()
+
+      if (createError) {
+        console.error("Erro ao criar empresa (DB):", createError)
+        toast.error(`Erro ao criar empresa: ${createError.message}`)
+        setLoading(false)
+        return
+      }
+
+      console.log("Empresa criada:", newCompany)
+
+      // 2. Vincular usuário à empresa
+      const { error: linkError } = await supabase
+        .from("usuarios_empresas")
+        .insert({
+          empresa_id: newCompany.id,
+          user_id: user.id,
+          role: 'owner'
+        })
+
+      if (linkError) {
+        console.error("Erro ao vincular usuário à empresa:", linkError)
+        toast.error(`Empresa criada, mas erro ao vincular usuário: ${linkError.message}`)
+        // Opcional: tentar deletar a empresa criada para evitar órfãos?
+        // Por enquanto, apenas avisar.
+      } else {
+        toast.success("Empresa criada com sucesso!")
+      }
+
+      setCreateModalOpen(false)
+      
+      // Recarregar dados
+      const { data: empresas, error: errEmp } = await supabase.from("empresas").select("*")
+      if (errEmp) throw errEmp
+
+      const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const metricsMap = new Map<string, MetricsRow>()
+      metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
+      
+      const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
+      setCompanies(mapped)
+    } catch (err: any) {
+      console.error("Exceção ao criar empresa:", err)
+      toast.error(`Erro inesperado: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleEditCompany = async (data: any) => {
@@ -157,6 +228,9 @@ export default function CompaniesPage() {
         telefone: data.phone,
         email: data.email,
         responsavel: data.responsible,
+        classificacao_tributaria: data.taxClassification,
+        natureza_juridica: data.legalNature,
+        inicio_validade: data.validityStartDate ? `${data.validityStartDate}-01` : null,
       })
       .eq("id", editingCompany.id)
     setEditingCompany(null)
@@ -164,22 +238,7 @@ export default function CompaniesPage() {
     const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
     const metricsMap = new Map<string, MetricsRow>()
     metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
-    const mapped = (empresas as CompanyRow[]).map((e) => ({
-      id: e.id,
-      name: e.razao_social,
-      cnpj: e.cnpj,
-      city: e.cidade || "",
-      state: e.estado || "",
-      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
-      fromESocial: e.origem === "esocial" || e.importada === true,
-      address: e.endereco || "",
-      phone: e.telefone || "",
-      email: e.email || "",
-      responsible: e.responsavel || "",
-      cnae: e.cnae || "",
-      activityDescription: e.atividade_principal || "",
-      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
-    }))
+    const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
     setCompanies(mapped)
   }
 
@@ -218,22 +277,7 @@ export default function CompaniesPage() {
     const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
     const metricsMap = new Map<string, MetricsRow>()
     metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
-    const mapped = (empresas as CompanyRow[]).map((e) => ({
-      id: e.id,
-      name: e.razao_social,
-      cnpj: e.cnpj,
-      city: e.cidade || "",
-      state: e.estado || "",
-      status: e.status === "ativo" ? "Ativa" : e.status === "inativo" ? "Inativa" : "Cancelada",
-      fromESocial: e.origem === "esocial" || e.importada === true,
-      address: e.endereco || "",
-      phone: e.telefone || "",
-      email: e.email || "",
-      responsible: e.responsavel || "",
-      cnae: e.cnae || "",
-      activityDescription: e.atividade_principal || "",
-      employees: metricsMap.get(e.id)?.total_funcionarios ?? 0,
-    }))
+    const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
     setCompanies(mapped)
   }
 
@@ -374,6 +418,7 @@ export default function CompaniesPage() {
         onSubmit={editingCompany ? handleEditCompany : handleCreateCompany}
         initialData={editingCompany}
         mode={editingCompany ? "edit" : "create"}
+        isLoading={loading}
       />
 
       <CompanyDetailsModal
