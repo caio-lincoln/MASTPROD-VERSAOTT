@@ -128,6 +128,15 @@ export default function ESocialContent() {
   const [showCreateS2240Modal, setShowCreateS2240Modal] = useState(false)
   const [showCreateS2220Modal, setShowCreateS2220Modal] = useState(false)
   const [showCreateS2210Modal, setShowCreateS2210Modal] = useState(false)
+  const [mandatoryTab, setMandatoryTab] = useState("s1000")
+  
+  // Mandatory Events Search/Pagination States
+  const [searchS1000, setSearchS1000] = useState("")
+  const [searchS1005, setSearchS1005] = useState("")
+  const [searchS1020, setSearchS1020] = useState("")
+  const [currentPageS1000, setCurrentPageS1000] = useState(1)
+  const [currentPageS1005, setCurrentPageS1005] = useState(1)
+  const [currentPageS1020, setCurrentPageS1020] = useState(1)
 
   // Hooks para dados reais
   const { events, loading: loadingEvents, refresh: refreshEvents } = useESocialEvents()
@@ -152,6 +161,9 @@ export default function ESocialContent() {
   const s2240Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2240').map(mapEvent), [events])
   const s2220Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2220').map(mapEvent), [events])
   const s2210Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-2210').map(mapEvent), [events])
+  const s1000Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-1000').map(mapEvent), [events])
+  const s1005Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-1005').map(mapEvent), [events])
+  const s1020Events = useMemo(() => events.filter(e => e.tipo_evento === 'S-1020').map(mapEvent), [events])
 
   // Filtragem e Paginação S-2240
   const filteredS2240 = useMemo(() => {
@@ -194,6 +206,49 @@ export default function ESocialContent() {
     const startIndex = (currentPageS2210 - 1) * ITEMS_PER_PAGE
     return filteredS2210.slice(startIndex, startIndex + ITEMS_PER_PAGE)
   }, [filteredS2210, currentPageS2210])
+
+  // Filtragem e Paginação S-1000
+  const filteredS1000 = useMemo(() => {
+    return s1000Events.filter(
+      (e) =>
+        e.company.toLowerCase().includes(searchS1000.toLowerCase()) || 
+        e.status.toLowerCase().includes(searchS1000.toLowerCase())
+    )
+  }, [searchS1000, s1000Events])
+
+  const totalPagesS1000 = Math.ceil(filteredS1000.length / ITEMS_PER_PAGE)
+  const paginatedS1000 = useMemo(() => {
+    const startIndex = (currentPageS1000 - 1) * ITEMS_PER_PAGE
+    return filteredS1000.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredS1000, currentPageS1000])
+
+  // Filtragem e Paginação S-1005
+  const filteredS1005 = useMemo(() => {
+    return s1005Events.filter(
+      (e) =>
+        e.company.toLowerCase().includes(searchS1005.toLowerCase())
+    )
+  }, [searchS1005, s1005Events])
+
+  const totalPagesS1005 = Math.ceil(filteredS1005.length / ITEMS_PER_PAGE)
+  const paginatedS1005 = useMemo(() => {
+    const startIndex = (currentPageS1005 - 1) * ITEMS_PER_PAGE
+    return filteredS1005.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredS1005, currentPageS1005])
+
+  // Filtragem e Paginação S-1020
+  const filteredS1020 = useMemo(() => {
+    return s1020Events.filter(
+      (e) =>
+        e.company.toLowerCase().includes(searchS1020.toLowerCase())
+    )
+  }, [searchS1020, s1020Events])
+
+  const totalPagesS1020 = Math.ceil(filteredS1020.length / ITEMS_PER_PAGE)
+  const paginatedS1020 = useMemo(() => {
+    const startIndex = (currentPageS1020 - 1) * ITEMS_PER_PAGE
+    return filteredS1020.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+  }, [filteredS1020, currentPageS1020])
 
   // Empresas Vinculadas
   const linkedCompanies = useMemo(() => {
@@ -441,6 +496,9 @@ export default function ESocialContent() {
           </TabsTrigger>
           <TabsTrigger value="s2210" className="data-[state=active]:bg-slate-800">
             S-2210
+          </TabsTrigger>
+          <TabsTrigger value="mandatory" className="data-[state=active]:bg-slate-800">
+            Eventos Obrigatórios
           </TabsTrigger>
         </TabsList>
 
@@ -720,6 +778,175 @@ export default function ESocialContent() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="mandatory" className="space-y-4">
+          <Tabs value={mandatoryTab} onValueChange={setMandatoryTab} className="w-full">
+            <TabsList className="bg-slate-900 border border-slate-800 mb-4">
+              <TabsTrigger value="s1000" className="data-[state=active]:bg-slate-800">
+                S-1000
+              </TabsTrigger>
+              <TabsTrigger value="s1005" className="data-[state=active]:bg-slate-800">
+                S-1005
+              </TabsTrigger>
+              <TabsTrigger value="s1020" className="data-[state=active]:bg-slate-800">
+                S-1020
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="s1000" className="space-y-4">
+              <Card className="bg-slate-900 border-slate-800">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Building2 className="w-5 h-5" />
+                        S-1000 - Informações do Empregador
+                      </CardTitle>
+                      <p className="text-sm text-slate-400 mt-2">Cadastro do empregador e informações tributárias</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => alert("Funcionalidade de criar S-1000 em desenvolvimento")}
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                  <div className="relative mt-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Input
+                      placeholder="Buscar por empresa ou status..."
+                      value={searchS1000}
+                      onChange={(e) => {
+                        setSearchS1000(e.target.value)
+                        setCurrentPageS1000(1)
+                      }}
+                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">{paginatedS1000.map((event) => renderEventCard(event, "s1000"))}</div>
+                  {filteredS1000.length > 0 && (
+                    <Pagination
+                      currentPage={currentPageS1000}
+                      totalPages={totalPagesS1000}
+                      onPageChange={setCurrentPageS1000}
+                      itemsPerPage={ITEMS_PER_PAGE}
+                      totalItems={filteredS1000.length}
+                    />
+                  )}
+                  {filteredS1000.length === 0 && (
+                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1000 encontrado</div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="s1005" className="space-y-4">
+              <Card className="bg-slate-900 border-slate-800">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Building2 className="w-5 h-5" />
+                        S-1005 - Tabela de Estabelecimentos
+                      </CardTitle>
+                      <p className="text-sm text-slate-400 mt-2">Cadastro de estabelecimentos, obras ou unidades</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => alert("Funcionalidade de criar S-1005 em desenvolvimento")}
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                  <div className="relative mt-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Input
+                      placeholder="Buscar por empresa..."
+                      value={searchS1005}
+                      onChange={(e) => {
+                        setSearchS1005(e.target.value)
+                        setCurrentPageS1005(1)
+                      }}
+                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">{paginatedS1005.map((event) => renderEventCard(event, "s1005"))}</div>
+                  {filteredS1005.length > 0 && (
+                    <Pagination
+                      currentPage={currentPageS1005}
+                      totalPages={totalPagesS1005}
+                      onPageChange={setCurrentPageS1005}
+                      itemsPerPage={ITEMS_PER_PAGE}
+                      totalItems={filteredS1005.length}
+                    />
+                  )}
+                  {filteredS1005.length === 0 && (
+                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1005 encontrado</div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="s1020" className="space-y-4">
+              <Card className="bg-slate-900 border-slate-800">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-white flex items-center gap-2">
+                        <Building2 className="w-5 h-5" />
+                        S-1020 - Tabela de Lotações Tributárias
+                      </CardTitle>
+                      <p className="text-sm text-slate-400 mt-2">Cadastro de lotações tributárias</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => alert("Funcionalidade de criar S-1020 em desenvolvimento")}
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Novo Evento
+                    </Button>
+                  </div>
+                  <div className="relative mt-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Input
+                      placeholder="Buscar por empresa..."
+                      value={searchS1020}
+                      onChange={(e) => {
+                        setSearchS1020(e.target.value)
+                        setCurrentPageS1020(1)
+                      }}
+                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">{paginatedS1020.map((event) => renderEventCard(event, "s1020"))}</div>
+                  {filteredS1020.length > 0 && (
+                    <Pagination
+                      currentPage={currentPageS1020}
+                      totalPages={totalPagesS1020}
+                      onPageChange={setCurrentPageS1020}
+                      itemsPerPage={ITEMS_PER_PAGE}
+                      totalItems={filteredS1020.length}
+                    />
+                  )}
+                  {filteredS1020.length === 0 && (
+                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1020 encontrado</div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 
