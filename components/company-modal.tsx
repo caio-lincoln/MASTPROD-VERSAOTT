@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Building2, Phone, MapPin, Search, Loader2, Calendar, Check, ChevronsUpDown } from "lucide-react"
+import { Building2, Phone, MapPin, Search, Loader2, Calendar, Check, ChevronsUpDown, ArrowRight, ArrowLeft } from "lucide-react"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import {
   Command,
@@ -102,6 +103,13 @@ const taxClassificationOptions = [
   { value: "99", label: "99 - Outros (uso excepcional, com validação manual)" },
 ]
 
+const taxClassificationOptionsCPF = [
+  { value: "06", label: "06 - Empregador Doméstico" },
+  { value: "21", label: "21 - Produtor Rural Pessoa Física" },
+  { value: "09", label: "09 - Pessoa Física (demais casos)" },
+  { value: "07", label: "07 - Segurado Especial" },
+]
+
 interface CompanyModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -112,9 +120,24 @@ interface CompanyModalProps {
 }
 
 export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, isLoading }: CompanyModalProps) {
+  const [step, setStep] = useState(0) // 0: Classificação, 1: Dados Cadastrais
   const [loadingCnpj, setLoadingCnpj] = useState(false)
   const [openLegalNature, setOpenLegalNature] = useState(false)
   const [openTaxClassification, setOpenTaxClassification] = useState(false)
+  const [isCPF, setIsCPF] = useState(false)
+  
+  // Indicadores eSocial
+  const [indicators, setIndicators] = useState({
+    indCoop: false,
+    indConstr: false,
+    indDesFolha: false,
+    indEntEd: false,
+    indEtt: false,
+    indProdRural: false,
+    indPPS: false, // Produtor Rural
+    indCPF: false  // Produtor Rural
+  })
+
   const [formData, setFormData] = useState({
     name: "",
     cnpj: "",
@@ -134,6 +157,12 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
   useEffect(() => {
     if (initialData) {
+      // Se for edição, assume que já passou da classificação, mas permite voltar? 
+      // Para simplificar, em edição vai direto para os dados, mas os indicadores devem ser carregados.
+      setStep(1) 
+      const isCpfValue = initialData.cnpj ? initialData.cnpj.replace(/\D/g, "").length === 11 : false
+      setIsCPF(isCpfValue)
+
       setFormData({
         name: initialData.name || "",
         cnpj: initialData.cnpj || "",
@@ -150,7 +179,19 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
         legalNature: initialData.legalNature || "",
         validityStartDate: initialData.validityStartDate || ""
       })
+      setIndicators({
+        indCoop: initialData.indCoop || false,
+        indConstr: initialData.indConstr || false,
+        indDesFolha: initialData.indDesFolha || false,
+        indEntEd: initialData.indEntEd || false,
+        indEtt: initialData.indEtt || false,
+        indProdRural: initialData.indProdRural || false,
+        indPPS: initialData.indPPS || false,
+        indCPF: initialData.indCPF || false
+      })
     } else {
+      setStep(0) // Novo cadastro começa no wizard
+      setIsCPF(false)
       setFormData({
         name: "",
         cnpj: "",
@@ -167,22 +208,49 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
         legalNature: "",
         validityStartDate: ""
       })
+      setIndicators({
+        indCoop: false,
+        indConstr: false,
+        indDesFolha: false,
+        indEntEd: false,
+        indEtt: false,
+        indProdRural: false,
+        indPPS: false,
+        indCPF: false
+      })
     }
   }, [initialData, open])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    // Combina dados do formulário com indicadores
+    onSubmit({
+      ...formData,
+      ...indicators,
+      isCPF // Passando explicitamente se é CPF
+    })
   }
 
   const formatCNPJ = (value: string) => {
     const numbers = value.replace(/\D/g, "")
-    if (numbers.length <= 14) {
-      return numbers
-        .replace(/(\d{2})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1/$2")
-        .replace(/(\d{4})(\d)/, "$1-$2")
+    if (isCPF) {
+      // Formato CPF: 000.000.000-00
+      if (numbers.length <= 11) {
+        return numbers
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d{1,2})/, "$1-$2")
+          .replace(/(-\d{2})\d+?$/, "$1")
+      }
+    } else {
+      // Formato CNPJ
+      if (numbers.length <= 14) {
+        return numbers
+          .replace(/(\d{2})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1.$2")
+          .replace(/(\d{3})(\d)/, "$1/$2")
+          .replace(/(\d{4})(\d)/, "$1-$2")
+      }
     }
     return value
   }
@@ -361,7 +429,203 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
           </DialogDescription>
         </DialogHeader>
 
+        {step === 0 ? (
+          <div className="space-y-6 py-4">
+            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
+              <div className="mb-6 p-4 bg-slate-800 rounded border border-slate-700">
+                <Label className="text-emerald-400 font-semibold mb-2 block">Tipo de Empregador</Label>
+                <Select 
+                  value={isCPF ? "cpf" : "cnpj"} 
+                  onValueChange={(value) => {
+                    const isNowCPF = value === "cpf"
+                    setIsCPF(isNowCPF)
+                    setFormData({...formData, cnpj: "", taxClassification: "", legalNature: ""})
+                    
+                    // Se mudar para CPF, limpa indicadores que não se aplicam
+                    if (isNowCPF) {
+                      setIndicators(prev => ({
+                        ...prev,
+                        indCoop: false,
+                        indConstr: false,
+                        indDesFolha: false,
+                        indEntEd: false,
+                        indEtt: false
+                      }))
+                    }
+                  }}
+                >
+                  <SelectTrigger className="bg-slate-900 border-slate-600 text-white w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                    <SelectItem value="cnpj">Pessoa Jurídica (CNPJ)</SelectItem>
+                    <SelectItem value="cpf">Pessoa Física (CPF)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <h3 className="text-lg font-medium text-emerald-400 mb-2">Classificação eSocial</h3>
+              <p className="text-slate-400 text-sm mb-4">
+                {isCPF 
+                  ? "Para empregador Pessoa Física (CPF), selecione apenas se for Produtor Rural."
+                  : "Responda as perguntas abaixo para configurar corretamente o perfil da empresa."}
+                <br/>A ausência de marcação será considerada como "NÃO".
+              </p>
+              
+              <div className="space-y-4">
+                {!isCPF && (
+                  <>
+                {/* 1. Cooperativa */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                  <Checkbox 
+                    id="indCoop" 
+                    checked={indicators.indCoop}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indCoop: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label htmlFor="indCoop" className="text-white font-medium cursor-pointer">
+                      É uma Cooperativa?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Se marcado, será enviado &lt;indCoop&gt;1&lt;/indCoop&gt; no XML.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 2. Construtora */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                  <Checkbox 
+                    id="indConstr" 
+                    checked={indicators.indConstr}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indConstr: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label htmlFor="indConstr" className="text-white font-medium cursor-pointer">
+                      É uma Construtora?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Se marcado, será enviado &lt;indConstr&gt;1&lt;/indConstr&gt; no XML.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Desoneração */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                  <Checkbox 
+                    id="indDesFolha" 
+                    checked={indicators.indDesFolha}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indDesFolha: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label htmlFor="indDesFolha" className="text-white font-medium cursor-pointer">
+                      Possui Desoneração da Folha?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Se marcado, será enviado &lt;indDesFolha&gt;1&lt;/indDesFolha&gt; no XML.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Entidade Educativa */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                  <Checkbox 
+                    id="indEntEd" 
+                    checked={indicators.indEntEd}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indEntEd: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label htmlFor="indEntEd" className="text-white font-medium cursor-pointer">
+                      É uma Entidade Educativa?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Se marcado, será enviado &lt;indEntEd&gt;1&lt;/indEntEd&gt; no XML.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 5. ETT */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                  <Checkbox 
+                    id="indEtt" 
+                    checked={indicators.indEtt}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indEtt: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none">
+                    <Label htmlFor="indEtt" className="text-white font-medium cursor-pointer">
+                      É uma Empresa de Trabalho Temporário?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Se marcado, será enviado &lt;indEtt&gt;1&lt;/indEtt&gt; no XML.
+                    </p>
+                  </div>
+                </div>
+                </>
+                )}
+
+                {/* 6. Produtor Rural */}
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors bg-slate-800/30">
+                  <Checkbox 
+                    id="indProdRural" 
+                    checked={indicators.indProdRural}
+                    onCheckedChange={(checked) => setIndicators({...indicators, indProdRural: !!checked})}
+                    className="mt-1"
+                  />
+                  <div className="grid gap-1.5 leading-none w-full">
+                    <Label htmlFor="indProdRural" className="text-white font-medium cursor-pointer">
+                      É Produtor Rural?
+                    </Label>
+                    <p className="text-xs text-slate-400">
+                      Habilita campos específicos de Produtor Rural (infoProdRural).
+                    </p>
+
+                    {indicators.indProdRural && (
+                      <div className="mt-3 ml-1 pl-3 border-l-2 border-slate-600 space-y-3">
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="indPPS" 
+                            checked={indicators.indPPS}
+                            onCheckedChange={(checked) => setIndicators({...indicators, indPPS: !!checked})}
+                          />
+                          <Label htmlFor="indPPS" className="text-slate-300 text-sm cursor-pointer">
+                            Indicativo de Previdência Social (indPPS)?
+                          </Label>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <Checkbox 
+                            id="indCPF" 
+                            checked={indicators.indCPF}
+                            onCheckedChange={(checked) => setIndicators({...indicators, indCPF: !!checked})}
+                          />
+                          <Label htmlFor="indCPF" className="text-slate-300 text-sm cursor-pointer">
+                            Indicativo de Contratação (indCPF)?
+                          </Label>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            
+            <div className="flex justify-end pt-6 border-t border-slate-800">
+              <Button onClick={() => setStep(1)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                Próximo <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setStep(0)} className="text-slate-400 hover:text-white -ml-2">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Classificação
+            </Button>
+          </div>
           {/* Informações Básicas */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
@@ -383,11 +647,11 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ *</Label>
+                <Label htmlFor="cnpj">{isCPF ? "CPF *" : "CNPJ *"}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="cnpj"
-                    placeholder="00.000.000/0000-00"
+                    placeholder={isCPF ? "000.000.000-00" : "00.000.000/0000-00"}
                     value={formData.cnpj}
                     onChange={(e) => setFormData({ ...formData, cnpj: formatCNPJ(e.target.value) })}
                     className="bg-slate-800 border-slate-700 text-white flex-1"
@@ -399,13 +663,15 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     size="icon" 
                     className="border-slate-700 bg-slate-800 hover:bg-slate-700"
                     onClick={handleSearchCNPJ}
-                    disabled={loadingCnpj}
+                    disabled={loadingCnpj || isCPF}
+                    title={isCPF ? "Busca automática indisponível para CPF" : "Buscar dados do CNPJ"}
                   >
                     {loadingCnpj ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
 
+              {!isCPF && (
               <div className="space-y-2">
                 <Label htmlFor="cnae">CNAE *</Label>
                 <Input
@@ -417,7 +683,9 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   required
                 />
               </div>
+              )}
 
+              {!isCPF && (
               <div className="space-y-2 flex flex-col">
                 <Label htmlFor="legalNature">Natureza Jurídica</Label>
                 <Popover open={openLegalNature} onOpenChange={setOpenLegalNature}>
@@ -476,6 +744,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   </PopoverContent>
                 </Popover>
               </div>
+              )}
 
               <div className="space-y-2 flex flex-col">
                 <Label htmlFor="taxClassification">Classificação Tributária</Label>
@@ -508,7 +777,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                       <CommandList className="max-h-[300px] overflow-y-auto pointer-events-auto">
                         <CommandEmpty>Nenhuma classificação tributária encontrada.</CommandEmpty>
                         <CommandGroup className="text-slate-400">
-                          {taxClassificationOptions.map((item) => (
+                          {(isCPF ? taxClassificationOptionsCPF : taxClassificationOptions).map((item) => (
                             <CommandItem
                               key={item.value}
                               value={item.label}
@@ -688,6 +957,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   )

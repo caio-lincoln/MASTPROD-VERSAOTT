@@ -29,6 +29,14 @@ type CompanyRow = {
   natureza_juridica: string | null
   classificacao_tributaria: string | null
   inicio_validade: string | null
+  ind_coop: boolean | null
+  ind_constr: boolean | null
+  ind_des_folha: boolean | null
+  ind_ent_ed: boolean | null
+  ind_ett: boolean | null
+  ind_prod_rural: boolean | null
+  ind_pps: boolean | null
+  ind_cpf: boolean | null
 }
 
 type MetricsRow = {
@@ -60,6 +68,14 @@ const mapCompanies = (empresas: CompanyRow[], metricsMap: Map<string, MetricsRow
     legalNature: e.natureza_juridica || "",
     taxClassification: e.classificacao_tributaria || "",
     validityStartDate: e.inicio_validade ? e.inicio_validade.substring(0, 7) : "",
+    indCoop: e.ind_coop || false,
+    indConstr: e.ind_constr || false,
+    indDesFolha: e.ind_des_folha || false,
+    indEntEd: e.ind_ent_ed || false,
+    indEtt: e.ind_ett || false,
+    indProdRural: e.ind_prod_rural || false,
+    indPPS: e.ind_pps || false,
+    indCPF: e.ind_cpf || false,
   }))
 }
 
@@ -161,7 +177,15 @@ export default function CompaniesPage() {
           origem: 'manual',
           importada: false,
           status: 'ativo',
-          user_id: user.id
+          user_id: user.id,
+          ind_coop: data.indCoop,
+          ind_constr: data.indConstr,
+          ind_des_folha: data.indDesFolha,
+          ind_ent_ed: data.indEntEd,
+          ind_ett: data.indEtt,
+          ind_prod_rural: data.indProdRural,
+          ind_pps: data.indPPS,
+          ind_cpf: data.indCPF
         })
         .select()
         .single()

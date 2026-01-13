@@ -1,7 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Building2, MapPin, Phone, Users, Shield } from "lucide-react"
+import { Building2, MapPin, Phone, Users, Shield, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface CompanyDetailsModalProps {
@@ -61,6 +61,31 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
               <div className="md:col-span-2">
                 <p className="text-xs text-slate-500 mb-1">Atividade Principal</p>
                 <p className="text-sm text-white">{company.activityDescription}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Dados Fiscais */}
+          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
+            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+              <FileText className="w-4 h-4" />
+              Dados Fiscais
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Natureza Jurídica</p>
+                <p className="text-sm text-white font-medium">{company.legalNature || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Classificação Tributária</p>
+                <p className="text-sm text-white font-medium">{company.taxClassification || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Início da Validade</p>
+                <p className="text-sm text-white font-medium">{company.validityStartDate || "-"}</p>
               </div>
             </div>
           </div>
