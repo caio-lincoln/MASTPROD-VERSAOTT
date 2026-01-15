@@ -6,11 +6,13 @@ export interface ESocialEvent {
   tipo_evento: string
   status: 'pendente' | 'enviado' | 'erro' | 'processando'
   created_at: string
+  updated_at?: string
   xml_envio?: string
   xml_retorno?: string
   protocolo?: string
   recibo?: string
   mensagem_erro?: string
+  certificate_id?: string | null
   funcionario?: {
     nome: string
     cpf: string

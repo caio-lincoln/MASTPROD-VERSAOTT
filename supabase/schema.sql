@@ -234,6 +234,14 @@ BEFORE UPDATE OR DELETE ON public.empresas
 FOR EACH ROW
 EXECUTE FUNCTION check_company_import_status();
 
+CREATE POLICY "Users can upload to documentos bucket" ON storage.objects
+    FOR INSERT
+    WITH CHECK (bucket_id = 'documentos' AND auth.role() = 'authenticated');
+
+CREATE POLICY "Users can view documentos bucket" ON storage.objects
+    FOR SELECT
+    USING (bucket_id = 'documentos' AND auth.role() = 'authenticated');
+
 -- Storage Bucket Setup (This needs to be done via dashboard or API, but SQL can define RLS for storage.objects if bucket exists)
 -- Assuming bucket 'library' exists:
 -- insert into storage.buckets (id, name) values ('library', 'library');

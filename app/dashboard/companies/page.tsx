@@ -79,6 +79,133 @@ const mapCompanies = (empresas: CompanyRow[], metricsMap: Map<string, MetricsRow
   }))
 }
 
+async function upsertCompanyCertificate(params: {
+  companyId: string
+  companyName: string
+  cnpj: string
+  certificateFile: File | null
+  removeExisting: boolean
+  certificatePassword: string | null
+}) {
+  const { companyId, companyName, certificateFile, removeExisting, certificatePassword } = params
+
+  const shouldClearDefault = removeExisting || !!certificateFile
+
+  if (shouldClearDefault) {
+    const { error: clearError } = await supabase
+      .from("company_certificates")
+      .update({ is_default: false })
+      .eq("company_id", companyId)
+      .eq("is_default", true)
+
+    if (clearError) {
+      console.error("Erro ao atualizar vínculo de certificado da empresa:", clearError)
+      toast.error("Erro ao atualizar vínculo de certificado da empresa.")
+      return
+    }
+  }
+
+  if (!certificateFile) {
+    return
+  }
+
+  const path = `${companyId}/${Date.now()}-${certificateFile.name}`
+
+  let validFrom: string | null = null
+  let validTo: string | null = null
+  let encryptedSecret: string | null = null
+
+  try {
+    const arrayBuffer = await certificateFile.arrayBuffer()
+    const bytes = new Uint8Array(arrayBuffer)
+    let binary = ""
+    for (let i = 0; i < bytes.length; i += 1) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    const pfxBase64 = btoa(binary)
+
+    const password = certificatePassword || ""
+
+    if (password) {
+      const resp = await fetch("/api/esocial/cert-metadata", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pfxBase64,
+          password,
+        }),
+      })
+
+      if (resp.ok) {
+        const data = (await resp.json()) as {
+          validFrom: string
+          validTo: string
+          encryptedSecret?: string
+        }
+        validFrom = data.validFrom
+        validTo = data.validTo
+        encryptedSecret = data.encryptedSecret ?? null
+      } else {
+        let errorBody: unknown = null
+        try {
+          errorBody = await resp.json()
+        } catch {
+          errorBody = null
+        }
+        console.error("Erro na NodeAPI de metadados do certificado:", errorBody)
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao tentar extrair validade do certificado:", err)
+  }
+
+  const { error: uploadError } = await supabase.storage.from("certificados").upload(path, certificateFile, {
+    cacheControl: "3600",
+    upsert: false,
+    contentType: certificateFile.type || "application/x-pkcs12",
+  })
+
+  if (uploadError) {
+    console.error("Erro ao enviar certificado para o Storage:", uploadError)
+    toast.error("Erro ao enviar certificado para o Storage.")
+    return
+  }
+
+  const { data: cert, error: certError } = await supabase
+    .from("certificates")
+    .insert({
+      name: `${companyName} - Certificado`,
+      pfx_storage_path: path,
+      pfx_base64_encrypted: encryptedSecret,
+      fingerprint: null,
+      valid_from: validFrom,
+      valid_to: validTo,
+    })
+    .select("id")
+    .single()
+
+  if (certError || !cert) {
+    console.error("Erro ao registrar certificado no banco:", certError)
+    toast.error("Erro ao registrar certificado no banco.")
+    return
+  }
+
+  const { error: linkError } = await supabase
+    .from("company_certificates")
+    .insert({
+      company_id: companyId,
+      certificate_id: cert.id,
+      is_default: true,
+    })
+
+  if (linkError) {
+    console.error("Erro ao vincular certificado à empresa:", linkError)
+    toast.error("Erro ao vincular certificado à empresa.")
+  }
+}
+
 export default function CompaniesPage() {
   const [search, setSearch] = useState("")
   const [companies, setCompanies] = useState<Array<any>>([])
@@ -199,6 +326,20 @@ export default function CompaniesPage() {
 
       console.log("Empresa criada:", newCompany)
 
+      const certificateFile = data.certificateFile as File | null
+      const certificatePassword = data.certificatePassword as string | null
+
+      if (certificateFile) {
+        await upsertCompanyCertificate({
+          companyId: newCompany.id,
+          companyName: data.name,
+          cnpj: data.cnpj,
+          certificateFile,
+          removeExisting: false,
+          certificatePassword: certificatePassword || null,
+        })
+      }
+
       // 2. Vincular usuário à empresa
       const { error: linkError } = await supabase
         .from("usuarios_empresas")
@@ -239,6 +380,10 @@ export default function CompaniesPage() {
 
   const handleEditCompany = async (data: any) => {
     if (!editingCompany) return
+    const certificateFile = data.certificateFile as File | null
+    const removeCertificate = data.removeCertificate as boolean | undefined
+    const certificatePassword = data.certificatePassword as string | null
+
     await supabase
       .from("empresas")
       .update({
@@ -257,6 +402,16 @@ export default function CompaniesPage() {
         inicio_validade: data.validityStartDate ? `${data.validityStartDate}-01` : null,
       })
       .eq("id", editingCompany.id)
+
+    await upsertCompanyCertificate({
+      companyId: editingCompany.id,
+      companyName: data.name,
+      cnpj: data.cnpj,
+      certificateFile: certificateFile || null,
+      removeExisting: !!removeCertificate,
+      certificatePassword: certificatePassword || null,
+    })
+
     setEditingCompany(null)
     const { data: empresas } = await supabase.from("empresas").select("*")
     const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")

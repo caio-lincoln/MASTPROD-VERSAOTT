@@ -27,6 +27,16 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useESocialEvents, useESocialCompanies, ESocialEvent } from "@/hooks/use-esocial"
 import { supabase } from "@/lib/supabaseClient"
+import { createS1000Event, regenerateS1000XML } from "@/lib/esocial/events/S-1000"
+import { Label } from "@/components/ui/label"
+import { transmitEvent, consultEvent } from "@/lib/esocial/transmission/gateway"
+import type {
+  ESocialTransmissionRequest,
+  ESocialTransmissionResponse,
+  ESocialConsultResponse,
+} from "@/lib/esocial/transmission/contract"
+import { listCompanyCertificates, getDefaultCompanyCertificate, attachCertificateToEvent } from "@/lib/esocial/events/repository"
+import type { Certificate } from "@/lib/esocial/events/types"
 
 // Mock modal components for demonstration purposes if actual components are not provided
 const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
@@ -108,6 +118,75 @@ const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   </>
 )
 
+const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: boolean; onClose: () => void; companies: any[]; onSuccess: () => void }) => {
+  const [selectedCompany, setSelectedCompany] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleCreate = async () => {
+    if (!selectedCompany) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await createS1000Event(selectedCompany)
+      if ((res as any).success) {
+        onSuccess()
+        onClose()
+      } else if ((res as any).errors) {
+        setError((res as any).errors.join("\n"))
+      }
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isOpen) return null
+
+  return (
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-md w-full p-6">
+          <h3 className="text-xl font-bold text-white mb-4">Gerar S-1000</h3>
+          <p className="text-sm text-slate-400 mb-4">Selecione a empresa para gerar o evento inicial S-1000.</p>
+          
+          {error && (
+            <Alert className="mb-4 bg-red-500/10 border-red-500/20">
+              <AlertCircle className="h-4 w-4 text-red-400" />
+              <AlertTitle className="text-red-400">Erro de Validação</AlertTitle>
+              <AlertDescription className="text-red-300 text-sm whitespace-pre-line mt-1">{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-slate-400">Selecione a Empresa</Label>
+              <select 
+                className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                value={selectedCompany}
+                onChange={(e) => setSelectedCompany(e.target.value)}
+              >
+                <option value="">Selecione...</option>
+                {companies.map(c => (
+                  <option key={c.id} value={c.id}>{c.razao_social} ({c.cnpj})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={onClose} disabled={loading} className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent">
+                Cancelar
+              </Button>
+              <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                {loading ? "Gerando..." : "Gerar XML"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+  )
+}
+
 const ITEMS_PER_PAGE = 10
 const COMPANIES_PER_PAGE = 5
 
@@ -135,22 +214,36 @@ export default function ESocialContent() {
   const [searchS1005, setSearchS1005] = useState("")
   const [searchS1020, setSearchS1020] = useState("")
   const [currentPageS1000, setCurrentPageS1000] = useState(1)
+  const [showCreateS1000Modal, setShowCreateS1000Modal] = useState(false)
   const [currentPageS1005, setCurrentPageS1005] = useState(1)
   const [currentPageS1020, setCurrentPageS1020] = useState(1)
+
+  const [showSendModal, setShowSendModal] = useState(false)
+  const [sendModalEvent, setSendModalEvent] = useState<any | null>(null)
+  const [sendModalCertificates, setSendModalCertificates] = useState<Certificate[]>([])
+  const [sendModalDefaultCertificate, setSendModalDefaultCertificate] = useState<Certificate | null>(null)
+  const [selectedCertificateId, setSelectedCertificateId] = useState<string>("")
+  const [useDefaultCertificate, setUseDefaultCertificate] = useState(false)
+  const [sendLoading, setSendLoading] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
 
   // Hooks para dados reais
   const { events, loading: loadingEvents, refresh: refreshEvents } = useESocialEvents()
   const { companies: allCompanies, loading: loadingCompanies, refresh: refreshCompanies } = useESocialCompanies()
 
-  // Mapeamento de dados para o formato esperado pela UI
   const mapEvent = (e: ESocialEvent) => ({
     id: e.id,
-    employee: e.funcionario?.nome || "Desconhecido",
+    eventType: e.tipo_evento,
+    companyId: (e as any).empresa_id,
+    certificateId: (e as any).certificate_id,
+    employee: e.funcionario?.nome || (e.tipo_evento.startsWith('S-1') ? 'Cadastro Patronal' : `Evento ${e.tipo_evento} - ${e.id.substring(0,8)}...`),
     date: new Date(e.created_at).toLocaleDateString("pt-BR"),
     status: e.status.charAt(0).toUpperCase() + e.status.slice(1),
     company: e.empresa?.razao_social || "Desconhecida",
     protocol: e.protocolo,
     xml: e.xml_envio,
+    xmlReturn: e.xml_retorno,
+    receipt: e.recibo,
     errorMessage: e.mensagem_erro,
     // Placeholders pois essas infos estariam no XML
     risk: "Ver detalhes",
@@ -299,31 +392,180 @@ export default function ESocialContent() {
     }
   }
 
-  const handleDownloadXML = (event: any) => {
-    if (!event.xml) {
+  const handleDownloadXML = (event: any, kind: "envio" | "retorno" = "envio") => {
+    const xmlContent = kind === "envio" ? event.xml : event.xmlReturn
+    if (!xmlContent) {
       alert("XML não disponível para este evento")
       return
     }
-    const blob = new Blob([event.xml], { type: "application/xml" })
+    const blob = new Blob([xmlContent], { type: "application/xml" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `evento-${event.id}-${event.date}.xml`
+    a.download =
+      kind === "envio"
+        ? `evento-${event.id}-${event.date}-envio.xml`
+        : `evento-${event.id}-${event.date}-retorno.xml`
     a.click()
     URL.revokeObjectURL(url)
   }
 
-  const handleSendEvent = (event: any) => {
-    alert(`Enviando evento ${event.id} - ${event.employee}`)
+  const openSendModal = async (event: any) => {
+    try {
+      setSendError(null)
+      setUseDefaultCertificate(false)
+      setSelectedCertificateId("")
+      setSendModalCertificates([])
+      setSendModalDefaultCertificate(null)
+      setSendModalEvent(event)
+      setShowSendModal(true)
+
+      if (!event.companyId) {
+        setSendError("Evento não está vinculado a uma empresa. Não é possível selecionar certificado.")
+        return
+      }
+
+      const certificates = await listCompanyCertificates(event.companyId)
+      setSendModalCertificates(certificates)
+
+      const defaultCert = await getDefaultCompanyCertificate(event.companyId)
+      setSendModalDefaultCertificate(defaultCert)
+
+      if (event.certificateId) {
+        setSelectedCertificateId(event.certificateId)
+      } else if (defaultCert) {
+        setSelectedCertificateId(defaultCert.id)
+        setUseDefaultCertificate(true)
+      }
+    } catch (error: any) {
+      setSendError(error.message || "Erro ao carregar certificados da empresa.")
+    }
   }
 
-  const handleGenerateXML = (event: any) => {
-    alert(`Gerando XML para evento ${event.id} - ${event.employee}`)
+  const handleSendEvent = async () => {
+    if (!sendModalEvent) {
+      return
+    }
+
+    try {
+      setSendLoading(true)
+      setSendError(null)
+
+      if (!selectedCertificateId) {
+        setSendError("Selecione um certificado para envio.")
+        setSendLoading(false)
+        return
+      }
+
+      if (!sendModalEvent.certificateId || sendModalEvent.certificateId !== selectedCertificateId) {
+        await attachCertificateToEvent(sendModalEvent.id, selectedCertificateId)
+      }
+
+      const payload: ESocialTransmissionRequest = {
+        eventType: sendModalEvent.eventType,
+        eventId: sendModalEvent.id,
+        environment: "homologation",
+        xml: sendModalEvent.xml,
+      }
+
+      const result: ESocialTransmissionResponse = await transmitEvent(payload)
+
+      await refreshEvents()
+
+      if (result.status === "enviado") {
+        alert(`Lote enviado com sucesso. Protocolo: ${result.protocolo}`)
+      } else {
+        alert(`Erro no envio: [${result.codigo}] ${result.mensagem}`)
+      }
+
+      setShowSendModal(false)
+      setSendModalEvent(null)
+    } catch (err: any) {
+      console.error("Erro ao marcar evento para envio:", err)
+      setSendError(err.message || "Erro ao marcar evento para envio.")
+    } finally {
+      setSendLoading(false)
+    }
   }
 
-  const handleDeleteEvent = (event: any) => {
-    if (confirm(`Deseja realmente excluir o evento de ${event.employee}?`)) {
-      alert(`Evento ${event.id} excluído`)
+  const handleToggleUseDefaultCertificate = () => {
+    if (!sendModalDefaultCertificate) {
+      return
+    }
+
+    const next = !useDefaultCertificate
+    setUseDefaultCertificate(next)
+
+    if (next) {
+      setSelectedCertificateId(sendModalDefaultCertificate.id)
+    }
+  }
+
+  const handleChangeSelectedCertificate = (value: string) => {
+    setSelectedCertificateId(value)
+    if (sendModalDefaultCertificate && value !== sendModalDefaultCertificate.id) {
+      setUseDefaultCertificate(false)
+    }
+  }
+
+  const handleCloseSendModal = () => {
+    if (sendLoading) return
+    setShowSendModal(false)
+    setSendModalEvent(null)
+    setSendModalCertificates([])
+    setSendModalDefaultCertificate(null)
+    setSelectedCertificateId("")
+    setUseDefaultCertificate(false)
+    setSendError(null)
+  }
+
+  const handleSendEventClick = (event: any) => {
+    openSendModal(event)
+  }
+
+  const handleResendEventClick = (event: any) => {
+    openSendModal(event)
+  }
+
+  const handleGenerateXML = async (event: any) => {
+    try {
+      if (event.eventType === 'S-1000') {
+        const res = await regenerateS1000XML(event.id)
+        if (res && !res.success && res.errors) {
+          alert(res.errors.join('\n'))
+          return
+        }
+        await refreshEvents()
+        alert('XML do evento S-1000 gerado e salvo com sucesso.')
+        return
+      }
+
+      alert('Geração automática de XML ainda não está implementada para este tipo de evento.')
+    } catch (err) {
+      console.error('Erro ao gerar XML do evento:', err)
+      alert('Erro ao gerar XML do evento.')
+    }
+  }
+
+  const handleDeleteEvent = async (event: any) => {
+    if (!confirm(`Deseja realmente excluir o evento de ${event.employee}?`)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('esocial_eventos')
+        .delete()
+        .eq('id', event.id)
+
+      if (error) {
+        throw error
+      }
+
+      await refreshEvents()
+    } catch (err) {
+      console.error('Erro ao excluir evento eSocial:', err)
+      alert('Erro ao excluir evento.')
     }
   }
 
@@ -364,9 +606,34 @@ export default function ESocialContent() {
     setCompanyPage(1)
   }
 
+  const handleConsultProcessing = async (event: any) => {
+    if (!event.id) {
+      return
+    }
+
+    try {
+      const response = await consultEvent({
+        eventId: event.id,
+        environment: "homologation",
+      })
+
+      await refreshEvents()
+
+      if (response.status === "processado") {
+        alert(`Evento processado com sucesso.\nCódigo: ${response.codigo}\nRecibo: ${response.recibo}`)
+      } else {
+        alert(`Erro na consulta: [${response.codigo}] ${response.mensagem}`)
+      }
+    } catch (err: any) {
+      console.error("Erro na consulta de processamento do evento eSocial:", err)
+      alert(err.message || "Erro ao consultar processamento do evento.")
+    }
+  }
+
   const renderEventCard = (event: any, type: string) => {
     const hasError = event.status === "Erro"
     const isPending = event.status === "Pendente"
+    const canConsult = event.protocol && (event.status === "Enviado" || event.status === "Processando")
 
     return (
       <div key={event.id} className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
@@ -429,12 +696,23 @@ export default function ESocialContent() {
               <Button
                 size="sm"
                 className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/20"
-                onClick={() => handleSendEvent(event)}
+                onClick={() => handleSendEventClick(event)}
               >
                 <Send className="w-3 h-3 mr-1" />
                 Enviar
               </Button>
             </>
+          )}
+
+          {canConsult && (
+            <Button
+              size="sm"
+              className="bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border-purple-500/20"
+              onClick={() => handleConsultProcessing(event)}
+            >
+              <Clock className="w-3 h-3 mr-1" />
+              Consultar Processamento
+            </Button>
           )}
 
           {event.xml && (
@@ -453,7 +731,7 @@ export default function ESocialContent() {
             <Button
               size="sm"
               className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20"
-              onClick={() => handleSendEvent(event)}
+              onClick={() => handleResendEventClick(event)}
             >
               <Send className="w-3 h-3 mr-1" />
               Reenviar
@@ -807,7 +1085,7 @@ export default function ESocialContent() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => alert("Funcionalidade de criar S-1000 em desenvolvimento")}
+                      onClick={() => setShowCreateS1000Modal(true)}
                       className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -950,6 +1228,100 @@ export default function ESocialContent() {
         </TabsContent>
       </Tabs>
 
+      {showSendModal && sendModalEvent && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-white mb-4">Enviar evento eSocial</h3>
+            <p className="text-sm text-slate-400 mb-4">
+              Selecione o certificado A1 para transmissão do evento.
+            </p>
+
+            {sendError && (
+              <Alert className="mb-4 bg-red-500/10 border-red-500/20">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <AlertTitle className="text-red-400">Erro</AlertTitle>
+                <AlertDescription className="text-red-300 text-sm whitespace-pre-line mt-1">
+                  {sendError}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-4">
+              <div className="space-y-1 text-sm">
+                <div className="text-slate-400">Empresa</div>
+                <div className="text-white">{sendModalEvent.company}</div>
+                <div className="text-slate-500 text-xs">
+                  Evento {sendModalEvent.eventType} • ID {sendModalEvent.id}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-slate-400">Certificado da empresa</Label>
+                <select
+                  className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  value={selectedCertificateId}
+                  onChange={(e) => handleChangeSelectedCertificate(e.target.value)}
+                  disabled={sendModalCertificates.length === 0 || sendLoading}
+                >
+                  <option value="">Selecione...</option>
+                  {sendModalCertificates.map((cert) => (
+                    <option key={cert.id} value={cert.id}>
+                      {cert.name}
+                      {cert.valid_to
+                        ? ` • válido até ${new Date(cert.valid_to).toLocaleDateString("pt-BR")}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+                {sendModalCertificates.length === 0 && (
+                  <p className="text-xs text-amber-400">
+                    Nenhum certificado cadastrado para esta empresa. Cadastre um certificado antes de enviar.
+                  </p>
+                )}
+              </div>
+
+              {sendModalDefaultCertificate && (
+                <div className="flex items-center gap-2 text-sm">
+                  <input
+                    id="use-default-cert"
+                    type="checkbox"
+                    className="rounded border-slate-700 bg-slate-800"
+                    checked={useDefaultCertificate}
+                    onChange={handleToggleUseDefaultCertificate}
+                    disabled={sendLoading}
+                  />
+                  <label htmlFor="use-default-cert" className="text-slate-300 cursor-pointer">
+                    Usar certificado padrão da empresa ({sendModalDefaultCertificate.name})
+                  </label>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseSendModal}
+                  disabled={sendLoading}
+                  className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={handleSendEvent}
+                  disabled={
+                    sendLoading ||
+                    !selectedCertificateId ||
+                    sendModalCertificates.length === 0
+                  }
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  {sendLoading ? "Enviando..." : "Confirmar envio"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCreateS2240Modal && (
         <EventS2240Modal isOpen={showCreateS2240Modal} onClose={() => setShowCreateS2240Modal(false)} />
       )}
@@ -960,6 +1332,19 @@ export default function ESocialContent() {
 
       {showCreateS2210Modal && (
         <EventS2210Modal isOpen={showCreateS2210Modal} onClose={() => setShowCreateS2210Modal(false)} />
+      )}
+
+      {showCreateS1000Modal && (
+        <EventS1000Modal 
+          isOpen={showCreateS1000Modal} 
+          onClose={() => setShowCreateS1000Modal(false)} 
+          companies={allCompanies}
+          onSuccess={() => {
+            // Recarregar eventos se necessário, ou apenas fechar
+            // A lista de eventos s1000Events é carregada via hook, talvez precise de um refresh manual
+            // Mas por enquanto, apenas fechar
+          }}
+        />
       )}
 
       {showLinkCompanyModal && (
@@ -1045,6 +1430,11 @@ export default function ESocialContent() {
                     >
                       {detailsModal.status}
                     </span>
+                    {detailsModal.receipt && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        Processado (recibo recebido)
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div>
@@ -1081,7 +1471,14 @@ export default function ESocialContent() {
                 )}
               </div>
 
-              {detailsModal.errorMessage && (
+              {detailsModal.receipt && (
+                <div className="sm:col-span-2">
+                  <label className="text-sm text-slate-400">Recibo</label>
+                  <p className="text-white font-mono text-sm break-all">{detailsModal.receipt}</p>
+                </div>
+              )}
+
+        {detailsModal.errorMessage && (
                 <Alert className="bg-red-500/10 border-red-500/20">
                   <AlertCircle className="h-4 w-4 text-red-400" />
                   <AlertTitle className="text-red-400">Erro no envio</AlertTitle>
@@ -1100,6 +1497,15 @@ export default function ESocialContent() {
                 </div>
               )}
 
+              {detailsModal.xmlReturn && (
+                <div>
+                  <label className="text-sm text-slate-400 mb-2 block">XML de Retorno</label>
+                  <pre className="bg-slate-950 p-3 rounded-lg border border-slate-700 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto">
+                    <code className="break-all whitespace-pre-wrap">{detailsModal.xmlReturn}</code>
+                  </pre>
+                </div>
+              )}
+
               <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-slate-700">
                 {detailsModal.xml && (
                   <Button
@@ -1107,7 +1513,16 @@ export default function ESocialContent() {
                     onClick={() => handleDownloadXML(detailsModal)}
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    Baixar XML
+                    Baixar XML de Envio
+                  </Button>
+                )}
+                {detailsModal.xmlReturn && (
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+                    onClick={() => handleDownloadXML(detailsModal, "retorno")}
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar XML de Retorno
                   </Button>
                 )}
                 <Button

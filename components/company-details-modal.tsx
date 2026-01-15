@@ -1,8 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Building2, MapPin, Phone, Users, Shield, FileText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import type { Certificate } from "@/lib/esocial/events/types"
+import { getDefaultCompanyCertificate } from "@/lib/esocial/events/repository"
 
 interface CompanyDetailsModalProps {
   open: boolean
@@ -11,7 +14,41 @@ interface CompanyDetailsModalProps {
 }
 
 export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDetailsModalProps) {
+  const [defaultCertificate, setDefaultCertificate] = useState<Certificate | null>(null)
+  const [certificateLoading, setCertificateLoading] = useState(false)
+  const [certificateError, setCertificateError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open || !company?.id) {
+      setDefaultCertificate(null)
+      setCertificateError(null)
+      return
+    }
+
+    const load = async () => {
+      setCertificateLoading(true)
+      setCertificateError(null)
+      try {
+        const cert = await getDefaultCompanyCertificate(company.id as string)
+        setDefaultCertificate(cert)
+      } catch (error: any) {
+        setCertificateError(error.message || "Erro ao carregar certificado da empresa.")
+      } finally {
+        setCertificateLoading(false)
+      }
+    }
+
+    load()
+  }, [open, company?.id])
+
   if (!company) return null
+
+  const formatDate = (value: string | null) => {
+    if (!value) return "-"
+    const d = new Date(value)
+    if (Number.isNaN(d.getTime())) return "-"
+    return d.toLocaleDateString("pt-BR")
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,7 +67,6 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Informações Básicas */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4" />
@@ -65,7 +101,6 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
             </div>
           </div>
 
-          {/* Dados Fiscais */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
               <FileText className="w-4 h-4" />
@@ -90,7 +125,42 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
             </div>
           </div>
 
-          {/* Localização */}
+          <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
+            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+              <Shield className="w-4 h-4" />
+              Certificado Digital
+            </h3>
+
+            {certificateLoading && (
+              <p className="text-xs text-slate-400">Carregando informações do certificado...</p>
+            )}
+
+            {!certificateLoading && certificateError && (
+              <p className="text-xs text-red-400">{certificateError}</p>
+            )}
+
+            {!certificateLoading && !certificateError && !defaultCertificate && (
+              <p className="text-xs text-slate-400">Nenhum certificado padrão cadastrado para esta empresa.</p>
+            )}
+
+            {!certificateLoading && !certificateError && defaultCertificate && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Nome do Certificado</p>
+                  <p className="text-sm text-white font-medium">{defaultCertificate.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Validade</p>
+                  <p className="text-sm text-white font-medium">
+                    {defaultCertificate.valid_from && defaultCertificate.valid_to
+                      ? `${formatDate(defaultCertificate.valid_from)} até ${formatDate(defaultCertificate.valid_to)}`
+                      : "-"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
               <MapPin className="w-4 h-4" />
@@ -117,7 +187,6 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
             </div>
           </div>
 
-          {/* Contato */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
               <Phone className="w-4 h-4" />
@@ -142,7 +211,6 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
             </div>
           </div>
 
-          {/* Estatísticas */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
             <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
               <Users className="w-4 h-4" />

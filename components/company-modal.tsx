@@ -125,6 +125,9 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
   const [openLegalNature, setOpenLegalNature] = useState(false)
   const [openTaxClassification, setOpenTaxClassification] = useState(false)
   const [isCPF, setIsCPF] = useState(false)
+  const [certificateFile, setCertificateFile] = useState<File | null>(null)
+  const [certificatePassword, setCertificatePassword] = useState("")
+  const [removeCertificate, setRemoveCertificate] = useState(false)
   
   // Indicadores eSocial
   const [indicators, setIndicators] = useState({
@@ -189,6 +192,9 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
         indPPS: initialData.indPPS || false,
         indCPF: initialData.indCPF || false
       })
+      setCertificateFile(null)
+      setCertificatePassword("")
+      setRemoveCertificate(false)
     } else {
       setStep(0) // Novo cadastro começa no wizard
       setIsCPF(false)
@@ -208,6 +214,9 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
         legalNature: "",
         validityStartDate: ""
       })
+      setCertificateFile(null)
+      setCertificatePassword("")
+      setRemoveCertificate(false)
       setIndicators({
         indCoop: false,
         indConstr: false,
@@ -227,7 +236,10 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
     onSubmit({
       ...formData,
       ...indicators,
-      isCPF // Passando explicitamente se é CPF
+      isCPF,
+      certificateFile,
+      certificatePassword: certificatePassword || null,
+      removeCertificate: mode === "edit" ? removeCertificate : false
     })
   }
 
@@ -935,6 +947,51 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+              Certificado A1
+            </h3>
+
+            <div className="space-y-2">
+              <Label htmlFor="certificate">Arquivo do certificado (.pfx/.p12)</Label>
+              <Input
+                id="certificate"
+                type="file"
+                accept=".pfx,.p12"
+                onChange={(e) => {
+                  const file = e.target.files && e.target.files[0] ? e.target.files[0] : null
+                  setCertificateFile(file)
+                }}
+                className="bg-slate-800 border-slate-700 text-white"
+              />
+            </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="certificatePassword">Senha do certificado A1</Label>
+            <Input
+              id="certificatePassword"
+              type="password"
+              value={certificatePassword}
+              onChange={(e) => setCertificatePassword(e.target.value)}
+              className="bg-slate-800 border-slate-700 text-white"
+            />
+          </div>
+
+            {mode === "edit" && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="removeCertificate"
+                  checked={removeCertificate}
+                  onCheckedChange={(checked) => setRemoveCertificate(!!checked)}
+                  className="border-slate-700"
+                />
+                <Label htmlFor="removeCertificate" className="text-sm text-slate-300">
+                  Remover certificado padrão atual desta empresa
+                </Label>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
