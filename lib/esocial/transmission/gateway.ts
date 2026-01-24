@@ -40,15 +40,23 @@ function getEdgeConsultUrl(): string {
   return `${getSupabaseUrl()}/functions/v1/esocial-consult`
 }
 
+function getBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    return window.location.origin
+  }
+  return process.env.NEXT_PUBLIC_APP_URL || ""
+}
+
 function getNodeTransmitUrl(): string {
-  return "/api/esocial/transmit"
+  return `${getBaseUrl()}/api/esocial/transmit`
 }
 
 function getNodeConsultUrl(): string {
-  return "/api/esocial/consult"
+  return `${getBaseUrl()}/api/esocial/consult`
 }
 
 async function callJsonEndpoint<TRequest, TResponse>(url: string, payload: TRequest): Promise<TResponse> {
+  console.log(`[Gateway] Chamando endpoint: ${url}`, payload)
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -83,7 +91,7 @@ async function callJsonEndpoint<TRequest, TResponse>(url: string, payload: TRequ
     const message = err instanceof Error ? String(err.message || "") : ""
     const lower = message.toLowerCase()
 
-    if (lower.includes("failed to fetch") || lower.includes("network")) {
+    if (lower.includes("failed to fetch") || lower.includes("network") || lower.includes("fetch failed")) {
       const isSupabase = url.includes("supabase.co")
 
       if (isSupabase) {

@@ -13,12 +13,28 @@ interface EmpresaDB {
   ind_prod_rural?: boolean;
   ind_pps?: boolean;
   ind_cpf?: boolean;
+  ind_opt_reg_eletron?: string;
 }
 
 export function mapToS1000(empresa: EmpresaDB): S1000Props {
   const cleanDoc = empresa.cnpj.replace(/\D/g, '');
   const isCPF = cleanDoc.length === 11;
   const tpInsc = isCPF ? '2' : '1';
+  const natJuridClean = empresa.natureza_juridica
+    ? empresa.natureza_juridica.replace(/\D/g, '')
+    : undefined;
+
+  let nrInsc: string;
+  if (isCPF) {
+    nrInsc = cleanDoc.substring(0, 11);
+  } else {
+    const natJuridFullCnpj = ['1015', '1040', '1074', '1163', '1341'];
+    if (natJuridClean && natJuridFullCnpj.includes(natJuridClean)) {
+      nrInsc = cleanDoc.substring(0, 14);
+    } else {
+      nrInsc = cleanDoc.substring(0, 8);
+    }
+  }
 
   const mapBooleanOrString = (val: string | boolean | undefined) => {
     if (typeof val === 'boolean') return val;
@@ -27,7 +43,7 @@ export function mapToS1000(empresa: EmpresaDB): S1000Props {
 
   const props: S1000Props = {
     tpInsc,
-    nrInsc: isCPF ? cleanDoc.substring(0, 11) : cleanDoc.substring(0, 14),
+    nrInsc,
     classTrib: empresa.classificacao_tributaria,
     iniValid: new Date().toISOString().slice(0, 7), // AAAA-MM
     
@@ -39,9 +55,13 @@ export function mapToS1000(empresa: EmpresaDB): S1000Props {
     indEtt: !!empresa.ind_ett,
   };
 
+  if (empresa.ind_opt_reg_eletron === '0' || empresa.ind_opt_reg_eletron === '1') {
+    props.indOptRegEletron = empresa.ind_opt_reg_eletron;
+  }
+
   // Lógica condicional
-  if (!isCPF && empresa.natureza_juridica) {
-    props.natJurid = empresa.natureza_juridica.replace(/\D/g, '');
+  if (!isCPF && natJuridClean) {
+    props.natJurid = natJuridClean;
   }
 
   // Produtor Rural

@@ -5,6 +5,13 @@ export interface ESocialCertificatePayload {
   password: string
 }
 
+export interface ESocialOccurrence {
+  codigo: string
+  descricao: string
+  tipo: string
+  localizacao?: string
+}
+
 export interface ESocialTransmissionRequest {
   eventType: string
   eventId: string
@@ -19,12 +26,14 @@ export interface ESocialTransmissionSuccess {
   recibo: string
   codigo: string
   mensagem: string
+  ocorrencias?: ESocialOccurrence[]
 }
 
 export interface ESocialTransmissionError {
   status: "rejeitado"
   codigo: string
   mensagem: string
+  ocorrencias?: ESocialOccurrence[]
 }
 
 export type ESocialTransmissionResponse =

@@ -6,7 +6,8 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint app components lib supabase --ext .js,.jsx,.ts,.tsx",
-    "start": "next start"
+    "start": "next start",
+    "validate:s1000": "node scripts/validate-s1000.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -75,6 +76,7 @@
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
     "tw-animate-css": "1.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "libxml-xsd": "^0.5.2"
   }
 }

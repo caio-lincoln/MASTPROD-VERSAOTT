@@ -482,7 +482,15 @@ export default function ESocialContent() {
       setSendModalEvent(null)
     } catch (err: any) {
       console.error("Erro ao marcar evento para envio:", err)
-      setSendError(err.message || "Erro ao marcar evento para envio.")
+      
+      let message = err.message || "Erro desconhecido ao enviar evento."
+      
+      // Tratamento específico para erro de conexão/fetch que pode não ter sido capturado ou formatado
+      if (message.includes("Failed to fetch") || message.includes("Network request failed")) {
+        message = "Não foi possível conectar ao servidor. Verifique se a API está rodando e acessível."
+      }
+
+      setSendError(message)
     } finally {
       setSendLoading(false)
     }
@@ -1340,9 +1348,7 @@ export default function ESocialContent() {
           onClose={() => setShowCreateS1000Modal(false)} 
           companies={allCompanies}
           onSuccess={() => {
-            // Recarregar eventos se necessário, ou apenas fechar
-            // A lista de eventos s1000Events é carregada via hook, talvez precise de um refresh manual
-            // Mas por enquanto, apenas fechar
+            refreshEvents()
           }}
         />
       )}

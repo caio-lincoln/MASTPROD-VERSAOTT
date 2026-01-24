@@ -54,6 +54,14 @@ function stripXmlDeclaration(xml: string): string {
   return xml.replace(/^\s*<\?xml[^>]*\?>\s*/i, "")
 }
 
+function syncTpAmbWithEnvironment(xml: string, environment: ESocialEnvironment): string {
+  const desired = environment === "production" ? "1" : "2"
+  if (!xml.includes("<tpAmb")) {
+    return xml
+  }
+  return xml.replace(/<tpAmb>\s*\d+\s*<\/tpAmb>/, `<tpAmb>${desired}</tpAmb>`)
+}
+
 function extractEventId(eventXml: string): string {
   const match = eventXml.match(/<\w+[^>]*\sId="([^"]+)"/)
   if (!match) {
@@ -104,6 +112,39 @@ function extractFirstTagValue(xml: string, tagName: string): string | null {
   return match ? match[1].trim() : null
 }
 
+interface ESocialOccurrence {
+  codigo: string
+  descricao: string
+  tipo: string
+  localizacao?: string
+}
+
+function extractOccurrencesFromRetornoEnvio(xml: string): ESocialOccurrence[] {
+  const ocorrenciasBlock = extractFirstTagValue(xml, "ocorrencias")
+  if (!ocorrenciasBlock) {
+    return []
+  }
+  const ocorrencias: ESocialOccurrence[] = []
+  const re = /<ocorrencia>([\s\S]*?)<\/ocorrencia>/gi
+  let match: RegExpExecArray | null
+  while ((match = re.exec(ocorrenciasBlock)) !== null) {
+    const block = match[1]
+    const codigo = extractFirstTagValue(block, "codigo")
+    const descricao = extractFirstTagValue(block, "descricao")
+    const tipo = extractFirstTagValue(block, "tipo")
+    const localizacao = extractFirstTagValue(block, "localizacao")
+    if (codigo && descricao && tipo) {
+      ocorrencias.push({
+        codigo,
+        descricao,
+        tipo,
+        localizacao: localizacao || undefined,
+      })
+    }
+  }
+  return ocorrencias
+}
+
 function parseEnviarLoteEventosResponse(soapXml: string): ESocialTransmissionResponse {
   const codigoResposta = extractFirstTagValue(soapXml, "cdResposta")
   const descResposta = extractFirstTagValue(soapXml, "descResposta")
@@ -124,13 +165,24 @@ function parseEnviarLoteEventosResponse(soapXml: string): ESocialTransmissionRes
       recibo: "",
       codigo: codigoResposta,
       mensagem: descResposta,
+      ocorrencias: extractOccurrencesFromRetornoEnvio(soapXml),
     }
+  }
+
+  const ocorrencias = extractOccurrencesFromRetornoEnvio(soapXml)
+  let mensagem = descResposta
+  if (ocorrencias.length > 0) {
+    const primeira = ocorrencias[0]
+    const detalheBase = `[${primeira.codigo}] ${primeira.descricao}`
+    const detalhe = primeira.localizacao ? `${detalheBase} (${primeira.localizacao})` : detalheBase
+    mensagem = `${descResposta} - Detalhe: ${detalhe}`
   }
 
   return {
     status: "rejeitado",
     codigo: codigoResposta,
-    mensagem: descResposta,
+    mensagem,
+    ocorrencias,
   }
 }
 
@@ -148,12 +200,14 @@ interface ESocialTransmissionSuccess {
   recibo: string
   codigo: string
   mensagem: string
+  ocorrencias?: ESocialOccurrence[]
 }
 
 interface ESocialTransmissionError {
   status: "rejeitado"
   codigo: string
   mensagem: string
+  ocorrencias?: ESocialOccurrence[]
 }
 
 type ESocialTransmissionResponse = ESocialTransmissionSuccess | ESocialTransmissionError
@@ -282,20 +336,28 @@ async function validateAndDecodeCertificate(payload: ESocialCertificatePayload):
 }
 
 function signESocialXML(xml: string, certPem: string, privateKeyPem: string): string {
+  const rootXpath = "/*[local-name()='eSocial']"
+
   const signer = new SignedXml({
     privateKey: privateKeyPem,
     publicCert: certPem,
     signatureAlgorithm: "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-    canonicalizationAlgorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
+    canonicalizationAlgorithm: "http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
   })
 
   signer.addReference({
-    xpath: "/*[local-name()='eSocial']/*[1]",
+    xpath: rootXpath,
+    uri: "",
     digestAlgorithm: "http://www.w3.org/2001/04/xmlenc#sha256",
-    transforms: ["http://www.w3.org/2001/10/xml-exc-c14n#"],
+    transforms: [
+      "http://www.w3.org/2000/09/xmldsig#enveloped-signature",
+      "http://www.w3.org/TR/2001/REC-xml-c14n-20010315",
+    ],
   })
 
-  signer.computeSignature(xml)
+  signer.computeSignature(xml, {
+    location: { reference: rootXpath, action: "append" },
+  })
 
   return signer.getSignedXml()
 }
@@ -368,7 +430,8 @@ async function transmitToESocial(req: ESocialTransmissionRequest): Promise<ESoci
       comm_package_version: ESOCIAL_COMM_PACKAGE.communicationPackageVersion,
     })
 
-  const signedXml = signESocialXML(req.xml, cert.certPem, cert.privateKeyPem)
+  const xmlWithCorrectAmb = syncTpAmbWithEnvironment(req.xml, req.environment)
+  const signedXml = signESocialXML(xmlWithCorrectAmb, cert.certPem, cert.privateKeyPem)
   const loteXml = buildLoteEventosXml(signedXml, tpInsc, nrInsc)
   const soapEnvelope = buildSoapEnvelope(loteXml)
 
