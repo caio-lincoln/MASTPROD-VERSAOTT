@@ -52,7 +52,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Detalhes da Empresa

@@ -17,7 +17,7 @@ interface RiskModalProps {
   onSubmit: (data: any) => void
   initialData?: any
   mode: "create" | "edit"
-  companies: Array<{ id: number; name: string; cnpj: string }>
+  companies: Array<{ id: string; name: string; cnpj: string }>
 }
 
 export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, companies }: RiskModalProps) {
@@ -39,7 +39,10 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData)
+      setFormData({
+        ...initialData,
+        companyId: initialData.companyId?.toString() || "",
+      })
     } else {
       setFormData({
         name: "",
@@ -87,7 +90,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Novo Risco Ocupacional" : "Editar Risco Ocupacional"}</DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -105,10 +108,10 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   Empresa <span className="text-red-400">*</span>
                 </Label>
                 <Select value={formData.companyId} onValueChange={handleCompanyChange}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     {companies.map((company) => (
                       <SelectItem
                         key={company.id}
@@ -133,7 +136,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Ruído excessivo"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
             </div>
@@ -144,10 +147,10 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   Tipo <span className="text-red-400">*</span>
                 </Label>
                 <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     <SelectItem value="Físico" className="text-white hover:bg-slate-700">
                       Físico
                     </SelectItem>
@@ -175,10 +178,10 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   value={formData.severity}
                   onValueChange={(value) => setFormData({ ...formData, severity: value })}
                 >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     <SelectItem value="Baixo" className="text-white hover:bg-slate-700">
                       Baixo
                     </SelectItem>
@@ -201,10 +204,10 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   value={formData.probability}
                   onValueChange={(value) => setFormData({ ...formData, probability: value })}
                 >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     <SelectItem value="Baixa" className="text-white hover:bg-slate-700">
                       Baixa
                     </SelectItem>
@@ -226,7 +229,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                   placeholder="Ex: Produção"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
 
@@ -238,7 +241,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                     type="date"
                     value={formData.identifiedDate}
                     onChange={(e) => setFormData({ ...formData, identifiedDate: e.target.value })}
-                    className="pl-10 bg-slate-800 border-slate-700 text-white"
+                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                   />
                 </div>
               </div>
@@ -257,7 +260,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descreva detalhadamente o risco identificado"
-                className="bg-slate-800 border-slate-700 text-white min-h-[80px]"
+                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
               />
             </div>
 
@@ -267,7 +270,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                 placeholder="Ex: Máquinas industriais em operação"
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
               />
             </div>
 
@@ -277,7 +280,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                 value={formData.consequences}
                 onChange={(e) => setFormData({ ...formData, consequences: e.target.value })}
                 placeholder="Descreva as possíveis consequências da exposição ao risco"
-                className="bg-slate-800 border-slate-700 text-white min-h-[80px]"
+                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
               />
             </div>
           </div>
@@ -294,7 +297,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                 value={formData.measures}
                 onChange={(e) => setFormData({ ...formData, measures: e.target.value })}
                 placeholder="Descreva as medidas de controle implementadas ou recomendadas"
-                className="bg-slate-800 border-slate-700 text-white min-h-[80px]"
+                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
               />
             </div>
 
@@ -306,7 +309,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
                 value={formData.responsibleName}
                 onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
                 placeholder="Nome do responsável pela gestão do risco"
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
               />
             </div>
           </div>
@@ -316,7 +319,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 hover:bg-slate-800"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>

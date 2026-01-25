@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, AlertTriangle, Eye, Edit, Trash2, Building2 } from "lucide-react"
+import { Plus, Search, AlertTriangle, Eye, Edit, Trash2, Building2, Filter } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { RiskModal } from "@/components/risk-modal"
 import { RiskDetailsModal } from "@/components/risk-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { supabase } from "@/lib/supabaseClient"
+import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
+import { cn } from "@/lib/utils"
 
 type CompanyRow = { id: string; razao_social: string }
 type RiskRow = {
@@ -228,132 +229,130 @@ export default function RisksPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Riscos Ocupacionais</h2>
-          <p className="text-slate-400">Identificação e controle de riscos</p>
-        </div>
-        <Button
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      <DashboardHeader 
+        title="Riscos Ocupacionais" 
+        subtitle="Identificação e controle de riscos"
+      >
+        <Button 
           onClick={() => setCreateModalOpen(true)}
-          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Risco
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <div className="space-y-4">
-            <div>
-              <Label className="text-slate-300 mb-2 block">Filtrar por Empresa</Label>
-              <Select value={selectedCompany} onValueChange={handleCompanyFilter}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="Selecione uma empresa" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all" className="text-white hover:bg-slate-700">
-                    Todas as empresas
-                  </SelectItem>
-                  {companies.map((company) => (
-                    <SelectItem
-                      key={company.id}
-                      value={company.id}
-                      className="text-white hover:bg-slate-700"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-emerald-400" />
-                        <span>{company.name}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <Input
-                placeholder="Buscar riscos por nome ou tipo..."
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 bg-slate-800 border-slate-700 text-white"
-              />
-            </div>
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar riscos por nome ou tipo..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
-          <div className="space-y-3">
+          <Select value={selectedCompany} onValueChange={handleCompanyFilter}>
+            <SelectTrigger className="w-full md:w-[250px] bg-slate-800/50 border-slate-700 text-white">
+              <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+              <SelectValue placeholder="Filtrar por empresa" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+              <SelectItem value="all">Todas as empresas</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-400 animate-pulse">Carregando riscos...</p>
+          </div>
+        ) : error ? (
+          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+            {error}
+          </div>
+        ) : (
+          <div className="grid gap-4">
             {paginatedRisks.map((risk) => (
               <div
                 key={risk.id}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all duration-200"
+                className="glass-card p-5 rounded-xl hover:bg-slate-800/60 transition-all duration-300 group border border-slate-700/50 hover:border-primary/30"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-3 flex-1">
-                    <div className="p-2 rounded-lg bg-red-500/10">
-                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                      <AlertTriangle className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white mb-1">{risk.name}</h3>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Building2 className="w-4 h-4 text-slate-400" />
-                        <span className="text-sm text-slate-400">
-                          {companies.find((c) => c.id === risk.companyId)?.name || ""}
-                        </span>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{risk.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <Building2 className="w-3 h-3" />
+                        <span>{companies.find((c) => c.id === risk.companyId)?.name || ""}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span>Setor: {risk.sector}</span>
                       </div>
-                      <p className="text-sm text-slate-400 mb-2">Setor: {risk.sector}</p>
-                      <p className="text-sm text-slate-300">Medidas: {risk.measures}</p>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2 items-end">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium border ${getSeverityColor(risk.severity)}`}
-                    >
+                  <div className="flex flex-wrap gap-2">
+                    <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium border", getSeverityColor(risk.severity))}>
                       {risk.severity}
                     </span>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-slate-700 text-slate-300">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-700/50 text-slate-300 border border-slate-600/50">
                       {risk.type}
                     </span>
+                    <StatusBadge status={risk.status} />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-slate-700">
+                <div className="bg-slate-900/20 rounded-lg p-4 mb-4 border border-slate-700/30">
+                  <p className="text-sm text-slate-300 mb-2"><span className="text-slate-500 font-medium">Medidas de Controle:</span> {risk.measures}</p>
+                  <p className="text-sm text-slate-300"><span className="text-slate-500 font-medium">Descrição:</span> {risk.description}</p>
+                </div>
+
+                <div className="flex justify-end gap-2">
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
+                    className="text-slate-400 hover:text-white hover:bg-slate-700"
                     onClick={() => setViewingRisk(risk)}
-                    className="border-slate-700 hover:bg-slate-800"
                   >
-                    <Eye className="w-4 h-4 mr-1" />
+                    <Eye className="w-4 h-4 mr-2" />
                     Visualizar
                   </Button>
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
+                    className="text-slate-400 hover:text-primary hover:bg-primary/10"
                     onClick={() => setEditingRisk(risk)}
-                    className="border-slate-700 hover:bg-slate-800"
                   >
-                    <Edit className="w-4 h-4 mr-1" />
+                    <Edit className="w-4 h-4 mr-2" />
                     Editar
                   </Button>
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
+                    className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                     onClick={() => handleDeleteRisk(risk.id)}
-                    className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                   >
-                    <Trash2 className="w-4 h-4 mr-1" />
+                    <Trash2 className="w-4 h-4 mr-2" />
                     Excluir
                   </Button>
                 </div>
               </div>
             ))}
           </div>
+        )}
 
-          {filteredRisks.length > 0 && (
+        {filteredRisks.length > 0 && (
+          <div className="mt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -361,9 +360,9 @@ export default function RisksPage() {
               itemsPerPage={ITEMS_PER_PAGE}
               totalItems={filteredRisks.length}
             />
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ContentContainer>
 
       <RiskModal
         open={createModalOpen || !!editingRisk}

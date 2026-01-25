@@ -102,7 +102,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Novo Treinamento</DialogTitle>
         </DialogHeader>
@@ -120,7 +120,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -134,7 +134,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     placeholder="Ex: 8h"
                     value={formData.duration}
                     onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -149,7 +149,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     id="instructor"
                     value={formData.instructor}
                     onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -163,7 +163,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -178,7 +178,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white resize-none"
+                  className="bg-slate-800/50 border-slate-700 text-white resize-none"
                 />
               </div>
 
@@ -194,10 +194,10 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     setEmployeeSearch("")
                   }}
                 >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     {companies.map((company) => (
                       <SelectItem key={company.id} value={company.id} className="text-white">
                         <div className="flex items-center gap-2">
@@ -227,7 +227,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                       placeholder="Buscar funcionários..."
                       value={employeeSearch}
                       onChange={(e) => setEmployeeSearch(e.target.value)}
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
                     />
                   </div>
 
@@ -302,7 +302,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>

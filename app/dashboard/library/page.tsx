@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search, FileText, Download, Eye, Building2, Filter } from "lucide-react"
@@ -10,6 +9,8 @@ import { DocumentUploadModal } from "@/components/document-upload-modal"
 import { DocumentDetailsModal } from "@/components/document-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { supabase } from "@/lib/supabaseClient"
+import { DashboardHeader, ContentContainer, StatusBadge } from "@/app/dashboard/esocial/components/visual-components"
+import { cn } from "@/lib/utils"
 
 type CompanyRow = { id: string; razao_social: string }
 type DocumentRow = {
@@ -141,22 +142,21 @@ export default function LibraryPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Biblioteca Digital</h2>
-          <p className="text-slate-400">Documentos e normas de segurança</p>
-        </div>
+      <DashboardHeader
+        title="Biblioteca Digital"
+        subtitle="Documentos e normas de segurança"
+      >
         <Button
           onClick={() => setUploadModalOpen(true)}
-          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Upload Documento
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+        <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Filter className="w-5 h-5 text-slate-400" />
@@ -170,14 +170,14 @@ export default function LibraryPage() {
                   placeholder="Buscar documentos..."
                   value={search}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
                 />
               </div>
 
               <div className="relative">
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
                 <Select value={selectedCompany} onValueChange={handleCompanyChange}>
-                  <SelectTrigger className="pl-10 bg-slate-800 border-slate-700 text-white">
+                  <SelectTrigger className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-primary/50 focus:border-primary/50">
                     <SelectValue placeholder="Filtrar por empresa" />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700">
@@ -197,75 +197,76 @@ export default function LibraryPage() {
             {selectedCompany !== "all" && (
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <span>Exibindo documentos de:</span>
-                <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium">
+                <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
                   {companies.find((c) => c.id === selectedCompany)?.name}
                 </span>
               </div>
             )}
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+
+        <div className="space-y-3">
           {loading && <div className="text-slate-400">Carregando...</div>}
           {error && <div className="text-red-400">{error}</div>}
-          <div className="space-y-3">
-            {paginatedDocuments.map((doc) => (
-              <div
-                key={doc.id}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all duration-200 group"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3 flex-1">
-                    <div className="p-2 rounded-lg bg-blue-500/10">
-                      <FileText className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-white mb-1">{doc.name}</h3>
-                      <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap">
-                        <span>{doc.type}</span>
-                        <span>•</span>
-                        <span>{doc.size}</span>
-                        <span>•</span>
-                        <span>{doc.date}</span>
-                        <span className="px-2 py-0.5 rounded bg-slate-700 text-slate-300">{doc.category}</span>
-                        <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
-                          <Building2 className="w-3 h-3" />
-                          {companies.find((c) => c.id === doc.companyId)?.name || ""}
-                        </span>
-                      </div>
-                    </div>
+          {paginatedDocuments.map((doc) => (
+            <div
+              key={doc.id}
+              className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all duration-300 group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                    <FileText className="w-6 h-6 text-blue-400" />
                   </div>
-
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-slate-400 hover:text-white"
-                      onClick={() => setViewingDocument(doc)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-slate-400 hover:text-white"
-                      onClick={() => handleDownload(doc)}
-                    >
-                      <Download className="w-4 h-4" />
-                    </Button>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-white mb-1 text-lg">{doc.name}</h3>
+                    <div className="flex items-center gap-3 text-sm text-slate-400 flex-wrap">
+                      <span className="bg-slate-800 px-2 py-0.5 rounded text-xs">{doc.type}</span>
+                      <span className="text-slate-600">•</span>
+                      <span>{doc.size}</span>
+                      <span className="text-slate-600">•</span>
+                      <span>{doc.date}</span>
+                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-xs border border-slate-700">{doc.category}</span>
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">
+                        <Building2 className="w-3 h-3" />
+                        {companies.find((c) => c.id === doc.companyId)?.name || ""}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-slate-400 hover:text-white hover:bg-slate-800"
+                    onClick={() => setViewingDocument(doc)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-slate-400 hover:text-white hover:bg-slate-800"
+                    onClick={() => handleDownload(doc)}
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            ))}
-          </div>
-
-          {filteredDocuments.length === 0 && (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400">Nenhum documento encontrado</p>
             </div>
-          )}
+          ))}
+        </div>
 
-          {filteredDocuments.length > 0 && (
+        {filteredDocuments.length === 0 && !loading && (
+          <div className="text-center py-12 bg-slate-900/30 rounded-xl border border-slate-800/50">
+            <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4 opacity-50" />
+            <p className="text-slate-400 text-lg">Nenhum documento encontrado</p>
+          </div>
+        )}
+
+        {filteredDocuments.length > 0 && (
+          <div className="mt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -273,9 +274,9 @@ export default function LibraryPage() {
               itemsPerPage={ITEMS_PER_PAGE}
               totalItems={filteredDocuments.length}
             />
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </ContentContainer>
 
       <DocumentUploadModal
         open={uploadModalOpen}

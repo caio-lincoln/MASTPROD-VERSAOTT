@@ -15,7 +15,7 @@ interface DocumentUploadModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (data: any) => void
-  companies: Array<{ id: number; name: string; cnpj: string }>
+  companies: Array<{ id: string; name: string; cnpj: string }>
 }
 
 export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }: DocumentUploadModalProps) {
@@ -47,7 +47,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
   }
 
   const handleCompanyChange = (value: string) => {
-    const company = companies.find((c) => c.id === Number.parseInt(value))
+    const company = companies.find((c) => c.id.toString() === value)
     setFormData({
       ...formData,
       companyId: value,
@@ -65,7 +65,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
 
     onSubmit({
       ...formData,
-      companyId: Number.parseInt(formData.companyId),
+      companyId: formData.companyId, // Ensure this is a string as per updated types
       tags: formData.tags
         .split(",")
         .map((t) => t.trim())
@@ -90,15 +90,15 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Upload de Documento</DialogTitle>
           <DialogDescription className="text-slate-400">
             Adicione um novo documento à biblioteca digital
           </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        
+        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Seleção de Arquivo */}
           <div className="space-y-2">
             <Label className="text-slate-300">Arquivo *</Label>
@@ -150,10 +150,10 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
                 Tipo de Documento *
               </Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   <SelectItem value="Norma" className="text-white">
                     Norma
                   </SelectItem>
@@ -184,10 +184,10 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
                 value={formData.category}
                 onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                   <SelectValue placeholder="Selecione a categoria" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   <SelectItem value="Legislação" className="text-white">
                     Legislação
                   </SelectItem>
@@ -218,10 +218,10 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
                 Empresa Vinculada *
               </Label>
               <Select value={formData.companyId} onValueChange={handleCompanyChange}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id.toString()} className="text-white">
                       {company.name} - {company.cnpj}
@@ -240,7 +240,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
                 placeholder="Ex: 1.0"
                 value={formData.version}
                 onChange={(e) => setFormData({ ...formData, version: e.target.value })}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
               />
             </div>
           </div>
@@ -255,7 +255,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
               placeholder="Descreva o conteúdo do documento..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="bg-slate-800 border-slate-700 text-white min-h-[100px]"
+              className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
             />
           </div>
 
@@ -269,7 +269,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
               placeholder="Ex: NR-35, Altura, Segurança"
               value={formData.tags}
               onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-              className="bg-slate-800 border-slate-700 text-white"
+              className="bg-slate-800/50 border-slate-700 text-white"
             />
           </div>
 
@@ -279,7 +279,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 hover:bg-slate-800"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>

@@ -62,7 +62,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-emerald-400" />
@@ -85,10 +85,10 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
               <div className="space-y-2">
                 <Label htmlFor="company">Empresa *</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     {allCompanies.map((company) => (
                       <SelectItem key={company.id} value={company.id.toString()}>
                         {company.name} - {company.cnpj}
@@ -101,10 +101,10 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
               <div className="space-y-2">
                 <Label htmlFor="employee">Funcionário *</Label>
                 <Select value={selectedEmployee} onValueChange={setSelectedEmployee} disabled={!selectedCompany}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione o funcionário" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     {filteredEmployees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id.toString()}>
                         {employee.name} - {employee.role}
@@ -128,7 +128,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -140,7 +140,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
             </div>
@@ -154,10 +154,10 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
               <div className="space-y-2">
                 <Label htmlFor="riskType">Tipo de Risco *</Label>
                 <Select value={riskType} onValueChange={setRiskType}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     <SelectItem value="fisico">Físico</SelectItem>
                     <SelectItem value="quimico">Químico</SelectItem>
                     <SelectItem value="biologico">Biológico</SelectItem>
@@ -174,7 +174,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={riskAgent}
                   onChange={(e) => setRiskAgent(e.target.value)}
                   placeholder="Ex: Ruído, Calor, Benzeno..."
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -186,7 +186,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={intensity}
                   onChange={(e) => setIntensity(e.target.value)}
                   placeholder="Ex: 85 dB, 30°C..."
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -198,7 +198,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={technique}
                   onChange={(e) => setTechnique(e.target.value)}
                   placeholder="Ex: Dosimetria, Termômetro..."
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -217,7 +217,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={epcUsed}
                   onChange={(e) => setEpcUsed(e.target.value)}
                   placeholder="Equipamentos de Proteção Coletiva"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
 
@@ -228,7 +228,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={epiUsed}
                   onChange={(e) => setEpiUsed(e.target.value)}
                   placeholder="Equipamentos de Proteção Individual"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -240,7 +240,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
                   value={observations}
                   onChange={(e) => setObservations(e.target.value)}
                   placeholder="Informações adicionais sobre as condições ambientais..."
-                  className="bg-slate-800 border-slate-700 text-white min-h-[100px]"
+                  className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
                 />
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function EventS2240Modal({ isOpen, onClose }: EventS2240ModalProp
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>

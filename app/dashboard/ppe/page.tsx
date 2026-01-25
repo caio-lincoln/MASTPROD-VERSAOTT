@@ -1,16 +1,17 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Package, Calendar, Eye, Edit, XCircle, Building2 } from "lucide-react"
+import { Plus, Search, Package, Calendar, Eye, Edit, XCircle, Building2, Filter } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { PPEModal } from "@/components/ppe-modal"
 import { PPEDetailsModal } from "@/components/ppe-details-modal"
 import { PPECancelModal } from "@/components/ppe-cancel-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { supabase } from "@/lib/supabaseClient"
+import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
+import { cn } from "@/lib/utils"
 
 type EpiRow = {
   id: string
@@ -173,144 +174,143 @@ export default function PPEPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">EPIs</h2>
-          <p className="text-slate-400">Controle de Equipamentos de Proteção Individual</p>
-        </div>
-        <Button
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      <DashboardHeader 
+        title="EPIs" 
+        subtitle="Controle de Equipamentos de Proteção Individual"
+      >
+        <Button 
           onClick={() => {
             setEditingPPE(null)
             setIsModalOpen(true)
           }}
-          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo EPI
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <label className="text-sm text-slate-400 mb-2 block">Selecione a Empresa</label>
-                <Select
-                  value={selectedCompany}
-                  onValueChange={(value) => {
-                    setSelectedCompany(value)
-                    setCurrentPage(1)
-                  }}
-                >
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                    <SelectValue placeholder="Todas as empresas" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">
-                      Todas as empresas
-                    </SelectItem>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id} className="text-white">
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <Input
-                placeholder="Buscar EPIs por nome, CA ou tipo..."
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 bg-slate-800 border-slate-700 text-white"
-              />
-            </div>
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar EPIs por nome, CA ou tipo..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
-          <div className="space-y-3">
+          <Select
+            value={selectedCompany}
+            onValueChange={(value) => {
+              setSelectedCompany(value)
+              setCurrentPage(1)
+            }}
+          >
+            <SelectTrigger className="w-full md:w-[250px] bg-slate-800/50 border-slate-700 text-white">
+              <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+              <SelectValue placeholder="Filtrar por empresa" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+              <SelectItem value="all">Todas as empresas</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-400 animate-pulse">Carregando EPIs...</p>
+          </div>
+        ) : error ? (
+          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+            {error}
+          </div>
+        ) : (
+          <div className="grid gap-4">
             {paginatedPPE.map((item) => (
               <div
                 key={item.id}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all duration-200"
+                className="glass-card p-5 rounded-xl hover:bg-slate-800/60 transition-all duration-300 group border border-slate-700/50 hover:border-primary/30"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-1">{item.name}</h3>
-                    <p className="text-sm text-slate-400 mb-1">
-                      CA: {item.ca} | Tipo: {item.type}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm text-slate-500">
-                      <Building2 className="w-3 h-3" />
-                      <span>{companies.find((c) => c.id === item.companyId)?.name || ""}</span>
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                      <Package className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{item.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                        <span className="font-medium text-slate-400">CA: {item.ca}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span>{item.type}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <div className="flex items-center gap-1">
+                          <Building2 className="w-3 h-3" />
+                          <span>{companies.find((c) => c.id === item.companyId)?.name || ""}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      item.status === "Adequado"
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : item.status === "Cancelado"
-                          ? "bg-slate-500/10 text-slate-400"
-                          : "bg-red-500/10 text-red-400"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
+                  <StatusBadge 
+                    status={item.status} 
+                    type={item.status === "Adequado" ? "success" : item.status === "Cancelado" ? "default" : "error"} 
+                  />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mb-4">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Package className="w-4 h-4" />
-                    <span>Estoque: {item.quantity} unidades</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-y border-slate-700/50 mb-4 bg-slate-900/20 rounded-lg px-4 mx-[-0.5rem]">
+                  <div className="flex items-center gap-3">
+                    <Package className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-300">Estoque: <span className={cn("font-medium", item.quantity <= item.minQuantity ? "text-red-400" : "text-white")}>{item.quantity}</span></span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Package className="w-4 h-4" />
-                    <span>Mínimo: {item.minQuantity} unidades</span>
+                  <div className="flex items-center gap-3">
+                    <Package className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-300">Mínimo: <span className="text-white">{item.minQuantity}</span></span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Calendar className="w-4 h-4" />
-                    <span>Validade: {item.validity}</span>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-300">Validade: {item.validity}</span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex justify-end gap-2">
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
+                    className="text-slate-400 hover:text-white hover:bg-slate-700"
                     onClick={() => setDetailsPPE(item)}
-                    className="border-slate-700 text-slate-300 hover:bg-slate-800"
                   >
-                    <Eye className="w-4 h-4 mr-1" />
+                    <Eye className="w-4 h-4 mr-2" />
                     Visualizar
                   </Button>
                   {!item.isCancelled && (
                     <>
                       <Button
+                        variant="ghost"
                         size="sm"
-                        variant="outline"
+                        className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
                         onClick={() => {
                           setEditingPPE(item)
                           setIsModalOpen(true)
                         }}
-                        className="border-emerald-700 text-emerald-400 hover:bg-emerald-500/10"
                       >
-                        <Edit className="w-4 h-4 mr-1" />
+                        <Edit className="w-4 h-4 mr-2" />
                         Editar
                       </Button>
                       <Button
+                        variant="ghost"
                         size="sm"
-                        variant="outline"
+                        className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                         onClick={() => setCancelPPE(item)}
-                        className="border-red-700 text-red-400 hover:bg-red-500/10"
                       >
-                        <XCircle className="w-4 h-4 mr-1" />
+                        <XCircle className="w-4 h-4 mr-2" />
                         Cancelar
                       </Button>
                     </>
@@ -319,8 +319,10 @@ export default function PPEPage() {
               </div>
             ))}
           </div>
+        )}
 
-          {filteredPPE.length > 0 && (
+        {filteredPPE.length > 0 && (
+          <div className="mt-6">
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -328,16 +330,16 @@ export default function PPEPage() {
               itemsPerPage={ITEMS_PER_PAGE}
               totalItems={filteredPPE.length}
             />
-          )}
+          </div>
+        )}
 
-          {filteredPPE.length === 0 && (
-            <div className="text-center py-12">
-              <Package className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400">Nenhum EPI encontrado para os filtros selecionados</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        {filteredPPE.length === 0 && !loading && (
+          <div className="text-center py-12">
+            <Package className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+            <p className="text-slate-400">Nenhum EPI encontrado para os filtros selecionados</p>
+          </div>
+        )}
+      </ContentContainer>
 
       <PPEModal
         open={isModalOpen}

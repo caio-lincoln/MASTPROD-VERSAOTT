@@ -38,7 +38,7 @@ export function PPECancelModal({ ppe, onClose, onConfirm }: PPECancelModalProps)
 
   return (
     <Dialog open={!!ppe} onOpenChange={handleClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-red-400">
             <AlertTriangle className="w-5 h-5" />
@@ -68,7 +68,7 @@ export function PPECancelModal({ ppe, onClose, onConfirm }: PPECancelModalProps)
                 setError("")
               }}
               placeholder="Descreva o motivo do cancelamento (ex: EPI descontinuado, CA vencido, substituído por outro modelo...)"
-              className={`bg-slate-800 border-slate-700 min-h-[100px] ${error ? "border-red-500" : ""}`}
+              className={`bg-slate-800/50 border-slate-700 text-white min-h-[100px] ${error ? "border-red-500" : ""}`}
             />
             {error && (
               <p className="text-xs text-red-400 flex items-center gap-1">
@@ -90,7 +90,7 @@ export function PPECancelModal({ ppe, onClose, onConfirm }: PPECancelModalProps)
           <Button
             variant="outline"
             onClick={handleClose}
-            className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+            className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
           >
             Voltar
           </Button>

@@ -433,7 +433,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Nova Empresa" : "Editar Empresa"}</DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -466,10 +466,10 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     }
                   }}
                 >
-                  <SelectTrigger className="bg-slate-900 border-slate-600 text-white w-full">
+                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white w-full">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-900 border-slate-700 text-white">
+                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
                     <SelectItem value="cnpj">Pessoa Jurídica (CNPJ)</SelectItem>
                     <SelectItem value="cpf">Pessoa Física (CPF)</SelectItem>
                   </SelectContent>
@@ -653,7 +653,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Nome da empresa"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -666,7 +666,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     placeholder={isCPF ? "000.000.000-00" : "00.000.000/0000-00"}
                     value={formData.cnpj}
                     onChange={(e) => setFormData({ ...formData, cnpj: formatCNPJ(e.target.value) })}
-                    className="bg-slate-800 border-slate-700 text-white flex-1"
+                    className="bg-slate-800/50 border-slate-700 text-white flex-1"
                     required
                   />
                   <Button 
@@ -691,7 +691,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="0000-0/00"
                   value={formData.cnae}
                   onChange={(e) => setFormData({ ...formData, cnae: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -706,7 +706,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                       variant="outline"
                       role="combobox"
                       aria-expanded={openLegalNature}
-                      className="w-full justify-between bg-slate-800 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
+                      className="w-full justify-between bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
                     >
                       {formData.legalNature
                         ? formData.legalNature
@@ -766,7 +766,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                       variant="outline"
                       role="combobox"
                       aria-expanded={openTaxClassification}
-                      className="w-full justify-between bg-slate-800 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
+                      className="w-full justify-between bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
                     >
                       {formData.taxClassification
                         ? formData.taxClassification
@@ -823,7 +823,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     type="month"
                     value={formData.validityStartDate}
                     onChange={(e) => setFormData({ ...formData, validityStartDate: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white pl-10"
+                    className="bg-slate-800/50 border-slate-700 text-white pl-10"
                     required
                   />
                   <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
@@ -838,7 +838,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="0"
                   value={formData.employees || ""}
                   onChange={(e) => setFormData({ ...formData, employees: Number.parseInt(e.target.value) || 0 })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
             </div>
@@ -850,7 +850,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 placeholder="Descreva a atividade principal da empresa"
                 value={formData.activityDescription}
                 onChange={(e) => setFormData({ ...formData, activityDescription: e.target.value })}
-                className="bg-slate-800 border-slate-700 text-white min-h-[80px]"
+                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
                 required
               />
             </div>
@@ -871,7 +871,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Rua, número, complemento"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -884,7 +884,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     placeholder="Cidade"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -897,7 +897,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     maxLength={2}
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-                    className="bg-slate-800 border-slate-700 text-white"
+                    className="bg-slate-800/50 border-slate-700 text-white"
                     required
                   />
                 </div>
@@ -920,7 +920,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="(00) 0000-0000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
 
@@ -932,7 +932,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="contato@empresa.com.br"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
 
@@ -943,7 +943,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Nome do responsável"
                   value={formData.responsible}
                   onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                 />
               </div>
             </div>
@@ -964,7 +964,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   const file = e.target.files && e.target.files[0] ? e.target.files[0] : null
                   setCertificateFile(file)
                 }}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
               />
             </div>
 
@@ -975,7 +975,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
               type="password"
               value={certificatePassword}
               onChange={(e) => setCertificatePassword(e.target.value)}
-              className="bg-slate-800 border-slate-700 text-white"
+              className="bg-slate-800/50 border-slate-700 text-white"
             />
           </div>
 
@@ -995,7 +995,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
               Cancelar
             </Button>
             <Button

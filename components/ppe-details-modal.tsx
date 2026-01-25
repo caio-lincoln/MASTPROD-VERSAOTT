@@ -15,7 +15,7 @@ export function PPEDetailsModal({ ppe, onClose }: PPEDetailsModalProps) {
 
   return (
     <Dialog open={!!ppe} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Detalhes do EPI</DialogTitle>
         </DialogHeader>

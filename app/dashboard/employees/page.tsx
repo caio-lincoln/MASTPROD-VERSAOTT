@@ -1,16 +1,16 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Mail, Phone, Briefcase, Eye, Edit, Trash2, Building2 } from "lucide-react"
+import { Plus, Search, Mail, Phone, Briefcase, Eye, Edit, Trash2, Building2, Filter } from "lucide-react"
 import { EmployeeModal } from "@/components/employee-modal"
 import { EmployeeDetailsModal } from "@/components/employee-details-modal"
 import { EmployeeCancelModal } from "@/components/employee-cancel-modal"
 import { Pagination } from "@/components/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { supabase } from "@/lib/supabaseClient"
+import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 
 type EmployeeRow = {
   id: string
@@ -197,179 +197,168 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Funcionários</h2>
-          <p className="text-slate-400">Gerencie o cadastro de funcionários</p>
-        </div>
-        <Button
-          onClick={() => setModalOpen(true)}
-          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
-        >
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      <DashboardHeader 
+        title="Funcionários" 
+        subtitle="Gestão de colaboradores e vínculos"
+      >
+        <Button onClick={() => setModalOpen(true)} className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]">
           <Plus className="w-4 h-4 mr-2" />
           Novo Funcionário
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium text-slate-300 mb-2 block">Filtrar por Empresa</label>
-              <Select value={companyFilter} onValueChange={handleCompanyFilter}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-                  <SelectValue placeholder="Selecione uma empresa" />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
-                  <SelectItem value="all">Todas as Empresas</SelectItem>
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-              <Input
-                placeholder="Buscar funcionários por nome, email ou cargo..."
-                value={search}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="pl-10 bg-slate-800 border-slate-700 text-white"
-              />
-            </div>
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              placeholder="Buscar por nome, cargo ou email..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Select value={companyFilter} onValueChange={handleCompanyFilter}>
+            <SelectTrigger className="w-full md:w-[250px] bg-slate-800/50 border-slate-700 text-white">
+              <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+              <SelectValue placeholder="Filtrar por empresa" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+              <SelectItem value="all">Todas as empresas</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-20">
+            <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-slate-400 animate-pulse">Carregando funcionários...</p>
+          </div>
+        ) : (
+          <div className="grid gap-4">
             {paginatedEmployees.map((employee) => (
               <div
                 key={employee.id}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all duration-200 hover:shadow-lg"
+                className="glass-card p-5 rounded-xl hover:bg-slate-800/60 transition-all duration-300 group border border-slate-700/50 hover:border-primary/30"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-1">{employee.name}</h3>
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
-                      <Briefcase className="w-3 h-3" />
-                      <span>
-                        {employee.position} • {employee.department}
-                      </span>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border border-slate-600 flex items-center justify-center text-lg font-bold text-slate-300 shadow-inner group-hover:from-primary/20 group-hover:to-primary/10 group-hover:border-primary/30 group-hover:text-primary transition-all">
+                      {employee.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-400 mt-1">
-                      <Building2 className="w-3 h-3" />
-                      <span>{getCompanyName(employee.companyId)}</span>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{employee.name}</h3>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Briefcase className="w-3 h-3" />
+                        <span>{employee.position}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span>{employee.department}</span>
+                      </div>
                     </div>
                   </div>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      employee.status === "Ativo"
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : employee.status === "Férias"
-                          ? "bg-amber-500/10 text-amber-400"
-                          : "bg-red-500/10 text-red-400"
-                    }`}
-                  >
-                    {employee.status}
-                  </span>
+                  <StatusBadge status={employee.status} />
                 </div>
 
-                <div className="space-y-2 text-sm mb-4">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Mail className="w-4 h-4" />
-                    <span>{employee.email}</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 border-y border-slate-700/50 mb-4 bg-slate-900/20 rounded-lg px-4 mx-[-0.5rem]">
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-300 truncate" title={employee.email}>{employee.email || "Sem email"}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Phone className="w-4 h-4" />
-                    <span>{employee.phone}</span>
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-slate-500" />
+                    <span className="text-sm text-slate-300">{employee.phone || "Sem telefone"}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-3 border-t border-slate-700">
+                <div className="flex justify-end gap-2">
                   <Button
+                    variant="ghost"
                     size="sm"
-                    variant="outline"
-                    onClick={() => setViewingEmployee(employee)}
-                    className="flex-1 border-slate-700 hover:bg-slate-800"
+                    className="text-slate-400 hover:text-white hover:bg-slate-700"
+                    onClick={() => {
+                      setViewingEmployee(employee)
+                    }}
                   >
-                    <Eye className="w-3 h-3 mr-1" />
-                    Visualizar
+                    <Eye className="w-4 h-4 mr-2" />
+                    Detalhes
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-slate-400 hover:text-primary hover:bg-primary/10"
+                    onClick={() => {
+                      setEditingEmployee(employee)
+                      setModalOpen(true)
+                    }}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar
                   </Button>
                   {employee.status !== "Cancelado" && (
-                    <>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setEditingEmployee(employee)}
-                        className="flex-1 border-slate-700 hover:bg-slate-800"
-                      >
-                        <Edit className="w-3 h-3 mr-1" />
-                        Editar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCancelingEmployee(employee)}
-                        className="flex-1 border-red-500/30 text-red-400 hover:bg-red-500/10"
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Cancelar
-                      </Button>
-                    </>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                      onClick={() => {
+                        setCancelingEmployee(employee)
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Inativar
+                    </Button>
                   )}
                 </div>
               </div>
             ))}
           </div>
+        )}
 
-          {filteredEmployees.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-slate-400">Nenhum funcionário encontrado</p>
-            </div>
-          )}
-
-          {filteredEmployees.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={ITEMS_PER_PAGE}
-              totalItems={filteredEmployees.length}
-            />
-          )}
-        </CardContent>
-      </Card>
+        <div className="mt-6">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            itemsPerPage={ITEMS_PER_PAGE}
+            totalItems={filteredEmployees.length}
+          />
+        </div>
+      </ContentContainer>
 
       <EmployeeModal
-        open={modalOpen || !!editingEmployee}
-        onOpenChange={(open) => {
-          if (!open) {
-            setModalOpen(false)
-            setEditingEmployee(null)
-          }
+        isOpen={modalOpen}
+        onClose={() => {
+          setModalOpen(false)
+          setEditingEmployee(null)
         }}
-        onSubmit={editingEmployee ? handleEditEmployee : handleCreateEmployee}
-        initialData={editingEmployee}
-        mode={editingEmployee ? "edit" : "create"}
-        companies={companies.map((c) => ({ id: c.id, name: c.name, cnpj: "" }))}
+        onSuccess={() => {
+          setModalOpen(false)
+          setEditingEmployee(null)
+          window.location.reload()
+        }}
+        employee={editingEmployee}
+        companies={companies}
       />
 
       <EmployeeDetailsModal
-        open={!!viewingEmployee}
-        onOpenChange={(open) => !open && setViewingEmployee(null)}
+        isOpen={!!viewingEmployee}
+        onClose={() => setViewingEmployee(null)}
         employee={viewingEmployee}
-        companyName={viewingEmployee ? getCompanyName(viewingEmployee.companyId) : ""}
       />
 
       <EmployeeCancelModal
-        open={!!cancelingEmployee}
-        onOpenChange={(open) => !open && setCancelingEmployee(null)}
-        onConfirm={handleCancelEmployee}
-        employeeName={cancelingEmployee?.name || ""}
+        isOpen={!!cancelingEmployee}
+        onClose={() => setCancelingEmployee(null)}
+        onSuccess={() => {
+          setCancelingEmployee(null)
+          window.location.reload()
+        }}
+        employee={cancelingEmployee}
       />
     </div>
   )

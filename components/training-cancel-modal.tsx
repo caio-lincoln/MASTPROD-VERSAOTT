@@ -25,7 +25,7 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-red-500/10 rounded-lg">
@@ -49,7 +49,7 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Descreva o motivo do cancelamento..."
-              className="bg-slate-800 border-slate-700 text-white resize-none"
+              className="bg-slate-800/50 border-slate-700 text-white resize-none"
               required
             />
           </div>
@@ -58,7 +58,7 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
             <Button
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Voltar
             </Button>

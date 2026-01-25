@@ -72,37 +72,50 @@ export default function DashboardLayout({
   if (!user) return null
 
   return (
-    <div className="flex h-screen bg-slate-950">
-      <Sidebar />
+    <div className="flex h-screen bg-slate-950 relative overflow-hidden">
+      {/* Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-[#0f0a1f] to-slate-950 pointer-events-none z-0" />
+      
+      {/* Decorative blobs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-semibold text-white">Sistema SST</h1>
-            <p className="text-sm text-slate-400">Gestão de Saúde e Segurança do Trabalho</p>
-          </div>
+      <div className="relative z-10 flex h-full w-full">
+        <Sidebar />
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-slate-800">
-              <User className="w-4 h-4 text-slate-400" />
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">{user.name}</p>
-                <p className="text-xs text-slate-400">{user.email}</p>
-              </div>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="bg-slate-900/50 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center justify-between z-20">
+            <div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">Sistema SST</h1>
+              <p className="text-sm text-slate-400">Gestão de Saúde e Segurança do Trabalho</p>
             </div>
 
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              size="icon"
-              className="text-slate-400 hover:text-white hover:bg-slate-800"
-            >
-              <LogOut className="w-5 h-5" />
-            </Button>
-          </div>
-        </header>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                    {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-white">{user.name}</p>
+                  <p className="text-xs text-slate-400">{user.email}</p>
+                </div>
+              </div>
 
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="icon"
+                className="text-slate-400 hover:text-white hover:bg-white/10 rounded-full"
+              >
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
+          </header>
+
+          <main className="flex-1 overflow-y-auto bg-transparent p-6 relative">
+             {children}
+          </main>
+        </div>
       </div>
     </div>
   )

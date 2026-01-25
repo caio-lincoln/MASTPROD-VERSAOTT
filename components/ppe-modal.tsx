@@ -89,9 +89,9 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
     if (!formData.ca.trim()) newErrors.ca = "CA é obrigatório"
     if (!formData.type) newErrors.type = "Tipo é obrigatório"
     if (!formData.manufacturer.trim()) newErrors.manufacturer = "Fabricante é obrigatório"
-    if (!formData.quantity || Number.parseInt(formData.quantity) < 0)
+    if (!formData.quantity || Number.isNaN(Number.parseInt(formData.quantity)) || Number.parseInt(formData.quantity) < 0)
       newErrors.quantity = "Quantidade válida é obrigatória"
-    if (!formData.minQuantity || Number.parseInt(formData.minQuantity) < 0)
+    if (!formData.minQuantity || Number.isNaN(Number.parseInt(formData.minQuantity)) || Number.parseInt(formData.minQuantity) < 0)
       newErrors.minQuantity = "Quantidade mínima válida é obrigatória"
     if (!formData.validity) newErrors.validity = "Data de validade é obrigatória"
     if (!formData.companyId) newErrors.companyId = "Empresa é obrigatória"
@@ -127,7 +127,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editingPPE ? "Editar EPI" : "Novo EPI"}</DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -142,10 +142,10 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
               Empresa *
             </Label>
             <Select value={formData.companyId} onValueChange={handleCompanyChange}>
-              <SelectTrigger className={`bg-slate-800 border-slate-700 ${errors.companyId ? "border-red-500" : ""}`}>
+              <SelectTrigger className={`bg-slate-800/50 border-slate-700 text-white ${errors.companyId ? "border-red-500" : ""}`}>
                 <SelectValue placeholder="Selecione a empresa" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectContent className="bg-slate-800 border-slate-700 text-white">
                 {companies.map((company) => (
                   <SelectItem key={company.id} value={company.id.toString()} className="text-white">
                     <div className="flex flex-col">
@@ -175,7 +175,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Ex: Capacete de Segurança"
-                className={`bg-slate-800 border-slate-700 ${errors.name ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.name ? "border-red-500" : ""}`}
               />
               {errors.name && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -195,7 +195,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 value={formData.ca}
                 onChange={(e) => setFormData({ ...formData, ca: e.target.value })}
                 placeholder="Ex: 12345"
-                className={`bg-slate-800 border-slate-700 ${errors.ca ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.ca ? "border-red-500" : ""}`}
               />
               {errors.ca && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -213,10 +213,10 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 Tipo de Proteção *
               </Label>
               <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                <SelectTrigger className={`bg-slate-800 border-slate-700 ${errors.type ? "border-red-500" : ""}`}>
+                <SelectTrigger className={`bg-slate-800/50 border-slate-700 text-white ${errors.type ? "border-red-500" : ""}`}>
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   {ppeTypes.map((type) => (
                     <SelectItem key={type} value={type} className="text-white">
                       {type}
@@ -242,7 +242,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 value={formData.manufacturer}
                 onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
                 placeholder="Ex: SafetyPro"
-                className={`bg-slate-800 border-slate-700 ${errors.manufacturer ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.manufacturer ? "border-red-500" : ""}`}
               />
               {errors.manufacturer && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -263,7 +263,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               placeholder="Descreva as características e especificações do EPI..."
-              className="bg-slate-800 border-slate-700 min-h-[80px]"
+              className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
             />
           </div>
 
@@ -280,7 +280,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                 placeholder="0"
-                className={`bg-slate-800 border-slate-700 ${errors.quantity ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.quantity ? "border-red-500" : ""}`}
               />
               {errors.quantity && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -302,7 +302,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 value={formData.minQuantity}
                 onChange={(e) => setFormData({ ...formData, minQuantity: e.target.value })}
                 placeholder="0"
-                className={`bg-slate-800 border-slate-700 ${errors.minQuantity ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.minQuantity ? "border-red-500" : ""}`}
               />
               {errors.minQuantity && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -322,7 +322,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
                 type="date"
                 value={formData.validity}
                 onChange={(e) => setFormData({ ...formData, validity: e.target.value })}
-                className={`bg-slate-800 border-slate-700 ${errors.validity ? "border-red-500" : ""}`}
+                className={`bg-slate-800/50 border-slate-700 text-white ${errors.validity ? "border-red-500" : ""}`}
               />
               {errors.validity && (
                 <p className="text-xs text-red-400 flex items-center gap-1">
@@ -338,7 +338,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-slate-700 text-slate-300 hover:bg-slate-800"
+            className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
           >
             Cancelar
           </Button>

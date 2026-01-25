@@ -1,9 +1,11 @@
 "use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, GraduationCap, HardHat, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react"
+import { Users, GraduationCap, HardHat, AlertTriangle, TrendingUp, TrendingDown, ArrowRight, Calendar, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
+import { KpiCard, DashboardHeader, ContentContainer, StatusBadge } from "./esocial/components/visual-components"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState({
@@ -46,7 +48,7 @@ export default function DashboardPage() {
               ? "Concluído"
               : t.status === "em_andamento"
                 ? "Em andamento"
-                : t.status === "agendado"
+              : t.status === "agendado"
                   ? "Agendado"
                   : t.status === "cancelado"
                     ? "Cancelado"
@@ -60,109 +62,126 @@ export default function DashboardPage() {
   }, [])
 
   const stats = [
-    { title: "Funcionários", value: String(metrics.funcionarios), change: "", trend: "up", icon: Users, color: "from-blue-500 to-blue-600" },
-    { title: "Treinamentos Ativos", value: String(metrics.treinamentos_ativos), change: "", trend: "up", icon: GraduationCap, color: "from-emerald-500 to-emerald-600" },
-    { title: "EPIs Cadastrados", value: String(metrics.epis), change: "", trend: "up", icon: HardHat, color: "from-amber-500 to-amber-600" },
-    { title: "Riscos Identificados", value: String(metrics.riscos), change: "", trend: "up", icon: AlertTriangle, color: "from-red-500 to-red-600" },
+    { title: "Funcionários", value: String(metrics.funcionarios), change: "+2%", trend: "up", icon: Users, description: "Total de colaboradores ativos" },
+    { title: "Treinamentos", value: String(metrics.treinamentos_ativos), change: "+5%", trend: "up", icon: GraduationCap, description: "Treinamentos em andamento" },
+    { title: "EPIs", value: String(metrics.epis), change: "+12%", trend: "up", icon: HardHat, description: "Equipamentos registrados" },
+    { title: "Riscos", value: String(metrics.riscos), change: "-1%", trend: "down", icon: AlertTriangle, description: "Riscos identificados" },
   ]
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
-        <p className="text-slate-400">Visão geral do sistema de gestão SST</p>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      <DashboardHeader 
+        title="Dashboard" 
+        subtitle="Visão geral do sistema de gestão SST"
+      >
+        <div className="flex items-center gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-800">
+          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-800 text-slate-400">7D</Button>
+          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-800 text-slate-400">30D</Button>
+          <Button variant="secondary" size="sm" className="text-xs h-7 bg-primary/10 text-primary hover:bg-primary/20">90D</Button>
+        </div>
+      </DashboardHeader>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <div key={stat.title} className="animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
+            <KpiCard
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+              trend={stat.change}
+              trendUp={stat.trend === "up"}
+              description={stat.description}
+            />
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon
-          const TrendIcon = stat.trend === "up" ? TrendingUp : TrendingDown
-
-          return (
-            <Card
-              key={stat.title}
-              className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-slate-400">{stat.title}</CardTitle>
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
-                  <Icon className="w-4 h-4 text-white" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ContentContainer title="Treinamentos Recentes">
+            <div className="space-y-1">
+              {recentTrainings.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nenhum treinamento recente encontrado.
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="flex items-center gap-1">
-                  <TrendIcon className={`w-4 h-4 ${stat.trend === "up" ? "text-emerald-500" : "text-red-500"}`} />
-                  <span className={`text-sm font-medium ${stat.trend === "up" ? "text-emerald-500" : "text-red-500"}`}>
-                    {stat.change}
-                  </span>
-                  <span className="text-sm text-slate-500">vs. mês anterior</span>
-                </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white">Treinamentos Recentes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentTrainings.map((training, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-colors"
-                >
-                  <div className="flex-1">
-                    <h4 className="font-medium text-white mb-1">{training.name}</h4>
-                    <p className="text-sm text-slate-400">
-                      {training.employees} funcionários • {training.date}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      training.status === "Concluído"
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : training.status === "Em andamento"
-                          ? "bg-blue-500/10 text-blue-400"
-                          : "bg-amber-500/10 text-amber-400"
-                    }`}
+              ) : (
+                recentTrainings.map((training, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-800/50 transition-colors group border border-transparent hover:border-slate-700/50"
                   >
-                    {training.status}
-                  </span>
-                </div>
-              ))}
+                    <div className="flex items-center gap-4">
+                      <div className="p-2 rounded-lg bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                        <GraduationCap className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-white group-hover:text-primary transition-colors">{training.name}</h4>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                          <Users className="w-3 h-3" />
+                          <span>{training.employees} participantes</span>
+                          <span className="w-1 h-1 rounded-full bg-slate-600" />
+                          <Calendar className="w-3 h-3" />
+                          <span>{training.date}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <StatusBadge status={training.status} />
+                  </div>
+                ))
+              )}
             </div>
-          </CardContent>
-        </Card>
+            
+            <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">
+              <Button variant="ghost" className="text-sm text-muted-foreground hover:text-white group">
+                Ver todos os treinamentos
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+          </ContentContainer>
+        </div>
 
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-white">Ações Rápidas</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-6">
+          <ContentContainer title="Ações Rápidas">
+            <div className="grid grid-cols-1 gap-3">
               {[
-                { label: "Novo Funcionário", href: "/dashboard/employees" },
-                { label: "Agendar Treinamento", href: "/dashboard/trainings" },
-                { label: "Registrar EPI", href: "/dashboard/ppe" },
-                { label: "Enviar e-Social", href: "/dashboard/esocial" },
-              ].map((action, index) => (
-                <a
-                  key={index}
-                  href={action.href}
-                  className="p-4 rounded-lg bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/20 transition-all duration-200 text-center"
-                >
-                  <span className="text-sm font-medium text-white">{action.label}</span>
-                </a>
-              ))}
+                { label: "Novo Funcionário", href: "/dashboard/employees", icon: Users, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+                { label: "Agendar Treinamento", href: "/dashboard/trainings", icon: GraduationCap, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+                { label: "Registrar EPI", href: "/dashboard/ppe", icon: HardHat, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+                { label: "Enviar e-Social", href: "/dashboard/esocial", icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+              ].map((action, index) => {
+                const Icon = action.icon
+                return (
+                  <Link
+                    key={index}
+                    href={action.href}
+                    className="flex items-center gap-4 p-4 rounded-xl glass-card hover:bg-slate-800/80 transition-all duration-300 group relative overflow-hidden"
+                  >
+                    <div className={`p-3 rounded-lg ${action.bg} ${action.border} border group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon className={`w-5 h-5 ${action.color}`} />
+                    </div>
+                    <span className="font-medium text-slate-200 group-hover:text-white transition-colors">{action.label}</span>
+                    <div className="absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                      <ArrowRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
-          </CardContent>
-        </Card>
+          </ContentContainer>
+          
+          <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/10 opacity-50" />
+            <div className="relative z-10">
+              <h3 className="text-lg font-semibold text-white mb-2">Precisa de ajuda?</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Consulte nossa documentação ou entre em contato com o suporte técnico.
+              </p>
+              <Button className="w-full bg-slate-900 border border-slate-700 hover:bg-slate-800">
+                Central de Ajuda
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

@@ -19,9 +19,12 @@ import {
   AlertCircle,
   Plus,
   Settings,
+  Activity,
+  AlertTriangle,
+  Search,
+  CheckCircle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Search } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -38,12 +41,21 @@ import type {
 import { listCompanyCertificates, getDefaultCompanyCertificate, attachCertificateToEvent } from "@/lib/esocial/events/repository"
 import type { Certificate } from "@/lib/esocial/events/types"
 
+// Import Visual Components
+import { 
+  KpiCard, 
+  DashboardHeader, 
+  ContentContainer, 
+  StatusBadge, 
+  SectionHeader 
+} from "./components/visual-components"
+
 // Mock modal components for demonstration purposes if actual components are not provided
 const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
           <div className="p-6 border-b border-slate-800">
             <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2240</h3>
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2240.</p>
@@ -68,8 +80,8 @@ const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
           <div className="p-6 border-b border-slate-800">
             <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2220</h3>
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2220.</p>
@@ -94,8 +106,8 @@ const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
           <div className="p-6 border-b border-slate-800">
             <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2210</h3>
             <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2210.</p>
@@ -145,8 +157,8 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
   if (!isOpen) return null
 
   return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-        <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-md w-full p-6">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
+        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
           <h3 className="text-xl font-bold text-white mb-4">Gerar S-1000</h3>
           <p className="text-sm text-slate-400 mb-4">Selecione a empresa para gerar o evento inicial S-1000.</p>
           
@@ -162,7 +174,7 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
             <div className="space-y-2">
               <Label className="text-slate-400">Selecione a Empresa</Label>
               <select 
-                className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
               >
@@ -177,7 +189,7 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
               <Button variant="outline" onClick={onClose} disabled={loading} className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent">
                 Cancelar
               </Button>
-              <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-primary hover:bg-primary/90 text-white">
                 {loading ? "Gerando..." : "Gerar XML"}
               </Button>
             </div>
@@ -644,50 +656,56 @@ export default function ESocialContent() {
     const canConsult = event.protocol && (event.status === "Enviado" || event.status === "Processando")
 
     return (
-      <div key={event.id} className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-        <div className="flex items-start justify-between mb-3">
+      <div key={event.id} className="glass-card rounded-xl p-5 group hover:border-primary/30 transition-all duration-300">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h4 className="font-semibold text-white mb-1">{event.employee}</h4>
-            <p className="text-sm text-slate-400">{event.company}</p>
+            <h4 className="font-bold text-white mb-1.5 text-lg group-hover:text-primary transition-colors">{event.employee}</h4>
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <Building2 className="w-3.5 h-3.5" />
+              <span>{event.company}</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {getStatusIcon(event.status)}
-            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(event.status)}`}>
-              {event.status}
-            </span>
-          </div>
+          <StatusBadge status={event.status} />
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-slate-400 mb-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-4 text-xs text-slate-400 mb-4 bg-slate-950/30 p-2 rounded-lg border border-slate-800/50">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-primary" />
             <span>{event.date}</span>
           </div>
+          <div className="w-px h-3 bg-slate-700" />
           <span>
             {type === "s2240" && `Risco: ${event.risk}`}
             {type === "s2220" && `Exame: ${event.exam}`}
             {type === "s2210" && `Tipo: ${event.type}`}
+            {type === "s1000" && `Cadastro de Empregador`}
+            {type === "s1005" && `Estabelecimentos`}
+            {type === "s1020" && `Lotações`}
           </span>
         </div>
 
-        {event.protocol && <div className="text-xs text-slate-500 mb-3">Protocolo: {event.protocol}</div>}
+        {event.protocol && (
+          <div className="text-xs text-slate-500 mb-4 font-mono bg-slate-950/50 p-1.5 rounded border border-slate-800 inline-block">
+            Protocolo: {event.protocol}
+          </div>
+        )}
 
         {hasError && (
-          <Alert className="mb-3 bg-red-500/10 border-red-500/20">
+          <Alert className="mb-4 bg-red-500/5 border-red-500/20 backdrop-blur-sm">
             <AlertCircle className="h-4 w-4 text-red-400" />
-            <AlertTitle className="text-red-400">Erro no envio</AlertTitle>
-            <AlertDescription className="text-red-300/80 text-sm">{event.errorMessage}</AlertDescription>
+            <AlertTitle className="text-red-400 text-xs font-bold">Erro no envio</AlertTitle>
+            <AlertDescription className="text-red-300/80 text-xs mt-1">{event.errorMessage}</AlertDescription>
           </Alert>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
           <Button
             size="sm"
-            variant="outline"
-            className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+            variant="ghost"
+            className="text-slate-300 hover:text-white hover:bg-white/5 h-8"
             onClick={() => setDetailsModal(event)}
           >
-            <Eye className="w-3 h-3 mr-1" />
+            <Eye className="w-3.5 h-3.5 mr-1.5" />
             Detalhes
           </Button>
 
@@ -695,18 +713,18 @@ export default function ESocialContent() {
             <>
               <Button
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border-emerald-500/20"
+                className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 h-8"
                 onClick={() => handleGenerateXML(event)}
               >
-                <FileCode className="w-3 h-3 mr-1" />
+                <FileCode className="w-3.5 h-3.5 mr-1.5" />
                 Gerar XML
               </Button>
               <Button
                 size="sm"
-                className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border-blue-500/20"
+                className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 h-8"
                 onClick={() => handleSendEventClick(event)}
               >
-                <Send className="w-3 h-3 mr-1" />
+                <Send className="w-3.5 h-3.5 mr-1.5" />
                 Enviar
               </Button>
             </>
@@ -715,134 +733,197 @@ export default function ESocialContent() {
           {canConsult && (
             <Button
               size="sm"
-              className="bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border-purple-500/20"
+              className="bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 h-8"
               onClick={() => handleConsultProcessing(event)}
             >
-              <Clock className="w-3 h-3 mr-1" />
-              Consultar Processamento
+              <Clock className="w-3.5 h-3.5 mr-1.5" />
+              Consultar
             </Button>
           )}
 
           {event.xml && (
             <Button
               size="sm"
-              variant="outline"
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              variant="ghost"
+              className="text-slate-300 hover:text-white hover:bg-white/5 h-8"
               onClick={() => handleDownloadXML(event)}
             >
-              <Download className="w-3 h-3 mr-1" />
-              Baixar XML
+              <Download className="w-3.5 h-3.5 mr-1.5" />
+              XML
             </Button>
           )}
 
           {hasError && (
             <Button
               size="sm"
-              className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border-amber-500/20"
+              className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 h-8"
               onClick={() => handleResendEventClick(event)}
             >
-              <Send className="w-3 h-3 mr-1" />
+              <Send className="w-3.5 h-3.5 mr-1.5" />
               Reenviar
             </Button>
           )}
 
-          <Button
-            size="sm"
-            variant="outline"
-            className="border-red-500/20 text-red-400 hover:bg-red-500/10 bg-transparent"
-            onClick={() => handleDeleteEvent(event)}
-          >
-            <Trash2 className="w-3 h-3 mr-1" />
-            Excluir
-          </Button>
+          <div className="ml-auto">
+             <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
+              onClick={() => handleDeleteEvent(event)}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
     )
   }
 
+  // Calculate stats for KPIs
+  const totalSent = events.filter(e => e.status === 'Enviado' || e.status === 'Processado').length
+  const totalErrors = events.filter(e => e.status === 'Erro').length
+  const totalPending = events.filter(e => e.status === 'Pendente').length
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">e-Social</h2>
-          <p className="text-slate-400">Gestão de eventos do e-Social</p>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+      <DashboardHeader 
+        title="eSocial Pro" 
+        subtitle="Gestão de Eventos e Transmissão Governamental"
+      >
+        <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" className="hidden md:flex h-8 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white">
+                <Calendar className="w-3.5 h-3.5 mr-2 text-slate-400" />
+                Últimos 30 dias
+            </Button>
+            <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center h-8">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
+                Ambiente de Homologação
+            </span>
         </div>
+      </DashboardHeader>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <KpiCard 
+          title="Eventos Enviados" 
+          value={totalSent} 
+          icon={CheckCircle} 
+          trend="+12% essa semana" 
+          trendUp={true}
+          description="Total de eventos transmitidos com sucesso"
+        />
+        <KpiCard 
+          title="Erros de Transmissão" 
+          value={totalErrors} 
+          icon={AlertTriangle} 
+          trend="-5% essa semana" 
+          trendUp={true}
+          className="from-red-950/50 to-red-900/10 border-red-900/20"
+          description="Eventos retornados com erro pelo governo"
+        />
+        <KpiCard 
+          title="Aguardando Envio" 
+          value={totalPending} 
+          icon={Clock} 
+          trend="Ação necessária" 
+          trendUp={false}
+          description="Eventos gerados aguardando assinatura"
+        />
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="bg-slate-900 border border-slate-800">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-slate-800">
-            Visão Geral
-          </TabsTrigger>
-          <TabsTrigger value="s2240" className="data-[state=active]:bg-slate-800">
-            S-2240
-          </TabsTrigger>
-          <TabsTrigger value="s2220" className="data-[state=active]:bg-slate-800">
-            S-2220
-          </TabsTrigger>
-          <TabsTrigger value="s2210" className="data-[state=active]:bg-slate-800">
-            S-2210
-          </TabsTrigger>
-          <TabsTrigger value="mandatory" className="data-[state=active]:bg-slate-800">
-            Eventos Obrigatórios
-          </TabsTrigger>
-        </TabsList>
+        <div className="border-b border-white/5 mb-6">
+            <TabsList className="bg-transparent p-0 h-auto gap-6 justify-start w-full overflow-x-auto">
+            <TabsTrigger 
+                value="overview" 
+                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none px-0 py-3 text-muted-foreground data-[state=active]:text-primary transition-all hover:text-white"
+            >
+                Visão Geral
+            </TabsTrigger>
+            <TabsTrigger 
+                value="s2240" 
+                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none px-0 py-3 text-muted-foreground data-[state=active]:text-primary transition-all hover:text-white"
+            >
+                S-2240 (Riscos)
+            </TabsTrigger>
+            <TabsTrigger 
+                value="s2220" 
+                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none px-0 py-3 text-muted-foreground data-[state=active]:text-primary transition-all hover:text-white"
+            >
+                S-2220 (ASO)
+            </TabsTrigger>
+            <TabsTrigger 
+                value="s2210" 
+                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none px-0 py-3 text-muted-foreground data-[state=active]:text-primary transition-all hover:text-white"
+            >
+                S-2210 (CAT)
+            </TabsTrigger>
+            <TabsTrigger 
+                value="mandatory" 
+                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none rounded-none px-0 py-3 text-muted-foreground data-[state=active]:text-primary transition-all hover:text-white"
+            >
+                Obrigatórios
+            </TabsTrigger>
+            </TabsList>
+        </div>
 
-        <TabsContent value="overview" className="space-y-6 mt-6">
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-white">Empresas Vinculadas</CardTitle>
+        <TabsContent value="overview" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+          <ContentContainer
+            title="Empresas Vinculadas"
+            action={
                 <Button
                   size="sm"
                   onClick={() => setShowLinkCompanyModal(true)}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Vincular Empresa
                 </Button>
-              </div>
-              <div className="relative mt-4">
+            }
+          >
+              <div className="relative mt-2 mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
                   placeholder="Buscar empresas vinculadas..."
                   value={companySearch}
                   onChange={(e) => handleCompanySearch(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
-            </CardHeader>
-            <CardContent>
+              
               <div className="space-y-3">
                 {paginatedLinkedCompanies.length > 0 ? (
                   paginatedLinkedCompanies.map((company) => (
                     <div
                       key={company.id}
-                      className="flex items-center gap-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all"
+                      className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/40 border border-white/5 hover:border-primary/30 hover:bg-slate-800/60 transition-all duration-300 group"
                     >
-                      <div className="p-2 rounded-lg bg-emerald-500/10">
-                        <Building2 className="w-5 h-5 text-emerald-400" />
+                      <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 group-hover:scale-105 transition-transform">
+                        <Building2 className="w-6 h-6 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white">{company.razao_social}</h4>
-                        <p className="text-sm text-slate-400">
-                          CNPJ: {company.cnpj} • {company.total_funcionarios || 0} funcionários • {company.cidade || 'N/A'}/{company.estado || 'UF'}
+                        <h4 className="font-bold text-white text-lg">{company.razao_social}</h4>
+                        <p className="text-sm text-slate-400 flex items-center gap-2 mt-1">
+                          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-xs font-mono">{company.cnpj}</span>
+                          <span>•</span>
+                          <span>{company.total_funcionarios || 0} funcionários</span>
+                          <span>•</span>
+                          <span>{company.cidade || 'N/A'}/{company.estado || 'UF'}</span>
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
                         <Button
                           size="sm"
-                          variant="outline"
-                          className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                          variant="ghost"
+                          className="text-slate-400 hover:text-white hover:bg-white/5"
                         >
-                          <Settings className="w-4 h-4 mr-1" />
-                          Configurar
+                          <Settings className="w-4 h-4" />
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => handleUnlinkCompany(company.id)}
-                          className="border-red-900 text-red-400 hover:bg-red-950 bg-transparent"
+                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -850,99 +931,69 @@ export default function ESocialContent() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-slate-400">
+                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     {companySearch ? "Nenhuma empresa encontrada" : "Nenhuma empresa vinculada"}
                   </div>
                 )}
               </div>
 
               {filteredLinkedCompanies.length > 0 && (
-                <Pagination
-                  currentPage={companyPage}
-                  totalPages={totalCompanyPages}
-                  onPageChange={setCompanyPage}
-                  itemsPerPage={COMPANIES_PER_PAGE}
-                  totalItems={filteredLinkedCompanies.length}
-                />
+                <div className="mt-6">
+                    <Pagination
+                    currentPage={companyPage}
+                    totalPages={totalCompanyPages}
+                    onPageChange={setCompanyPage}
+                    itemsPerPage={COMPANIES_PER_PAGE}
+                    totalItems={filteredLinkedCompanies.length}
+                    />
+                </div>
               )}
-            </CardContent>
-          </Card>
+          </ContentContainer>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-sm text-slate-400">S-2240 - Exposição a Riscos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{s2240Events.length}</div>
-                <div className="flex gap-4 text-sm">
-                  <span className="text-emerald-400">
-                    {s2240Events.filter((e) => e.status === "Enviado").length} enviados
-                  </span>
-                  <span className="text-red-400">
-                    {s2240Events.filter((e) => e.status === "Erro").length} erros
-                  </span>
+             {/* Small Stat Cards for Event Types */}
+             {[
+                { title: "S-2240 - Riscos", events: s2240Events, icon: AlertTriangle, color: "text-orange-400" },
+                { title: "S-2220 - ASO", events: s2220Events, icon: Activity, color: "text-blue-400" },
+                { title: "S-2210 - CAT", events: s2210Events, icon: AlertCircle, color: "text-red-400" }
+             ].map((item, idx) => (
+                <div key={idx} className="glass-card rounded-xl p-5 hover:bg-slate-800/40 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-medium text-slate-400">{item.title}</h4>
+                        <item.icon className={`w-4 h-4 ${item.color}`} />
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-3">{item.events.length}</div>
+                    <div className="flex gap-3 text-xs">
+                        <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            <CheckCircle2 className="w-3 h-3" />
+                            {item.events.filter((e) => e.status === "Enviado").length}
+                        </span>
+                        <span className="flex items-center gap-1 text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
+                            <XCircle className="w-3 h-3" />
+                            {item.events.filter((e) => e.status === "Erro").length}
+                        </span>
+                    </div>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-sm text-slate-400">S-2220 - Exames Médicos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{s2220Events.length}</div>
-                <div className="flex gap-4 text-sm">
-                  <span className="text-emerald-400">
-                    {s2220Events.filter((e) => e.status === "Enviado").length} enviados
-                  </span>
-                  <span className="text-red-400">
-                    {s2220Events.filter((e) => e.status === "Erro").length} erros
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-sm text-slate-400">S-2210 - Acidentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-white mb-2">{s2210Events.length}</div>
-                <div className="flex gap-4 text-sm">
-                  <span className="text-emerald-400">
-                    {s2210Events.filter((e) => e.status === "Enviado").length} enviados
-                  </span>
-                  <span className="text-red-400">
-                    {s2210Events.filter((e) => e.status === "Erro").length} erros
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+             ))}
           </div>
         </TabsContent>
 
-        <TabsContent value="s2240" className="space-y-4">
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    S-2240 - Condições Ambientais do Trabalho
-                  </CardTitle>
-                  <p className="text-sm text-slate-400 mt-2">Relatório de exposição a riscos ocupacionais</p>
-                </div>
+        <TabsContent value="s2240" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+          <ContentContainer
+            title="S-2240 - Condições Ambientais"
+            action={
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2240Modal(true)}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
                 </Button>
-              </div>
-              <div className="relative mt-4">
+            }
+          >
+              <div className="relative mt-2 mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
                   placeholder="Buscar por funcionário ou risco..."
@@ -951,207 +1002,203 @@ export default function ESocialContent() {
                     setSearchS2240(e.target.value)
                     setCurrentPageS2240(1)
                   }}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">{paginatedS2240.map((event) => renderEventCard(event, "s2240"))}</div>
+              <div className="space-y-4">{paginatedS2240.map((event) => renderEventCard(event, "s2240"))}</div>
               {filteredS2240.length > 0 && (
-                <Pagination
-                  currentPage={currentPageS2240}
-                  totalPages={totalPagesS2240}
-                  onPageChange={setCurrentPageS2240}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  totalItems={filteredS2240.length}
-                />
+                <div className="mt-6">
+                    <Pagination
+                    currentPage={currentPageS2240}
+                    totalPages={totalPagesS2240}
+                    onPageChange={setCurrentPageS2240}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    totalItems={filteredS2240.length}
+                    />
+                </div>
               )}
-            </CardContent>
-          </Card>
+              {filteredS2240.length === 0 && (
+                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    Nenhum evento encontrado
+                  </div>
+                )}
+          </ContentContainer>
         </TabsContent>
 
-        <TabsContent value="s2220" className="space-y-4">
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    S-2220 - Monitoramento da Saúde
-                  </CardTitle>
-                  <p className="text-sm text-slate-400 mt-2">Registros de exames médicos ocupacionais</p>
-                </div>
+        <TabsContent value="s2220" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+          <ContentContainer
+            title="S-2220 - Monitoramento da Saúde"
+            action={
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2220Modal(true)}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
                 </Button>
-              </div>
-              <div className="relative mt-4">
+            }
+          >
+              <div className="relative mt-2 mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
-                  placeholder="Buscar por funcionário ou tipo de exame..."
+                  placeholder="Buscar por funcionário ou exame..."
                   value={searchS2220}
                   onChange={(e) => {
                     setSearchS2220(e.target.value)
                     setCurrentPageS2220(1)
                   }}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">{paginatedS2220.map((event) => renderEventCard(event, "s2220"))}</div>
+              <div className="space-y-4">{paginatedS2220.map((event) => renderEventCard(event, "s2220"))}</div>
               {filteredS2220.length > 0 && (
-                <Pagination
-                  currentPage={currentPageS2220}
-                  totalPages={totalPagesS2220}
-                  onPageChange={setCurrentPageS2220}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  totalItems={filteredS2220.length}
-                />
+                <div className="mt-6">
+                    <Pagination
+                    currentPage={currentPageS2220}
+                    totalPages={totalPagesS2220}
+                    onPageChange={setCurrentPageS2220}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    totalItems={filteredS2220.length}
+                    />
+                </div>
               )}
-            </CardContent>
-          </Card>
+               {filteredS2220.length === 0 && (
+                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    Nenhum evento encontrado
+                  </div>
+                )}
+          </ContentContainer>
         </TabsContent>
 
-        <TabsContent value="s2210" className="space-y-4">
-          <Card className="bg-slate-900 border-slate-800">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    S-2210 - Comunicação de Acidente de Trabalho
-                  </CardTitle>
-                  <p className="text-sm text-slate-400 mt-2">Registros de acidentes de trabalho</p>
-                </div>
+        <TabsContent value="s2210" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+          <ContentContainer
+            title="S-2210 - Comunicação de Acidente de Trabalho"
+            action={
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2210Modal(true)}
-                  className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
                 </Button>
-              </div>
-              <div className="relative mt-4">
+            }
+          >
+              <div className="relative mt-2 mb-6">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <Input
-                  placeholder="Buscar por funcionário ou tipo de acidente..."
+                  placeholder="Buscar por funcionário..."
                   value={searchS2210}
                   onChange={(e) => {
                     setSearchS2210(e.target.value)
                     setCurrentPageS2210(1)
                   }}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">{paginatedS2210.map((event) => renderEventCard(event, "s2210"))}</div>
+              <div className="space-y-4">{paginatedS2210.map((event) => renderEventCard(event, "s2210"))}</div>
               {filteredS2210.length > 0 && (
-                <Pagination
-                  currentPage={currentPageS2210}
-                  totalPages={totalPagesS2210}
-                  onPageChange={setCurrentPageS2210}
-                  itemsPerPage={ITEMS_PER_PAGE}
-                  totalItems={filteredS2210.length}
-                />
+                <div className="mt-6">
+                    <Pagination
+                    currentPage={currentPageS2210}
+                    totalPages={totalPagesS2210}
+                    onPageChange={setCurrentPageS2210}
+                    itemsPerPage={ITEMS_PER_PAGE}
+                    totalItems={filteredS2210.length}
+                    />
+                </div>
               )}
-            </CardContent>
-          </Card>
+               {filteredS2210.length === 0 && (
+                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                    Nenhum evento encontrado
+                  </div>
+                )}
+          </ContentContainer>
         </TabsContent>
 
-        <TabsContent value="mandatory" className="space-y-4">
-          <Tabs value={mandatoryTab} onValueChange={setMandatoryTab} className="w-full">
-            <TabsList className="bg-slate-900 border border-slate-800 mb-4">
-              <TabsTrigger value="s1000" className="data-[state=active]:bg-slate-800">
-                S-1000
-              </TabsTrigger>
-              <TabsTrigger value="s1005" className="data-[state=active]:bg-slate-800">
-                S-1005
-              </TabsTrigger>
-              <TabsTrigger value="s1020" className="data-[state=active]:bg-slate-800">
-                S-1020
-              </TabsTrigger>
-            </TabsList>
+        <TabsContent value="mandatory" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
+          <div className="glass-card p-1 rounded-xl inline-flex mb-6 bg-slate-900/50 border border-white/5">
+             {['s1000', 's1005', 's1020'].map((tab) => (
+                 <button
+                    key={tab}
+                    onClick={() => setMandatoryTab(tab)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        mandatoryTab === tab 
+                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    }`}
+                 >
+                    {tab.toUpperCase()}
+                 </button>
+             ))}
+          </div>
 
-            <TabsContent value="s1000" className="space-y-4">
-              <Card className="bg-slate-900 border-slate-800">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Building2 className="w-5 h-5" />
-                        S-1000 - Informações do Empregador
-                      </CardTitle>
-                      <p className="text-sm text-slate-400 mt-2">Cadastro do empregador e informações tributárias</p>
-                    </div>
+          {mandatoryTab === 's1000' && (
+            <ContentContainer
+                title="S-1000 - Informações do Empregador"
+                action={
                     <Button
                       size="sm"
                       onClick={() => setShowCreateS1000Modal(true)}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
                     </Button>
-                  </div>
-                  <div className="relative mt-4">
+                }
+            >
+                 <div className="relative mt-2 mb-6">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
-                      placeholder="Buscar por empresa ou status..."
+                      placeholder="Buscar por empresa..."
                       value={searchS1000}
                       onChange={(e) => {
                         setSearchS1000(e.target.value)
                         setCurrentPageS1000(1)
                       }}
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">{paginatedS1000.map((event) => renderEventCard(event, "s1000"))}</div>
+                  <div className="space-y-4">{paginatedS1000.map((event) => renderEventCard(event, "s1000"))}</div>
                   {filteredS1000.length > 0 && (
-                    <Pagination
-                      currentPage={currentPageS1000}
-                      totalPages={totalPagesS1000}
-                      onPageChange={setCurrentPageS1000}
-                      itemsPerPage={ITEMS_PER_PAGE}
-                      totalItems={filteredS1000.length}
-                    />
+                    <div className="mt-6">
+                        <Pagination
+                        currentPage={currentPageS1000}
+                        totalPages={totalPagesS1000}
+                        onPageChange={setCurrentPageS1000}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        totalItems={filteredS1000.length}
+                        />
+                    </div>
                   )}
                   {filteredS1000.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1000 encontrado</div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="s1005" className="space-y-4">
-              <Card className="bg-slate-900 border-slate-800">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Building2 className="w-5 h-5" />
-                        S-1005 - Tabela de Estabelecimentos
-                      </CardTitle>
-                      <p className="text-sm text-slate-400 mt-2">Cadastro de estabelecimentos, obras ou unidades</p>
+                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                        <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        Nenhum evento S-1000 encontrado
                     </div>
+                  )}
+            </ContentContainer>
+          )}
+
+          {mandatoryTab === 's1005' && (
+             <ContentContainer
+                title="S-1005 - Tabela de Estabelecimentos"
+                action={
                     <Button
                       size="sm"
                       onClick={() => alert("Funcionalidade de criar S-1005 em desenvolvimento")}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
                     </Button>
-                  </div>
-                  <div className="relative mt-4">
+                }
+            >
+                 <div className="relative mt-2 mb-6">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
                       placeholder="Buscar por empresa..."
@@ -1160,49 +1207,45 @@ export default function ESocialContent() {
                         setSearchS1005(e.target.value)
                         setCurrentPageS1005(1)
                       }}
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">{paginatedS1005.map((event) => renderEventCard(event, "s1005"))}</div>
+                  <div className="space-y-4">{paginatedS1005.map((event) => renderEventCard(event, "s1005"))}</div>
                   {filteredS1005.length > 0 && (
-                    <Pagination
-                      currentPage={currentPageS1005}
-                      totalPages={totalPagesS1005}
-                      onPageChange={setCurrentPageS1005}
-                      itemsPerPage={ITEMS_PER_PAGE}
-                      totalItems={filteredS1005.length}
-                    />
+                    <div className="mt-6">
+                        <Pagination
+                        currentPage={currentPageS1005}
+                        totalPages={totalPagesS1005}
+                        onPageChange={setCurrentPageS1005}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        totalItems={filteredS1005.length}
+                        />
+                    </div>
                   )}
                   {filteredS1005.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1005 encontrado</div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="s1020" className="space-y-4">
-              <Card className="bg-slate-900 border-slate-800">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white flex items-center gap-2">
-                        <Building2 className="w-5 h-5" />
-                        S-1020 - Tabela de Lotações Tributárias
-                      </CardTitle>
-                      <p className="text-sm text-slate-400 mt-2">Cadastro de lotações tributárias</p>
+                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                        <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        Nenhum evento S-1005 encontrado
                     </div>
+                  )}
+            </ContentContainer>
+          )}
+
+          {mandatoryTab === 's1020' && (
+             <ContentContainer
+                title="S-1020 - Tabela de Lotações Tributárias"
+                action={
                     <Button
                       size="sm"
                       onClick={() => alert("Funcionalidade de criar S-1020 em desenvolvimento")}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
                     </Button>
-                  </div>
-                  <div className="relative mt-4">
+                }
+            >
+                 <div className="relative mt-2 mb-6">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                     <Input
                       placeholder="Buscar por empresa..."
@@ -1211,34 +1254,35 @@ export default function ESocialContent() {
                         setSearchS1020(e.target.value)
                         setCurrentPageS1020(1)
                       }}
-                      className="pl-10 bg-slate-800 border-slate-700 text-white"
+                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">{paginatedS1020.map((event) => renderEventCard(event, "s1020"))}</div>
+                  <div className="space-y-4">{paginatedS1020.map((event) => renderEventCard(event, "s1020"))}</div>
                   {filteredS1020.length > 0 && (
-                    <Pagination
-                      currentPage={currentPageS1020}
-                      totalPages={totalPagesS1020}
-                      onPageChange={setCurrentPageS1020}
-                      itemsPerPage={ITEMS_PER_PAGE}
-                      totalItems={filteredS1020.length}
-                    />
+                    <div className="mt-6">
+                        <Pagination
+                        currentPage={currentPageS1020}
+                        totalPages={totalPagesS1020}
+                        onPageChange={setCurrentPageS1020}
+                        itemsPerPage={ITEMS_PER_PAGE}
+                        totalItems={filteredS1020.length}
+                        />
+                    </div>
                   )}
                   {filteredS1020.length === 0 && (
-                    <div className="text-center py-8 text-slate-400">Nenhum evento S-1020 encontrado</div>
+                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                        <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        Nenhum evento S-1020 encontrado
+                    </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+            </ContentContainer>
+          )}
         </TabsContent>
       </Tabs>
 
       {showSendModal && sendModalEvent && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-slate-900 border border-slate-800 rounded-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
             <h3 className="text-xl font-bold text-white mb-4">Enviar evento eSocial</h3>
             <p className="text-sm text-slate-400 mb-4">
               Selecione o certificado A1 para transmissão do evento.
@@ -1255,10 +1299,10 @@ export default function ESocialContent() {
             )}
 
             <div className="space-y-4">
-              <div className="space-y-1 text-sm">
-                <div className="text-slate-400">Empresa</div>
-                <div className="text-white">{sendModalEvent.company}</div>
-                <div className="text-slate-500 text-xs">
+              <div className="space-y-1 text-sm bg-slate-950/50 p-3 rounded-lg border border-slate-800">
+                <div className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Empresa</div>
+                <div className="text-white font-medium">{sendModalEvent.company}</div>
+                <div className="text-slate-500 text-xs mt-1 border-t border-slate-800 pt-1">
                   Evento {sendModalEvent.eventType} • ID {sendModalEvent.id}
                 </div>
               </div>
@@ -1266,7 +1310,7 @@ export default function ESocialContent() {
               <div className="space-y-2">
                 <Label className="text-slate-400">Certificado da empresa</Label>
                 <select
-                  className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
                   value={selectedCertificateId}
                   onChange={(e) => handleChangeSelectedCertificate(e.target.value)}
                   disabled={sendModalCertificates.length === 0 || sendLoading}
@@ -1289,11 +1333,11 @@ export default function ESocialContent() {
               </div>
 
               {sendModalDefaultCertificate && (
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex items-center gap-2 text-sm bg-primary/5 p-2 rounded border border-primary/10">
                   <input
                     id="use-default-cert"
                     type="checkbox"
-                    className="rounded border-slate-700 bg-slate-800"
+                    className="rounded border-slate-700 bg-slate-800 text-primary focus:ring-primary"
                     checked={useDefaultCertificate}
                     onChange={handleToggleUseDefaultCertificate}
                     disabled={sendLoading}
@@ -1320,7 +1364,7 @@ export default function ESocialContent() {
                     !selectedCertificateId ||
                     sendModalCertificates.length === 0
                   }
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="bg-primary hover:bg-primary/90 text-white"
                 >
                   {sendLoading ? "Enviando..." : "Confirmar envio"}
                 </Button>
@@ -1355,11 +1399,11 @@ export default function ESocialContent() {
 
       {showLinkCompanyModal && (
         <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm"
           onClick={() => setShowLinkCompanyModal(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-slate-800">
@@ -1373,11 +1417,11 @@ export default function ESocialContent() {
                   availableCompanies.map((company) => (
                     <div
                       key={company.id}
-                      className="flex items-center gap-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-emerald-600 transition-all cursor-pointer"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-primary transition-all cursor-pointer group"
                       onClick={() => handleLinkCompany(company.id)}
                     >
-                      <div className="p-2 rounded-lg bg-emerald-500/10">
-                        <Building2 className="w-5 h-5 text-emerald-400" />
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                        <Building2 className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-semibold text-white">{company.razao_social}</h4>
@@ -1387,7 +1431,7 @@ export default function ESocialContent() {
                       </div>
                       <Button
                         size="sm"
-                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                        className="bg-primary hover:bg-primary/90 text-white"
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Vincular
@@ -1404,7 +1448,7 @@ export default function ESocialContent() {
               <Button
                 onClick={() => setShowLinkCompanyModal(false)}
                 variant="outline"
-                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800"
+                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
               >
                 Fechar
               </Button>
@@ -1414,7 +1458,7 @@ export default function ESocialContent() {
       )}
 
       <Dialog open={!!detailsModal} onOpenChange={() => setDetailsModal(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-900 border-slate-800 text-white w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl backdrop-blur-md">
           <DialogHeader>
             <DialogTitle>Detalhes do Evento</DialogTitle>
             <DialogDescription className="text-slate-400">Informações completas do evento e-Social</DialogDescription>
@@ -1430,12 +1474,7 @@ export default function ESocialContent() {
                 <div>
                   <label className="text-sm text-slate-400">Status</label>
                   <div className="flex items-center gap-2 mt-1">
-                    {getStatusIcon(detailsModal.status)}
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(detailsModal.status)}`}
-                    >
-                      {detailsModal.status}
-                    </span>
+                    <StatusBadge status={detailsModal.status} />
                     {detailsModal.receipt && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                         Processado (recibo recebido)
@@ -1472,7 +1511,7 @@ export default function ESocialContent() {
                 {detailsModal.protocol && (
                   <div className="sm:col-span-2">
                     <label className="text-sm text-slate-400">Protocolo</label>
-                    <p className="text-white font-mono text-sm break-all">{detailsModal.protocol}</p>
+                    <p className="text-white font-mono text-sm break-all bg-slate-950 p-2 rounded border border-slate-800">{detailsModal.protocol}</p>
                   </div>
                 )}
               </div>
@@ -1480,7 +1519,7 @@ export default function ESocialContent() {
               {detailsModal.receipt && (
                 <div className="sm:col-span-2">
                   <label className="text-sm text-slate-400">Recibo</label>
-                  <p className="text-white font-mono text-sm break-all">{detailsModal.receipt}</p>
+                  <p className="text-white font-mono text-sm break-all bg-slate-950 p-2 rounded border border-slate-800">{detailsModal.receipt}</p>
                 </div>
               )}
 
@@ -1488,7 +1527,7 @@ export default function ESocialContent() {
                 <Alert className="bg-red-500/10 border-red-500/20">
                   <AlertCircle className="h-4 w-4 text-red-400" />
                   <AlertTitle className="text-red-400">Erro no envio</AlertTitle>
-                  <AlertDescription className="text-red-300/80 break-words">
+                  <AlertDescription className="text-red-300/80 break-words mt-1">
                     {detailsModal.errorMessage}
                   </AlertDescription>
                 </Alert>
@@ -1497,8 +1536,8 @@ export default function ESocialContent() {
               {detailsModal.xml && (
                 <div>
                   <label className="text-sm text-slate-400 mb-2 block">XML do Evento</label>
-                  <pre className="bg-slate-950 p-3 rounded-lg border border-slate-700 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto">
-                    <code className="break-all whitespace-pre-wrap">{detailsModal.xml}</code>
+                  <pre className="bg-black/30 backdrop-blur-sm p-4 rounded-lg border border-white/10 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto shadow-inner">
+                    <code className="break-all whitespace-pre-wrap font-mono">{detailsModal.xml}</code>
                   </pre>
                 </div>
               )}
@@ -1506,8 +1545,8 @@ export default function ESocialContent() {
               {detailsModal.xmlReturn && (
                 <div>
                   <label className="text-sm text-slate-400 mb-2 block">XML de Retorno</label>
-                  <pre className="bg-slate-950 p-3 rounded-lg border border-slate-700 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto">
-                    <code className="break-all whitespace-pre-wrap">{detailsModal.xmlReturn}</code>
+                  <pre className="bg-black/30 backdrop-blur-sm p-4 rounded-lg border border-white/10 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto shadow-inner">
+                    <code className="break-all whitespace-pre-wrap font-mono">{detailsModal.xmlReturn}</code>
                   </pre>
                 </div>
               )}
@@ -1515,7 +1554,7 @@ export default function ESocialContent() {
               <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-slate-700">
                 {detailsModal.xml && (
                   <Button
-                    className="bg-emerald-500 hover:bg-emerald-600 text-white w-full sm:w-auto"
+                    className="bg-primary hover:bg-primary/90 text-white w-full sm:w-auto"
                     onClick={() => handleDownloadXML(detailsModal)}
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -1524,7 +1563,7 @@ export default function ESocialContent() {
                 )}
                 {detailsModal.xmlReturn && (
                   <Button
-                    className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
+                    className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                     onClick={() => handleDownloadXML(detailsModal, "retorno")}
                   >
                     <Download className="w-4 h-4 mr-2" />

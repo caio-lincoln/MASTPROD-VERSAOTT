@@ -1,15 +1,15 @@
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Building2, Users, MapPin, Eye, Edit, Trash2, Shield } from "lucide-react"
+import { Plus, Search, Building2, Users, MapPin, Eye, Edit, Trash2, Shield, Filter } from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { CompanyModal } from "@/components/company-modal"
 import { CompanyDetailsModal } from "@/components/company-details-modal"
 import { supabase } from "@/lib/supabaseClient"
 import { toast } from "sonner"
+import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 
 type CompanyRow = {
   id: string
@@ -461,87 +461,109 @@ export default function CompaniesPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-white mb-2">Empresas</h2>
-          <p className="text-slate-400">Gerencie as empresas vinculadas</p>
-        </div>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+      <DashboardHeader 
+        title="Empresas" 
+        subtitle="Gerencie as empresas vinculadas"
+      >
         <Button
           onClick={() => setCreateModalOpen(true)}
-          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nova Empresa
         </Button>
-      </div>
+      </DashboardHeader>
 
-      <Card className="bg-slate-900 border-slate-800">
-        <CardHeader>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+      <ContentContainer>
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar empresas por nome ou CNPJ..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-slate-800 border-slate-700 text-white"
+              className="pl-10 bg-slate-900/50 border-slate-800 text-white placeholder:text-slate-500 focus:border-primary/50 focus:ring-primary/20"
             />
           </div>
-        </CardHeader>
-        <CardContent>
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
-          <div className="space-y-3">
+          <Button variant="outline" className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white">
+            <Filter className="w-4 h-4 mr-2" />
+            Filtros
+          </Button>
+        </div>
+
+        <div>
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          )}
+          
+          {error && (
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+              {error}
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 gap-4">
             {paginatedCompanies.map((company) => (
               <div
                 key={company.id}
-                className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-all duration-200"
+                className="p-5 rounded-xl bg-slate-800/30 border border-slate-700/50 hover:border-primary/30 hover:bg-slate-800/60 transition-all duration-300 group"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-500/10">
-                      <Building2 className="w-5 h-5 text-emerald-400" />
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                      <Building2 className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-semibold text-white">{company.name}</h3>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{company.name}</h3>
                         {company.fromESocial && (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
                             <Shield className="w-3 h-3" />
-                            e-Social
+                            eSocial
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-slate-400">CNPJ: {company.cnpj}</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span className="font-mono">{company.cnpj}</span>
+                        {company.cnae && (
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-slate-600" />
+                            <span>CNAE: {company.cnae}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">
-                      {company.status}
-                    </span>
+                  <div className="flex items-center gap-2 self-start">
+                    <StatusBadge status={company.status} />
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-6 text-sm text-slate-400">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t border-slate-700/50">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
+                      <Users className="w-4 h-4 text-slate-500" />
                       <span>{company.employees} funcionários</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>
-                        {company.city} - {company.state}
-                      </span>
-                    </div>
+                    {(company.city || company.state) && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-slate-500" />
+                        <span>
+                          {company.city}{company.city && company.state ? " - " : ""}{company.state}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full md:w-auto">
                     <Button
                       size="sm"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => setViewingCompany(company)}
-                      className="border-slate-700 hover:bg-slate-800"
+                      className="flex-1 md:flex-none text-slate-400 hover:text-white hover:bg-slate-800"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Visualizar
@@ -550,18 +572,18 @@ export default function CompaniesPage() {
                       <>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => setEditingCompany(company)}
-                          className="border-slate-700 hover:bg-slate-800"
+                          className="flex-1 md:flex-none text-slate-400 hover:text-white hover:bg-slate-800"
                         >
                           <Edit className="w-4 h-4 mr-1" />
                           Editar
                         </Button>
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => handleDeleteCompany(company.id)}
-                          className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                          className="flex-1 md:flex-none text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           Excluir
@@ -574,17 +596,29 @@ export default function CompaniesPage() {
             ))}
           </div>
 
-          {filteredCompanies.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              itemsPerPage={ITEMS_PER_PAGE}
-              totalItems={filteredCompanies.length}
-            />
+          {paginatedCompanies.length === 0 && !loading && (
+            <div className="text-center py-12">
+              <div className="p-4 rounded-full bg-slate-800/50 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Building2 className="w-8 h-8 text-slate-500" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-1">Nenhuma empresa encontrada</h3>
+              <p className="text-slate-400">Tente ajustar seus filtros ou adicione uma nova empresa.</p>
+            </div>
           )}
-        </CardContent>
-      </Card>
+
+          {filteredCompanies.length > 0 && (
+            <div className="mt-6">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+                itemsPerPage={ITEMS_PER_PAGE}
+                totalItems={filteredCompanies.length}
+              />
+            </div>
+          )}
+        </div>
+      </ContentContainer>
 
       <CompanyModal
         open={createModalOpen || !!editingCompany}

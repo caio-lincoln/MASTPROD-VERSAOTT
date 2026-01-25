@@ -34,7 +34,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw]">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw]">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
@@ -171,7 +171,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
         </div>
 
         <div className="flex justify-end pt-4 border-t border-slate-700">
-          <Button onClick={() => onOpenChange(false)} className="bg-slate-800 hover:bg-slate-700 text-white">
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/20">
             Fechar
           </Button>
         </div>

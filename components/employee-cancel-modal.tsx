@@ -26,7 +26,7 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-red-400 flex items-center gap-2">
             <AlertCircle className="w-6 h-6" />
@@ -53,7 +53,7 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Descreva o motivo do cancelamento..."
-              className="bg-slate-800 border-slate-700 text-white min-h-[100px]"
+              className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
               required
             />
           </div>
@@ -66,7 +66,7 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
                 onOpenChange(false)
                 setReason("")
               }}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>

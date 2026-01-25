@@ -91,15 +91,20 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate required fields if necessary or rely on HTML required attribute
+    // Here we ensure companyId is a valid number, default to 0 if invalid
+    const companyId = Number.parseInt(formData.companyId)
+    
     onSubmit({
       ...formData,
-      companyId: Number.parseInt(formData.companyId),
+      companyId: Number.isNaN(companyId) ? 0 : companyId,
     })
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {mode === "create" ? "Novo Funcionário" : "Editar Funcionário"}
@@ -121,7 +126,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
                 required
               />
             </div>
@@ -135,7 +140,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="cpf"
                   value={formData.cpf}
                   onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   placeholder="000.000.000-00"
                   maxLength={14}
                   required
@@ -151,7 +156,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   type="date"
                   value={formData.birthDate}
                   onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -172,7 +177,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -185,7 +190,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   required
@@ -208,10 +213,10 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 value={formData.companyId}
                 onValueChange={(value) => setFormData({ ...formData, companyId: value })}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
+                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-slate-800 border-slate-700 text-white">
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id.toString()}>
                       {company.name} - {company.cnpj}
@@ -230,7 +235,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="position"
                   value={formData.position}
                   onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -243,7 +248,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="department"
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -258,7 +263,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 type="date"
                 value={formData.admission}
                 onChange={(e) => setFormData({ ...formData, admission: e.target.value })}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
                 required
               />
             </div>
@@ -276,7 +281,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="bg-slate-800 border-slate-700 text-white"
+                className="bg-slate-800/50 border-slate-700 text-white"
                 required
               />
             </div>
@@ -290,7 +295,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="city"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   required
                 />
               </div>
@@ -303,7 +308,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   id="state"
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-slate-700 text-white"
                   placeholder="SP"
                   maxLength={2}
                   required
@@ -317,7 +322,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
             >
               Cancelar
             </Button>
