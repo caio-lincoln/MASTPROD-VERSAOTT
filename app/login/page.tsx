@@ -176,9 +176,16 @@ export default function LoginPage() {
 
           <div className="text-center text-sm text-slate-500">
             Ainda não tem acesso?{" "}
-            <Link href="/register" className="font-medium text-orange-500 hover:text-orange-400 transition-colors">
+            <Link href="/support" className="font-medium text-orange-500 hover:text-orange-400 transition-colors">
               Entre em contato com o suporte
             </Link>
+          </div>
+          
+          <div className="text-center">
+             <Link href="/support" className="text-xs text-slate-600 hover:text-orange-500 transition-colors flex items-center justify-center gap-1">
+               <Shield className="h-3 w-3" />
+               Central de Ajuda e Documentação
+             </Link>
           </div>
         </div>
       </div>

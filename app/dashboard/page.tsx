@@ -179,9 +179,11 @@ export default function DashboardPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Consulte nossa documentação ou entre em contato com o suporte técnico.
               </p>
-              <Button className="w-full bg-slate-900 border border-slate-700 hover:bg-slate-800">
-                Central de Ajuda
-              </Button>
+              <Link href="/dashboard/help" className="w-full">
+                <Button className="w-full bg-slate-900 border border-slate-700 hover:bg-slate-800">
+                  Central de Ajuda
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
