@@ -1,54 +1,107 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  /* Premium Dark SaaS Theme - Orange/Dark */
-  --background: oklch(0.10 0.02 45); /* Deep Dark Orange-Black */
-  --foreground: oklch(0.98 0.01 45); /* Soft White */
-  
-  --card: oklch(0.14 0.03 45); /* Darker Orange-Grey */
-  --card-foreground: oklch(0.98 0.01 45);
-  
-  --popover: oklch(0.14 0.03 45);
-  --popover-foreground: oklch(0.98 0.01 45);
-  
+  /* Light Theme */
+  --background: oklch(1 0 0); /* White */
+  --foreground: oklch(0.14 0.03 45); /* Dark Text */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.14 0.03 45);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0.03 45);
+
   /* Primary: Vibrant Orange */
-  --primary: oklch(0.60 0.18 45); 
-  --primary-foreground: oklch(0.10 0.05 45); /* Dark text on orange for contrast */
-  
-  /* Secondary: Deep Brown/Orange */
-  --secondary: oklch(0.20 0.05 45); 
-  --secondary-foreground: oklch(0.90 0.02 45);
-  
-  --muted: oklch(0.20 0.03 45);
-  --muted-foreground: oklch(0.60 0.05 45);
-  
-  --accent: oklch(0.25 0.10 45); /* Highlight Orange */
-  --accent-foreground: oklch(0.98 0.01 45);
-  
-  --destructive: oklch(0.55 0.20 20); /* Red */
+  --primary: oklch(0.60 0.18 45);
+  --primary-foreground: oklch(0.98 0.01 45); /* White text on orange */
+
+  /* Secondary: Light Orange/Grey */
+  --secondary: oklch(0.96 0.01 45);
+  --secondary-foreground: oklch(0.20 0.05 45);
+
+  --muted: oklch(0.96 0.01 45);
+  --muted-foreground: oklch(0.45 0.03 45);
+
+  --accent: oklch(0.96 0.01 45);
+  --accent-foreground: oklch(0.20 0.05 45);
+
+  --destructive: oklch(0.55 0.20 20);
   --destructive-foreground: oklch(0.98 0.01 45);
-  
-  --border: oklch(0.25 0.05 45);
-  --input: oklch(0.25 0.05 45);
+
+  --border: oklch(0.90 0.02 45);
+  --input: oklch(0.90 0.02 45);
   --ring: oklch(0.60 0.18 45);
-  
-  /* Charts - Adjusted for Warm/Fire vibe */
-  --chart-1: oklch(0.60 0.18 45); /* Orange */
-  --chart-2: oklch(0.65 0.20 60); /* Gold/Yellow */
-  --chart-3: oklch(0.55 0.20 20); /* Red */
-  --chart-4: oklch(0.50 0.15 30); /* Rust */
-  --chart-5: oklch(0.70 0.15 80); /* Lime/Yellow */
-  
+
+  /* Charts - Adjusted for Light Mode */
+  --chart-1: oklch(0.60 0.18 45);
+  --chart-2: oklch(0.65 0.20 60);
+  --chart-3: oklch(0.55 0.20 20);
+  --chart-4: oklch(0.50 0.15 30);
+  --chart-5: oklch(0.70 0.15 80);
+
   --radius: 0.75rem;
-  
-  --sidebar: oklch(0.08 0.03 45); /* Almost black orange */
-  --sidebar-foreground: oklch(0.98 0.01 45);
+
+  --sidebar: oklch(0.98 0.01 45);
+  --sidebar-foreground: oklch(0.20 0.05 45);
   --sidebar-primary: oklch(0.60 0.18 45);
   --sidebar-primary-foreground: oklch(0.98 0.01 45);
-  --sidebar-accent: oklch(0.18 0.05 45);
-  --sidebar-accent-foreground: oklch(0.98 0.01 45);
-  --sidebar-border: oklch(0.20 0.05 45);
+  --sidebar-accent: oklch(0.96 0.01 45);
+  --sidebar-accent-foreground: oklch(0.20 0.05 45);
+  --sidebar-border: oklch(0.90 0.02 45);
+  --sidebar-ring: oklch(0.60 0.18 45);
+}
+
+.dark {
+  /* Premium Dark SaaS Theme - Zinc/Slate + Orange */
+  --background: oklch(0.12 0.02 260); /* Deep Cool Dark Grey (Zinc-like) */
+  --foreground: oklch(0.98 0.00 0); /* Pure White */
+
+  --card: oklch(0.15 0.02 260); /* Slightly lighter cool grey */
+  --card-foreground: oklch(0.98 0.00 0);
+
+  --popover: oklch(0.15 0.02 260);
+  --popover-foreground: oklch(0.98 0.00 0);
+
+  /* Primary: Vibrant Orange (Kept as requested) */
+  --primary: oklch(0.60 0.18 45);
+  --primary-foreground: oklch(0.98 0.00 0); /* White text */
+
+  /* Secondary: Cool Grey */
+  --secondary: oklch(0.20 0.02 260);
+  --secondary-foreground: oklch(0.98 0.00 0);
+
+  --muted: oklch(0.20 0.02 260);
+  --muted-foreground: oklch(0.65 0.02 260);
+
+  --accent: oklch(0.25 0.02 260); /* Hover state grey */
+  --accent-foreground: oklch(0.98 0.00 0);
+
+  --destructive: oklch(0.55 0.20 20);
+  --destructive-foreground: oklch(0.98 0.00 0);
+
+  --border: oklch(0.25 0.02 260);
+  --input: oklch(0.25 0.02 260);
+  --ring: oklch(0.60 0.18 45);
+
+  /* Charts */
+  --chart-1: oklch(0.60 0.18 45); /* Orange */
+  --chart-2: oklch(0.40 0.15 260); /* Dark Blue */
+  --chart-3: oklch(0.50 0.15 200); /* Cyan */
+  --chart-4: oklch(0.55 0.20 20); /* Red */
+  --chart-5: oklch(0.70 0.15 80); /* Lime */
+
+  --sidebar: oklch(0.10 0.02 260); /* Darker Zinc */
+  --sidebar-foreground: oklch(0.98 0.00 0);
+  --sidebar-primary: oklch(0.60 0.18 45);
+  --sidebar-primary-foreground: oklch(0.98 0.00 0);
+  --sidebar-accent: oklch(0.18 0.02 260);
+  --sidebar-accent-foreground: oklch(0.98 0.00 0);
+  --sidebar-border: oklch(0.20 0.02 260);
   --sidebar-ring: oklch(0.60 0.18 45);
 }
 
@@ -98,33 +151,6 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/30 selection:text-primary-foreground;
-    background-image: 
-      radial-gradient(circle at 15% 50%, oklch(0.20 0.10 290 / 0.15), transparent 25%),
-      radial-gradient(circle at 85% 30%, oklch(0.20 0.10 330 / 0.10), transparent 25%);
-    background-attachment: fixed;
-  }
-
-  /* Custom Scrollbar for Premium Feel */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-border/50 rounded-full hover:bg-primary/50 transition-colors;
-  }
-  
-  /* Glass Effect Utility */
-  .glass {
-    @apply bg-card/40 backdrop-blur-xl border border-white/5 shadow-xl;
-  }
-  
-  .glass-card {
-    @apply bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-md border border-white/5 hover:border-primary/20 transition-all duration-300 shadow-lg hover:shadow-primary/5;
+    @apply bg-background text-foreground;
   }
 }

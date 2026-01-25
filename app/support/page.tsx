@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Search, BookOpen, MessageCircle, Mail, Phone, FileText, Video, LifeBuoy, ExternalLink, ArrowLeft, Shield } from "lucide-react"
 import Link from "next/link"
+import { ModeToggle } from "@/components/theme-toggle"
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 p-6 md:p-12">
+    <div className="min-h-screen bg-background text-foreground p-6 md:p-12">
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Header with Back Button */}
@@ -21,27 +22,30 @@ export default function SupportPage() {
               </div>
             </Link>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-white">Central de Suporte</h1>
-              <p className="text-slate-400">Mastprod SST</p>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Central de Suporte</h1>
+              <p className="text-muted-foreground">Mastprod SST</p>
             </div>
           </div>
-          <Link href="/login">
-            <Button variant="outline" className="border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar para Login
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <ModeToggle />
+            <Link href="/login">
+              <Button variant="outline" className="border-border text-muted-foreground hover:text-foreground hover:bg-muted">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Voltar para Login
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Search Section */}
         <div className="relative max-w-2xl mx-auto w-full">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-slate-500" />
+            <Search className="h-5 w-5 text-muted-foreground" />
           </div>
           <Input 
             type="text" 
             placeholder="Como podemos ajudar você hoje?" 
-            className="pl-10 h-14 bg-slate-900/50 border-slate-800 text-slate-200 focus-visible:ring-orange-500/50 text-lg rounded-xl"
+            className="pl-10 h-14 bg-muted/50 border-border text-foreground focus-visible:ring-orange-500/50 text-lg rounded-xl"
           />
         </div>
 
@@ -88,9 +92,9 @@ export default function SupportPage() {
             const Icon = item.icon
             return (
               <Link key={index} href={item.href} className="block group">
-                <Card className="h-full bg-slate-900/50 border-slate-800 hover:border-slate-700 transition-all hover:bg-slate-800/80">
+                <Card className="h-full bg-muted/50 border-border hover:border-foreground/20 transition-all hover:bg-muted/80">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-slate-200 group-hover:text-white">
+                    <CardTitle className="text-sm font-medium text-foreground group-hover:text-primary">
                       {item.title}
                     </CardTitle>
                     <div className={`p-2 rounded-lg ${item.bg} ${item.border} border`}>

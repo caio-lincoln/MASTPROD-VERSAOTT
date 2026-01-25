@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { Sidebar } from "@/components/sidebar"
 import { LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ModeToggle } from "@/components/theme-toggle"
 
 export default function DashboardLayout({
   children,
@@ -63,7 +64,7 @@ export default function DashboardLayout({
 
   if (isLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-white">
+      <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
         Carregando...
       </div>
     )
@@ -72,32 +73,33 @@ export default function DashboardLayout({
   if (!user) return null
 
   return (
-    <div className="flex h-screen bg-slate-950 relative overflow-hidden">
+    <div className="flex h-screen bg-background relative overflow-hidden">
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-[#0f0a1f] to-slate-950 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/20 to-background pointer-events-none z-0" />
       
       {/* Decorative blobs */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-orange-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
       <div className="relative z-10 flex h-full w-full">
         <Sidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-slate-900/50 backdrop-blur-md border-b border-white/5 px-6 py-4 flex items-center justify-between z-20">
+          <header className="bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between z-20">
             <div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">Sistema SST</h1>
-              <p className="text-sm text-slate-400">Gestão de Saúde e Segurança do Trabalho</p>
+              <h1 className="text-xl font-semibold text-foreground tracking-tight">Sistema SST</h1>
+              <p className="text-sm text-muted-foreground">Gestão de Saúde e Segurança do Trabalho</p>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+              <ModeToggle />
+              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-muted border border-border hover:bg-muted/80 transition-colors">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center text-white font-bold text-xs">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-white">{user.name}</p>
-                  <p className="text-xs text-slate-400">{user.email}</p>
+                  <p className="text-sm font-medium text-foreground">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
               </div>
 

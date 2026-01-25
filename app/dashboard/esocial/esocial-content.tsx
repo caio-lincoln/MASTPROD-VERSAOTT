@@ -46,8 +46,7 @@ import {
   KpiCard, 
   DashboardHeader, 
   ContentContainer, 
-  StatusBadge, 
-  SectionHeader 
+  StatusBadge
 } from "./components/visual-components"
 
 // Mock modal components for demonstration purposes if actual components are not provided
@@ -55,19 +54,19 @@ const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   <>
     {isOpen && (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
-          <div className="p-6 border-b border-slate-800">
-            <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2240</h3>
-            <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2240.</p>
+        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="p-6 border-b border-border">
+            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2240</h3>
+            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2240.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-slate-400">Formulário de criação de evento S-2240 aqui...</p>
+            <p className="text-muted-foreground">Formulário de criação de evento S-2240 aqui...</p>
           </div>
-          <div className="p-6 border-t border-slate-800">
+          <div className="p-6 border-t border-border">
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
             >
               Cancelar
             </Button>
@@ -81,19 +80,19 @@ const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   <>
     {isOpen && (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
-          <div className="p-6 border-b border-slate-800">
-            <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2220</h3>
-            <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2220.</p>
+        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="p-6 border-b border-border">
+            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2220</h3>
+            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2220.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-slate-400">Formulário de criação de evento S-2220 aqui...</p>
+            <p className="text-muted-foreground">Formulário de criação de evento S-2220 aqui...</p>
           </div>
-          <div className="p-6 border-t border-slate-800">
+          <div className="p-6 border-t border-border">
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
             >
               Cancelar
             </Button>
@@ -107,19 +106,19 @@ const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
   <>
     {isOpen && (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
-          <div className="p-6 border-b border-slate-800">
-            <h3 className="text-xl font-bold text-white mb-2">Criar Evento S-2210</h3>
-            <p className="text-sm text-slate-400">Preencha os campos para criar um novo evento S-2210.</p>
+        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="p-6 border-b border-border">
+            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2210</h3>
+            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2210.</p>
           </div>
           <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-slate-400">Formulário de criação de evento S-2210 aqui...</p>
+            <p className="text-muted-foreground">Formulário de criação de evento S-2210 aqui...</p>
           </div>
-          <div className="p-6 border-t border-slate-800">
+          <div className="p-6 border-t border-border">
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
             >
               Cancelar
             </Button>
@@ -158,23 +157,23 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
 
   return (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
-          <h3 className="text-xl font-bold text-white mb-4">Gerar S-1000</h3>
-          <p className="text-sm text-slate-400 mb-4">Selecione a empresa para gerar o evento inicial S-1000.</p>
+        <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 shadow-2xl">
+          <h3 className="text-xl font-bold text-foreground mb-4">Gerar S-1000</h3>
+          <p className="text-sm text-muted-foreground mb-4">Selecione a empresa para gerar o evento inicial S-1000.</p>
           
           {error && (
-            <Alert className="mb-4 bg-red-500/10 border-red-500/20">
-              <AlertCircle className="h-4 w-4 text-red-400" />
-              <AlertTitle className="text-red-400">Erro de Validação</AlertTitle>
-              <AlertDescription className="text-red-300 text-sm whitespace-pre-line mt-1">{error}</AlertDescription>
+            <Alert className="mb-4 bg-destructive/10 border-destructive/20">
+              <AlertCircle className="h-4 w-4 text-destructive" />
+              <AlertTitle className="text-destructive">Erro de Validação</AlertTitle>
+              <AlertDescription className="text-destructive text-sm whitespace-pre-line mt-1">{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-slate-400">Selecione a Empresa</Label>
+              <Label className="text-muted-foreground">Selecione a Empresa</Label>
               <select 
-                className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                className="w-full bg-muted border-border text-foreground rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
                 value={selectedCompany}
                 onChange={(e) => setSelectedCompany(e.target.value)}
               >
@@ -186,10 +185,10 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={onClose} disabled={loading} className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent">
+              <Button variant="outline" onClick={onClose} disabled={loading} className="border-border text-muted-foreground hover:bg-muted bg-transparent">
                 Cancelar
               </Button>
-              <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-primary hover:bg-primary/90 text-white">
+              <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {loading ? "Gerando..." : "Gerar XML"}
               </Button>
             </div>
