@@ -100,7 +100,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Seção: Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400 flex items-center gap-2">Informações Básicas</h3>
+            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">Informações Básicas</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -250,7 +250,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
           {/* Seção: Detalhamento */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400">Detalhamento do Risco</h3>
+            <h3 className="text-lg font-semibold text-orange-400">Detalhamento do Risco</h3>
 
             <div>
               <Label className="text-slate-300">
@@ -287,7 +287,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
           {/* Seção: Controle e Medidas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400">Controle e Medidas</h3>
+            <h3 className="text-lg font-semibold text-orange-400">Controle e Medidas</h3>
 
             <div>
               <Label className="text-slate-300">
@@ -325,7 +325,7 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               {mode === "create" ? "Criar Risco" : "Salvar Alterações"}
             </Button>

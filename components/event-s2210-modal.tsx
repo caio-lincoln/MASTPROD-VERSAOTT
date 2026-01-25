@@ -66,7 +66,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
       <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-emerald-400" />
+            <FileText className="w-5 h-5 text-orange-400" />
             Novo Evento S-2210 - Comunicação de Acidente de Trabalho
           </DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -77,7 +77,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Identificação */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="font-semibold text-orange-400 flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Identificação
             </h3>
@@ -119,7 +119,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
 
           {/* Dados do Acidente */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400">Dados do Acidente</h3>
+            <h3 className="font-semibold text-orange-400">Dados do Acidente</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -200,7 +200,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
 
           {/* Atendimento Médico */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400">Atendimento Médico</h3>
+            <h3 className="font-semibold text-orange-400">Atendimento Médico</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 md:col-span-2">
@@ -295,7 +295,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               Gerar Evento
             </Button>

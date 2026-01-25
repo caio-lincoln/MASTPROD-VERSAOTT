@@ -78,7 +78,7 @@ export default function DashboardLayout({
       
       {/* Decorative blobs */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-orange-600/5 rounded-full blur-[120px] pointer-events-none z-0" />
 
       <div className="relative z-10 flex h-full w-full">
         <Sidebar />
@@ -92,7 +92,7 @@ export default function DashboardLayout({
 
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white font-bold text-xs">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center text-white font-bold text-xs">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-right hidden sm:block">

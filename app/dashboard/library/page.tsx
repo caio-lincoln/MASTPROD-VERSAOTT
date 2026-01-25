@@ -197,7 +197,7 @@ export default function LibraryPage() {
             {selectedCompany !== "all" && (
               <div className="flex items-center gap-2 text-sm text-slate-400">
                 <span>Exibindo documentos de:</span>
-                <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
+                <span className="px-2 py-1 rounded bg-orange-500/10 text-orange-400 font-medium border border-orange-500/20">
                   {companies.find((c) => c.id === selectedCompany)?.name}
                 </span>
               </div>
@@ -227,7 +227,7 @@ export default function LibraryPage() {
                       <span className="text-slate-600">•</span>
                       <span>{doc.date}</span>
                       <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-xs border border-slate-700">{doc.category}</span>
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-xs border border-emerald-500/20">
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 text-xs border border-orange-500/20">
                         <Building2 className="w-3 h-3" />
                         {companies.find((c) => c.id === doc.companyId)?.name || ""}
                       </span>

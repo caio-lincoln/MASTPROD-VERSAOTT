@@ -201,7 +201,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     {companies.map((company) => (
                       <SelectItem key={company.id} value={company.id} className="text-white">
                         <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-emerald-400" />
+                          <Building2 className="w-4 h-4 text-orange-400" />
                           <div>
                             <div className="font-medium">{company.name}</div>
                             <div className="text-xs text-slate-400">{company.cnpj}</div>
@@ -238,7 +238,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                         id="select-all"
                         checked={filteredEmployees.length > 0 && selectedEmployees.length === filteredEmployees.length}
                         onCheckedChange={toggleAllEmployees}
-                        className="border-slate-600 data-[state=checked]:bg-emerald-500"
+                        className="border-slate-600 data-[state=checked]:bg-orange-500"
                       />
                       <Label htmlFor="select-all" className="text-sm font-medium text-slate-300 cursor-pointer">
                         Selecionar todos ({filteredEmployees.length})
@@ -257,14 +257,14 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                                 id={`employee-${employee.id}`}
                                 checked={selectedEmployees.includes(Number(employee.id))}
                                 onCheckedChange={() => toggleEmployee(Number(employee.id))}
-                                className="border-slate-600 data-[state=checked]:bg-emerald-500"
+                                className="border-slate-600 data-[state=checked]:bg-orange-500"
                               />
                               <Label
                                 htmlFor={`employee-${employee.id}`}
                                 className="flex items-center gap-3 flex-1 cursor-pointer"
                               >
                                 <div className="p-2 rounded-lg bg-slate-700">
-                                  <User className="w-4 h-4 text-emerald-400" />
+                                  <User className="w-4 h-4 text-orange-400" />
                                 </div>
                                 <div className="flex-1">
                                   <div className="font-medium text-white">{employee.name}</div>
@@ -309,7 +309,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
             <Button
               type="submit"
               disabled={!formData.companyId || selectedEmployees.length === 0}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Criar Treinamento
             </Button>

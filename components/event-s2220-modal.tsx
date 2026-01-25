@@ -63,7 +63,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
       <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-emerald-400" />
+            <FileText className="w-5 h-5 text-orange-400" />
             Novo Evento S-2220 - Monitoramento da Saúde do Trabalhador
           </DialogTitle>
           <DialogDescription className="text-slate-400">
@@ -74,7 +74,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Identificação */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="font-semibold text-orange-400 flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Identificação
             </h3>
@@ -116,7 +116,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
 
           {/* Dados do Exame */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400">Dados do Exame</h3>
+            <h3 className="font-semibold text-orange-400">Dados do Exame</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -165,7 +165,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
 
           {/* Médico Examinador */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400">Médico Examinador</h3>
+            <h3 className="font-semibold text-orange-400">Médico Examinador</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2 md:col-span-2">
@@ -224,7 +224,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
 
           {/* Observações */}
           <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-emerald-400">Observações Adicionais</h3>
+            <h3 className="font-semibold text-orange-400">Observações Adicionais</h3>
 
             <div className="space-y-2">
               <Label htmlFor="observations">Observações</Label>
@@ -256,7 +256,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               Gerar Evento
             </Button>

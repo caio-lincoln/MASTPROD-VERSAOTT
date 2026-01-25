@@ -295,7 +295,7 @@ export default function PPEPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+                        className="text-slate-400 hover:text-orange-400 hover:bg-orange-500/10"
                         onClick={() => {
                           setEditingPPE(item)
                           setIsModalOpen(true)

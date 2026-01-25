@@ -30,7 +30,7 @@ export function PPEDetailsModal({ ppe, onClose }: PPEDetailsModalProps) {
             <Badge
               className={`${
                 ppe.status === "Adequado"
-                  ? "bg-emerald-500/10 text-emerald-400"
+                  ? "bg-orange-500/10 text-orange-400"
                   : ppe.status === "Cancelado"
                     ? "bg-slate-500/10 text-slate-400"
                     : "bg-red-500/10 text-red-400"
@@ -140,7 +140,7 @@ export function PPEDetailsModal({ ppe, onClose }: PPEDetailsModalProps) {
         <div className="flex justify-end pt-4 border-t border-slate-800">
           <Button
             onClick={onClose}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
           >
             Fechar
           </Button>

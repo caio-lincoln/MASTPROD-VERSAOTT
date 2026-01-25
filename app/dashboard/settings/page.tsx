@@ -101,8 +101,8 @@ export default function SettingsPage() {
               <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 flex justify-between items-center">
                 <span className="text-sm text-slate-400">Status do Servidor</span>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-medium text-emerald-400">Online</span>
+                  <CheckCircle2 className="w-4 h-4 text-orange-400" />
+                  <span className="text-sm font-medium text-orange-400">Online</span>
                 </div>
               </div>
             </div>

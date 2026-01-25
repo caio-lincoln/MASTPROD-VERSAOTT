@@ -68,7 +68,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
 
         <div className="space-y-6">
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <Building2 className="w-4 h-4" />
               Informações Básicas
             </h3>
@@ -91,7 +91,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
 
               <div>
                 <p className="text-xs text-slate-500 mb-1">Status</p>
-                <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">{company.status}</Badge>
+                <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/30">{company.status}</Badge>
               </div>
 
               <div className="md:col-span-2">
@@ -102,7 +102,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
           </div>
 
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <FileText className="w-4 h-4" />
               Dados Fiscais
             </h3>
@@ -126,7 +126,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
           </div>
 
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <Shield className="w-4 h-4" />
               Certificado Digital
             </h3>
@@ -162,7 +162,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
           </div>
 
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <MapPin className="w-4 h-4" />
               Localização
             </h3>
@@ -188,7 +188,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
           </div>
 
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <Phone className="w-4 h-4" />
               Contato
             </h3>
@@ -212,7 +212,7 @@ export function CompanyDetailsModal({ open, onOpenChange, company }: CompanyDeta
           </div>
 
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2 mb-3">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2 mb-3">
               <Users className="w-4 h-4" />
               Estatísticas
             </h3>

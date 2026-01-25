@@ -57,7 +57,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
         <div className="space-y-6">
           {/* Seção: Identificação */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">
               <FileText className="w-5 h-5" />
               Identificação
             </h3>
@@ -90,7 +90,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
 
           {/* Seção: Detalhamento */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">
               <Activity className="w-5 h-5" />
               Detalhamento
             </h3>
@@ -124,7 +124,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
 
           {/* Seção: Medidas de Controle */}
           <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700 space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">
               <Shield className="w-5 h-5" />
               Medidas de Controle
             </h3>
@@ -138,7 +138,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
             {risk.identifiedDate && (
               <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-emerald-400" />
+                  <Calendar className="w-4 h-4 text-orange-400" />
                   <span className="text-slate-400 text-sm">Data de Identificação</span>
                 </div>
                 <p className="text-white font-medium">
@@ -153,7 +153,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
             {risk.responsibleName && (
               <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
                 <div className="flex items-center gap-2 mb-2">
-                  <User className="w-4 h-4 text-emerald-400" />
+                  <User className="w-4 h-4 text-orange-400" />
                   <span className="text-slate-400 text-sm">Responsável</span>
                 </div>
                 <p className="text-white font-medium">{risk.responsibleName}</p>
@@ -162,10 +162,10 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
           </div>
 
           {/* Status */}
-          <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+          <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
             <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">Status: {risk.status}</span>
+              <Target className="w-5 h-5 text-orange-400" />
+              <span className="text-orange-400 font-medium">Status: {risk.status}</span>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
         <div className="flex justify-end pt-4 border-t border-slate-800">
           <Button
             onClick={() => onOpenChange(false)}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
           >
             Fechar
           </Button>

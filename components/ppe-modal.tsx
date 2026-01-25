@@ -344,7 +344,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
           </Button>
           <Button
             onClick={handleSubmit}
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+            className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
           >
             {editingPPE ? "Atualizar" : "Cadastrar"} EPI
           </Button>

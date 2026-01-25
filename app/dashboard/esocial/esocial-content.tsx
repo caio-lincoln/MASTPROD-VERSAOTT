@@ -381,7 +381,7 @@ export default function ESocialContent() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Enviado":
-        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        return <CheckCircle2 className="w-4 h-4 text-orange-400" />
       case "Pendente":
         return <Clock className="w-4 h-4 text-amber-400" />
       case "Erro":
@@ -394,7 +394,7 @@ export default function ESocialContent() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Enviado":
-        return "bg-emerald-500/10 text-emerald-400"
+        return "bg-orange-500/10 text-orange-400"
       case "Pendente":
         return "bg-amber-500/10 text-amber-400"
       case "Erro":
@@ -713,7 +713,7 @@ export default function ESocialContent() {
             <>
               <Button
                 size="sm"
-                className="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 h-8"
+                className="bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 h-8"
                 onClick={() => handleGenerateXML(event)}
               >
                 <FileCode className="w-3.5 h-3.5 mr-1.5" />
@@ -733,7 +733,7 @@ export default function ESocialContent() {
           {canConsult && (
             <Button
               size="sm"
-              className="bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 border border-purple-500/20 h-8"
+              className="bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 h-8"
               onClick={() => handleConsultProcessing(event)}
             >
               <Clock className="w-3.5 h-3.5 mr-1.5" />
@@ -965,7 +965,7 @@ export default function ESocialContent() {
                     </div>
                     <div className="text-2xl font-bold text-white mb-3">{item.events.length}</div>
                     <div className="flex gap-3 text-xs">
-                        <span className="flex items-center gap-1 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                        <span className="flex items-center gap-1 text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
                             <CheckCircle2 className="w-3 h-3" />
                             {item.events.filter((e) => e.status === "Enviado").length}
                         </span>
@@ -1476,7 +1476,7 @@ export default function ESocialContent() {
                   <div className="flex items-center gap-2 mt-1">
                     <StatusBadge status={detailsModal.status} />
                     {detailsModal.receipt && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/30">
                         Processado (recibo recebido)
                       </span>
                     )}

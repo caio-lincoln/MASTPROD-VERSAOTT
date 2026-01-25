@@ -71,7 +71,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
                 onClick={() => onPageChange(pageNum)}
                 className={
                   safeCurrentPage === pageNum
-                    ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                    ? "bg-orange-500 text-white hover:bg-orange-600"
                     : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
                 }
               >

@@ -112,7 +112,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
               />
               <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
                 {selectedFile ? (
-                  <div className="flex items-center gap-3 text-emerald-400">
+                  <div className="flex items-center gap-3 text-orange-400">
                     <FileText className="w-8 h-8" />
                     <div className="text-left">
                       <p className="font-medium">{selectedFile.name}</p>
@@ -285,7 +285,7 @@ export function DocumentUploadModal({ open, onOpenChange, onSubmit, companies }:
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               <Upload className="w-4 h-4 mr-2" />
               Fazer Upload

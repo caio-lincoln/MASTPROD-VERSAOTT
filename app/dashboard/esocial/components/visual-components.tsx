@@ -27,7 +27,7 @@ export function KpiCard({ title, value, icon: Icon, trend, trendUp = true, descr
           </div>
           {trend && (
             <div className={cn("flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border", 
-              trendUp ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
+              trendUp ? "bg-orange-500/10 text-orange-400 border-orange-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"
             )}>
               {trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingUp className="w-3 h-3 rotate-180" />}
               {trend}
@@ -97,7 +97,7 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, type = "default" }: StatusBadgeProps) {
   const styles = {
     default: "bg-slate-500/10 text-slate-400 border-slate-500/20",
-    success: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    success: "bg-orange-500/10 text-orange-400 border-orange-500/20",
     warning: "bg-amber-500/10 text-amber-400 border-amber-500/20",
     error: "bg-red-500/10 text-red-400 border-red-500/20",
     info: "bg-blue-500/10 text-blue-400 border-blue-500/20",
@@ -116,7 +116,7 @@ export function StatusBadge({ status, type = "default" }: StatusBadgeProps) {
   return (
     <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 w-fit", styles[finalType])}>
       <span className={cn("w-1.5 h-1.5 rounded-full", 
-        finalType === "success" ? "bg-emerald-400" :
+        finalType === "success" ? "bg-orange-400" :
         finalType === "warning" ? "bg-amber-400" :
         finalType === "error" ? "bg-red-400" :
         finalType === "info" ? "bg-blue-400" : "bg-slate-400"

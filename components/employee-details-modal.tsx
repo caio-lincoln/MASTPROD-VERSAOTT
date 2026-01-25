@@ -22,7 +22,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Ativo":
-        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+        return "bg-orange-500/10 text-orange-400 border-orange-500/30"
       case "Férias":
         return "bg-amber-500/10 text-amber-400 border-amber-500/30"
       case "Cancelado":
@@ -48,7 +48,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
         <div className="space-y-6 mt-4">
           {/* Informações Pessoais */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
               <User className="w-5 h-5" />
               Informações Pessoais
             </h3>
@@ -72,7 +72,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
 
           {/* Contato */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
               <Mail className="w-5 h-5" />
               Contato
             </h3>
@@ -96,7 +96,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
 
           {/* Informações Profissionais */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
               <Briefcase className="w-5 h-5" />
               Informações Profissionais
             </h3>
@@ -134,7 +134,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
 
           {/* Endereço */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
               <MapPin className="w-5 h-5" />
               Endereço
             </h3>
@@ -171,7 +171,7 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
         </div>
 
         <div className="flex justify-end pt-4 border-t border-slate-700">
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/20">
+          <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20">
             Fechar
           </Button>
         </div>

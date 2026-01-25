@@ -114,7 +114,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">
               Informações Básicas
             </h3>
 
@@ -165,7 +165,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2">Contato</h3>
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">Contato</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -201,7 +201,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Informações Profissionais */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2">
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">
               Informações Profissionais
             </h3>
 
@@ -271,7 +271,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Endereço */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-emerald-400 border-b border-slate-700 pb-2">Endereço</h3>
+            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">Endereço</h3>
 
             <div className="space-y-2">
               <Label htmlFor="address" className="text-slate-300">
@@ -328,7 +328,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               {mode === "create" ? "Criar Funcionário" : "Salvar Alterações"}
             </Button>

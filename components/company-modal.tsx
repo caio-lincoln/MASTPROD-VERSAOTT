@@ -445,7 +445,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
           <div className="space-y-6 py-4">
             <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
               <div className="mb-6 p-4 bg-slate-800 rounded border border-slate-700">
-                <Label className="text-emerald-400 font-semibold mb-2 block">Tipo de Empregador</Label>
+                <Label className="text-orange-400 font-semibold mb-2 block">Tipo de Empregador</Label>
                 <Select 
                   value={isCPF ? "cpf" : "cnpj"} 
                   onValueChange={(value) => {
@@ -476,7 +476,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 </Select>
               </div>
 
-              <h3 className="text-lg font-medium text-emerald-400 mb-2">Classificação eSocial</h3>
+              <h3 className="text-lg font-medium text-orange-400 mb-2">Classificação eSocial</h3>
               <p className="text-slate-400 text-sm mb-4">
                 {isCPF 
                   ? "Para empregador Pessoa Física (CPF), selecione apenas se for Produtor Rural."
@@ -626,7 +626,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
             </div>
             
             <div className="flex justify-end pt-6 border-t border-slate-800">
-              <Button onClick={() => setStep(1)} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button onClick={() => setStep(1)} className="bg-orange-600 hover:bg-orange-700 text-white">
                 Próximo <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -640,7 +640,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
           </div>
           {/* Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Informações Básicas
             </h3>
@@ -858,7 +858,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
           {/* Endereço */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               Endereço
             </h3>
@@ -907,7 +907,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
               <Phone className="w-4 h-4" />
               Contato
             </h3>
@@ -950,7 +950,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-emerald-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
               Certificado A1
             </h3>
 
@@ -1000,7 +1000,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
               disabled={isLoading}
             >
               {isLoading ? (

@@ -145,7 +145,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-3">
               {[
                 { label: "Novo Funcionário", href: "/dashboard/employees", icon: Users, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-                { label: "Agendar Treinamento", href: "/dashboard/trainings", icon: GraduationCap, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
+                { label: "Agendar Treinamento", href: "/dashboard/trainings", icon: GraduationCap, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
                 { label: "Registrar EPI", href: "/dashboard/ppe", icon: HardHat, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
                 { label: "Enviar e-Social", href: "/dashboard/esocial", icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
               ].map((action, index) => {
@@ -170,7 +170,7 @@ export default function DashboardPage() {
           </ContentContainer>
           
           <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-600/10 opacity-50" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-orange-600/10 opacity-50" />
             <div className="relative z-10">
               <h3 className="text-lg font-semibold text-white mb-2">Precisa de ajuda?</h3>
               <p className="text-sm text-muted-foreground mb-4">

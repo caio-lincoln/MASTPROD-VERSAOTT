@@ -41,7 +41,7 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
                 {document.category}
               </span>
               {document.version && (
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/10 text-emerald-400">
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-500/10 text-orange-400">
                   v{document.version}
                 </span>
               )}
@@ -60,7 +60,7 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
             {/* Empresa */}
             <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
               <div className="flex items-center gap-2 mb-2">
-                <Building2 className="w-4 h-4 text-emerald-400" />
+                <Building2 className="w-4 h-4 text-orange-400" />
                 <span className="text-sm font-medium text-slate-400">Empresa</span>
               </div>
               <p className="text-white font-medium">{document.companyName}</p>
@@ -78,7 +78,7 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
             {/* Data de Upload */}
             <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-4 h-4 text-purple-400" />
+                <Calendar className="w-4 h-4 text-orange-400" />
                 <span className="text-sm font-medium text-slate-400">Data de Upload</span>
               </div>
               <p className="text-white font-medium">
@@ -124,7 +124,7 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
             <Button
               onClick={handleDownload}
-              className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
             >
               <Download className="w-4 h-4 mr-2" />
               Baixar Documento

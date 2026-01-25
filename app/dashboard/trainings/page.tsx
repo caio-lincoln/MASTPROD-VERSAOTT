@@ -263,7 +263,7 @@ export default function TrainingsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleStatusChange(training.id, "Concluído")}
-                    className="border-emerald-700 text-emerald-400 hover:bg-emerald-900/20 bg-transparent"
+                    className="border-orange-700 text-orange-400 hover:bg-orange-900/20 bg-transparent"
                   >
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Concluir
