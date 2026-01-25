@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { KpiCard, DashboardHeader, ContentContainer, StatusBadge } from "./esocial/components/visual-components"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { SystemStatusWidget } from "@/components/system-status-widget"
 
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState({
@@ -168,6 +169,8 @@ export default function DashboardPage() {
               })}
             </div>
           </ContentContainer>
+
+          <SystemStatusWidget />
           
           <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-orange-600/10 opacity-50" />
