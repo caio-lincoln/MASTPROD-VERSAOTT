@@ -60,21 +60,21 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-orange-400" />
+            <FileText className="w-5 h-5 text-primary" />
             Novo Evento S-2220 - Monitoramento da Saúde do Trabalhador
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Informe os dados sobre exames médicos ocupacionais (ASO)
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* Identificação */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400 flex items-center gap-2">
+          {/* Identificação da Empresa */}
+        <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Identificação
             </h3>
@@ -83,10 +83,10 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               <div className="space-y-2">
                 <Label htmlFor="company">Empresa *</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {allCompanies.map((company) => (
                       <SelectItem key={company.id} value={company.id.toString()}>
                         {company.name} - {company.cnpj}
@@ -99,10 +99,10 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               <div className="space-y-2">
                 <Label htmlFor="employee">Funcionário *</Label>
                 <Select value={selectedEmployee} onValueChange={setSelectedEmployee} disabled={!selectedCompany}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione o funcionário" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {filteredEmployees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id.toString()}>
                         {employee.name} - {employee.role}
@@ -115,8 +115,8 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
           </div>
 
           {/* Dados do Exame */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400">Dados do Exame</h3>
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary">Dados do Exame</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -126,7 +126,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
                   type="date"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -134,10 +134,10 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               <div className="space-y-2">
                 <Label htmlFor="examType">Tipo de Exame *</Label>
                 <Select value={examType} onValueChange={setExamType}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="admissional">Admissional</SelectItem>
                     <SelectItem value="periodico">Periódico</SelectItem>
                     <SelectItem value="retorno">Retorno ao Trabalho</SelectItem>
@@ -150,10 +150,10 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               <div className="space-y-2">
                 <Label htmlFor="examResult">Resultado *</Label>
                 <Select value={examResult} onValueChange={setExamResult}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione o resultado" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="apto">Apto</SelectItem>
                     <SelectItem value="inapto">Inapto</SelectItem>
                     <SelectItem value="apto_restricao">Apto com Restrição</SelectItem>
@@ -164,8 +164,8 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
           </div>
 
           {/* Médico Examinador */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400">Médico Examinador</h3>
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary">Médico Examinador</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2 md:col-span-2">
@@ -175,7 +175,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
                   value={doctorName}
                   onChange={(e) => setDoctorName(e.target.value)}
                   placeholder="Nome completo"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -187,7 +187,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
                   value={doctorCrm}
                   onChange={(e) => setDoctorCrm(e.target.value)}
                   placeholder="000000"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -195,10 +195,10 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               <div className="space-y-2">
                 <Label htmlFor="doctorUf">UF *</Label>
                 <Select value={doctorUf} onValueChange={setDoctorUf}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="SP">SP</SelectItem>
                     <SelectItem value="RJ">RJ</SelectItem>
                     <SelectItem value="MG">MG</SelectItem>
@@ -215,7 +215,7 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
                   value={pcmsoCoordinator}
                   onChange={(e) => setPcmsoCoordinator(e.target.value)}
                   placeholder="Nome do médico coordenador"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -223,8 +223,8 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
           </div>
 
           {/* Observações */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400">Observações Adicionais</h3>
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary">Observações Adicionais</h3>
 
             <div className="space-y-2">
               <Label htmlFor="observations">Observações</Label>
@@ -233,14 +233,14 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
                 placeholder="Informações adicionais sobre o exame..."
-                className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
+                className="bg-background border-input text-foreground min-h-[100px]"
               />
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-950/30 border border-blue-900/50">
-            <AlertCircle className="w-5 h-5 text-blue-400" />
-            <p className="text-sm text-blue-300">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+            <AlertCircle className="w-5 h-5 text-blue-700" />
+            <p className="text-sm text-blue-700">
               Este evento será gerado conforme layout oficial do eSocial S-2220 versão S-1.3
             </p>
           </div>
@@ -250,13 +250,13 @@ export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProp
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-input text-muted-foreground hover:bg-slate-50 hover:text-foreground bg-transparent"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Gerar Evento
             </Button>

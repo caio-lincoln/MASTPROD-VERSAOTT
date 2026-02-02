@@ -6,108 +6,106 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Light Theme */
-  --background: oklch(1 0 0); /* White */
-  --foreground: oklch(0.14 0.03 45); /* Dark Text */
+  /* Enterprise Light Theme */
+  --background: #F8FAFC; /* Slate 50 */
+  --foreground: #0F172A; /* Slate 900 */
 
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0.03 45);
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0.03 45);
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
 
-  /* Primary: Vibrant Orange */
-  --primary: oklch(0.60 0.18 45);
-  --primary-foreground: oklch(0.98 0.01 45); /* White text on orange */
+  --primary: #2563EB; /* Blue 600 */
+  --primary-foreground: #FFFFFF;
 
-  /* Secondary: Light Orange/Grey */
-  --secondary: oklch(0.96 0.01 45);
-  --secondary-foreground: oklch(0.20 0.05 45);
+  --secondary: #F1F5F9; /* Slate 100 */
+  --secondary-foreground: #0F172A;
 
-  --muted: oklch(0.96 0.01 45);
-  --muted-foreground: oklch(0.45 0.03 45);
+  --muted: #F1F5F9; /* Slate 100 */
+  --muted-foreground: #64748B; /* Slate 500 */
 
-  --accent: oklch(0.96 0.01 45);
-  --accent-foreground: oklch(0.20 0.05 45);
+  --accent: #F1F5F9;
+  --accent-foreground: #0F172A;
 
-  --destructive: oklch(0.55 0.20 20);
-  --destructive-foreground: oklch(0.98 0.01 45);
+  --destructive: #DC2626; /* Red 600 */
+  --destructive-foreground: #FFFFFF;
 
-  --border: oklch(0.90 0.02 45);
-  --input: oklch(0.90 0.02 45);
-  --ring: oklch(0.60 0.18 45);
+  --border: #E5E7EB; /* Slate 200 */
+  --input: #E5E7EB;
+  --ring: #2563EB;
 
-  /* Charts - Adjusted for Light Mode */
-  --chart-1: oklch(0.60 0.18 45);
-  --chart-2: oklch(0.65 0.20 60);
-  --chart-3: oklch(0.55 0.20 20);
-  --chart-4: oklch(0.50 0.15 30);
-  --chart-5: oklch(0.70 0.15 80);
+  --radius: 0.5rem; /* Reduced radius for professional look */
 
-  --radius: 0.75rem;
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #334155; /* Slate 700 */
+  --sidebar-primary: #2563EB;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: #E5E7EB;
+  --sidebar-ring: #2563EB;
 
-  --sidebar: oklch(0.98 0.01 45);
-  --sidebar-foreground: oklch(0.20 0.05 45);
-  --sidebar-primary: oklch(0.60 0.18 45);
-  --sidebar-primary-foreground: oklch(0.98 0.01 45);
-  --sidebar-accent: oklch(0.96 0.01 45);
-  --sidebar-accent-foreground: oklch(0.20 0.05 45);
-  --sidebar-border: oklch(0.90 0.02 45);
-  --sidebar-ring: oklch(0.60 0.18 45);
+  /* Status Colors */
+  --warning: #F59E0B; /* Amber 500 */
+  --warning-foreground: #FFFFFF;
+  --success: #16A34A; /* Green 600 */
+  --success-foreground: #FFFFFF;
+  --info: #3B82F6; /* Blue 500 */
+  --info-foreground: #FFFFFF;
+
+  /* Charts */
+  --chart-1: #2563EB;
+  --chart-2: #3B82F6;
+  --chart-3: #60A5FA;
+  --chart-4: #93C5FD;
+  --chart-5: #BFDBFE;
 }
 
 .dark {
-  /* Premium Dark SaaS Theme - Zinc/Slate + Orange */
-  --background: oklch(0.12 0.02 260); /* Deep Cool Dark Grey (Zinc-like) */
-  --foreground: oklch(0.98 0.00 0); /* Pure White */
+  /* Dark Mode - Mapped to Slate Dark */
+  --background: #020617; /* Slate 950 */
+  --foreground: #F8FAFC; /* Slate 50 */
 
-  --card: oklch(0.15 0.02 260); /* Slightly lighter cool grey */
-  --card-foreground: oklch(0.98 0.00 0);
+  --card: #0F172A; /* Slate 900 */
+  --card-foreground: #F8FAFC;
 
-  --popover: oklch(0.15 0.02 260);
-  --popover-foreground: oklch(0.98 0.00 0);
+  --popover: #0F172A;
+  --popover-foreground: #F8FAFC;
 
-  /* Primary: Vibrant Orange (Kept as requested) */
-  --primary: oklch(0.60 0.18 45);
-  --primary-foreground: oklch(0.98 0.00 0); /* White text */
+  --primary: #3B82F6; /* Blue 500 */
+  --primary-foreground: #FFFFFF;
 
-  /* Secondary: Cool Grey */
-  --secondary: oklch(0.20 0.02 260);
-  --secondary-foreground: oklch(0.98 0.00 0);
+  --secondary: #1E293B; /* Slate 800 */
+  --secondary-foreground: #F8FAFC;
 
-  --muted: oklch(0.20 0.02 260);
-  --muted-foreground: oklch(0.65 0.02 260);
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8; /* Slate 400 */
 
-  --accent: oklch(0.25 0.02 260); /* Hover state grey */
-  --accent-foreground: oklch(0.98 0.00 0);
+  --accent: #1E293B;
+  --accent-foreground: #F8FAFC;
 
-  --destructive: oklch(0.55 0.20 20);
-  --destructive-foreground: oklch(0.98 0.00 0);
+  --destructive: #EF4444; /* Red 500 */
+  --destructive-foreground: #FFFFFF;
 
-  --border: oklch(0.25 0.02 260);
-  --input: oklch(0.25 0.02 260);
-  --ring: oklch(0.60 0.18 45);
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #3B82F6;
 
-  /* Charts */
-  --chart-1: oklch(0.60 0.18 45); /* Orange */
-  --chart-2: oklch(0.40 0.15 260); /* Dark Blue */
-  --chart-3: oklch(0.50 0.15 200); /* Cyan */
-  --chart-4: oklch(0.55 0.20 20); /* Red */
-  --chart-5: oklch(0.70 0.15 80); /* Lime */
-
-  --sidebar: oklch(0.10 0.02 260); /* Darker Zinc */
-  --sidebar-foreground: oklch(0.98 0.00 0);
-  --sidebar-primary: oklch(0.60 0.18 45);
-  --sidebar-primary-foreground: oklch(0.98 0.00 0);
-  --sidebar-accent: oklch(0.18 0.02 260);
-  --sidebar-accent-foreground: oklch(0.98 0.00 0);
-  --sidebar-border: oklch(0.20 0.02 260);
-  --sidebar-ring: oklch(0.60 0.18 45);
+  --sidebar: #0F172A;
+  --sidebar-foreground: #94A3B8;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E293B;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: #1E293B;
+  --sidebar-ring: #3B82F6;
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback";
-  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --font-sans: "Inter", "sans-serif";
+  --font-mono: "Geist Mono", "monospace";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -144,6 +142,12 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
 }
 
 @layer base {

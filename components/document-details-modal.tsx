@@ -19,69 +19,52 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/10">
-              <FileText className="w-6 h-6 text-blue-400" />
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <div className="p-2 rounded-lg bg-primary/10 text-primary">
+              <FileText className="w-6 h-6" />
             </div>
-            Detalhes do Documento
+            {document.name}
           </DialogTitle>
+          <p className="text-muted-foreground">
+            Detalhes completos do documento
+          </p>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Nome e Categoria */}
-          <div className="space-y-2">
-            <h3 className="text-2xl font-bold text-white">{document.name}</h3>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-slate-800 text-slate-300">
-                {document.type}
-              </span>
-              <span className="px-3 py-1 rounded-full text-sm font-medium bg-blue-500/10 text-blue-400">
-                {document.category}
-              </span>
-              {document.version && (
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-orange-500/10 text-orange-400">
-                  v{document.version}
-                </span>
-              )}
-            </div>
+        <div className="grid gap-6 py-4">
+          {/* Description */}
+          <div className="p-4 rounded-lg bg-white border border-border">
+            <h4 className="text-sm font-medium text-muted-foreground mb-2">Descrição</h4>
+            <p className="text-foreground leading-relaxed">{document.description}</p>
           </div>
 
-          {/* Descrição */}
-          {document.description && (
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-              <p className="text-slate-300 leading-relaxed">{document.description}</p>
-            </div>
-          )}
-
-          {/* Informações em Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Empresa */}
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+            {/* Company Info */}
+            <div className="p-4 rounded-lg bg-white border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <Building2 className="w-4 h-4 text-orange-400" />
-                <span className="text-sm font-medium text-slate-400">Empresa</span>
+                <Building2 className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">Empresa</span>
               </div>
-              <p className="text-white font-medium">{document.companyName}</p>
+              <p className="font-medium">{document.companyName}</p>
             </div>
 
-            {/* Tamanho */}
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+            {/* File Info */}
+            <div className="p-4 rounded-lg bg-white border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <Hash className="w-4 h-4 text-blue-400" />
-                <span className="text-sm font-medium text-slate-400">Tamanho</span>
+                <Hash className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">Tamanho</span>
               </div>
-              <p className="text-white font-medium">{document.size}</p>
+              <p className="font-medium">{document.size}</p>
             </div>
 
-            {/* Data de Upload */}
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+            {/* Date Info */}
+            <div className="p-4 rounded-lg bg-white border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-4 h-4 text-orange-400" />
-                <span className="text-sm font-medium text-slate-400">Data de Upload</span>
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">Data de Upload</span>
               </div>
-              <p className="text-white font-medium">
+              <p className="font-medium">
                 {new Date(document.date).toLocaleDateString("pt-BR", {
                   day: "2-digit",
                   month: "long",
@@ -90,46 +73,56 @@ export function DocumentDetailsModal({ open, onOpenChange, document }: DocumentD
               </p>
             </div>
 
-            {/* Enviado por */}
-            <div className="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+            {/* Uploader Info */}
+            <div className="p-4 rounded-lg bg-white border border-border">
               <div className="flex items-center gap-2 mb-2">
-                <User className="w-4 h-4 text-orange-400" />
-                <span className="text-sm font-medium text-slate-400">Enviado por</span>
+                <User className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-muted-foreground">Enviado por</span>
               </div>
-              <p className="text-white font-medium">{document.uploadedBy}</p>
+              <p className="font-medium">{document.uploadedBy}</p>
             </div>
           </div>
 
           {/* Tags */}
-          {document.tags && document.tags.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Tag className="w-4 h-4 text-slate-400" />
-                <span className="text-sm font-medium text-slate-400">Tags</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                {document.tags.map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 rounded-full text-sm bg-slate-800 text-slate-300 border border-slate-700"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+          <div className="p-4 rounded-lg bg-white border border-border">
+            <div className="flex items-center gap-2 mb-3">
+              <Tag className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-muted-foreground">Tags</span>
             </div>
-          )}
-
-          {/* Botão de Download */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button
-              onClick={handleDownload}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Baixar Documento
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1 rounded-full text-sm bg-muted text-muted-foreground border border-border">
+                {document.category}
+              </span>
+              <span className="px-3 py-1 rounded-full text-sm bg-muted text-muted-foreground border border-border">
+                {document.type}
+              </span>
+              {document.tags && document.tags.map((tag: string, index: number) => (
+                <span
+                  key={index}
+                  className="px-3 py-1 rounded-full text-sm bg-muted text-muted-foreground border border-border"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           </div>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-border">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="border-border text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent"
+          >
+            Fechar
+          </Button>
+          <Button 
+            onClick={handleDownload}
+            className="bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

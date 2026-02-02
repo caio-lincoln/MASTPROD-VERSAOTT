@@ -102,7 +102,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="bg-background border-border text-foreground max-w-4xl max-h-[90vh] overflow-hidden flex flex-col sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">Novo Treinamento</DialogTitle>
         </DialogHeader>
@@ -113,20 +113,20 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
               {/* Informações Básicas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name" className="text-slate-300">
+                  <Label htmlFor="name" className="text-muted-foreground">
                     Nome do Treinamento *
                   </Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="duration" className="text-slate-300">
+                  <Label htmlFor="duration" className="text-muted-foreground">
                     Carga Horária *
                   </Label>
                   <Input
@@ -134,7 +134,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     placeholder="Ex: 8h"
                     value={formData.duration}
                     onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
@@ -142,20 +142,20 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="instructor" className="text-slate-300">
+                  <Label htmlFor="instructor" className="text-muted-foreground">
                     Instrutor *
                   </Label>
                   <Input
                     id="instructor"
                     value={formData.instructor}
                     onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="date" className="text-slate-300">
+                  <Label htmlFor="date" className="text-muted-foreground">
                     Data *
                   </Label>
                   <Input
@@ -163,14 +163,14 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     type="date"
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-300">
+                <Label htmlFor="description" className="text-muted-foreground">
                   Descrição
                 </Label>
                 <Textarea
@@ -178,12 +178,12 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white resize-none"
+                  className="bg-white border-border text-foreground resize-none"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="company" className="text-slate-300">
+                <Label htmlFor="company" className="text-muted-foreground">
                   Empresa *
                 </Label>
                 <Select
@@ -194,17 +194,17 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                     setEmployeeSearch("")
                   }}
                 >
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-white border-border text-foreground">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id} className="text-white">
+                      <SelectItem key={company.id} value={company.id} className="text-popover-foreground">
                         <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-orange-400" />
+                          <Building2 className="w-4 h-4 text-primary" />
                           <div>
                             <div className="font-medium">{company.name}</div>
-                            <div className="text-xs text-slate-400">{company.cnpj}</div>
+                            <div className="text-xs text-muted-foreground">{company.cnpj}</div>
                           </div>
                         </div>
                       </SelectItem>
@@ -216,31 +216,31 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
               {formData.companyId && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Label className="text-slate-300">Funcionários Participantes *</Label>
-                    <span className="text-sm text-slate-400">{selectedEmployees.length} selecionado(s)</span>
+                    <Label className="text-muted-foreground">Funcionários Participantes *</Label>
+                    <span className="text-sm text-muted-foreground">{selectedEmployees.length} selecionado(s)</span>
                   </div>
 
                   {/* Campo de busca */}
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar funcionários..."
                       value={employeeSearch}
                       onChange={(e) => setEmployeeSearch(e.target.value)}
-                      className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                      className="pl-10 bg-white border-border text-foreground"
                     />
                   </div>
 
                   {/* Lista de funcionários */}
-                  <div className="border border-slate-700 rounded-lg bg-slate-800/50">
-                    <div className="p-3 border-b border-slate-700 flex items-center gap-2">
+                  <div className="border border-border rounded-lg bg-white">
+                    <div className="p-3 border-b border-border flex items-center gap-2">
                       <Checkbox
                         id="select-all"
                         checked={filteredEmployees.length > 0 && selectedEmployees.length === filteredEmployees.length}
                         onCheckedChange={toggleAllEmployees}
-                        className="border-slate-600 data-[state=checked]:bg-orange-500"
+                        className="border-input data-[state=checked]:bg-primary"
                       />
-                      <Label htmlFor="select-all" className="text-sm font-medium text-slate-300 cursor-pointer">
+                      <Label htmlFor="select-all" className="text-sm font-medium text-muted-foreground cursor-pointer">
                         Selecionar todos ({filteredEmployees.length})
                       </Label>
                     </div>
@@ -251,24 +251,24 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                           filteredEmployees.map((employee) => (
                             <div
                               key={employee.id}
-                              className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-700/50 transition-colors"
+                              className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-50 transition-colors"
                             >
                               <Checkbox
                                 id={`employee-${employee.id}`}
                                 checked={selectedEmployees.includes(Number(employee.id))}
                                 onCheckedChange={() => toggleEmployee(Number(employee.id))}
-                                className="border-slate-600 data-[state=checked]:bg-orange-500"
+                                className="border-input data-[state=checked]:bg-primary"
                               />
                               <Label
                                 htmlFor={`employee-${employee.id}`}
                                 className="flex items-center gap-3 flex-1 cursor-pointer"
                               >
-                                <div className="p-2 rounded-lg bg-slate-700">
-                                  <User className="w-4 h-4 text-orange-400" />
+                                <div className="p-2 rounded-lg bg-slate-100">
+                                  <User className="w-4 h-4 text-primary" />
                                 </div>
                                 <div className="flex-1">
-                                  <div className="font-medium text-white">{employee.name}</div>
-                                  <div className="text-xs text-slate-400">
+                                  <div className="font-medium text-foreground">{employee.name}</div>
+                                  <div className="text-xs text-muted-foreground">
                                     {employee.position} • {employee.department}
                                   </div>
                                 </div>
@@ -276,7 +276,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                             </div>
                           ))
                         ) : (
-                          <div className="p-8 text-center text-slate-400">
+                          <div className="p-8 text-center text-muted-foreground">
                             <User className="w-12 h-12 mx-auto mb-3 opacity-30" />
                             <p>Nenhum funcionário encontrado</p>
                           </div>
@@ -286,8 +286,8 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                   </div>
 
                   {selectedEmployees.length === 0 && (
-                    <p className="text-sm text-amber-400 flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-amber-400" />
+                    <p className="text-sm text-warning flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-warning" />
                       Selecione pelo menos um funcionário para o treinamento
                     </p>
                   )}
@@ -297,19 +297,19 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
           </ScrollArea>
 
           {/* Botões de ação */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
               disabled={!formData.companyId || selectedEmployees.length === 0}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Criar Treinamento
             </Button>

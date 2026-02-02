@@ -468,7 +468,7 @@ export default function CompaniesPage() {
       >
         <Button
           onClick={() => setCreateModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300"
+          className="bg-primary hover:bg-primary/90 text-white shadow-sm transition-all duration-300"
         >
           <Plus className="w-4 h-4 mr-2" />
           Nova Empresa
@@ -483,10 +483,10 @@ export default function CompaniesPage() {
               placeholder="Buscar empresas por nome ou CNPJ..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-slate-900/50 border-slate-800 text-white placeholder:text-slate-500 focus:border-primary/50 focus:ring-primary/20"
+              className="pl-10 bg-white border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:ring-primary/20 transition-all duration-200"
             />
           </div>
-          <Button variant="outline" className="border-slate-800 bg-slate-900/50 text-slate-300 hover:bg-slate-800 hover:text-white">
+          <Button variant="outline" className="border-border bg-white text-muted-foreground hover:bg-slate-50 hover:text-foreground">
             <Filter className="w-4 h-4 mr-2" />
             Filtros
           </Button>
@@ -500,7 +500,7 @@ export default function CompaniesPage() {
           )}
           
           {error && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+            <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">
               {error}
             </div>
           )}
@@ -509,18 +509,18 @@ export default function CompaniesPage() {
             {paginatedCompanies.map((company) => (
               <div
                 key={company.id}
-                className="p-5 rounded-xl bg-slate-800/30 border border-slate-700/50 hover:border-primary/30 hover:bg-slate-800/60 transition-all duration-300 group"
+                className="p-5 rounded-xl bg-white border border-border/50 hover:border-primary/30 hover:shadow-sm transition-all duration-300 group"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-                      <Building2 className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+                    <div className="p-3 rounded-xl bg-slate-50 border border-border group-hover:border-primary/30 group-hover:bg-blue-50 transition-colors">
+                      <Building2 className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{company.name}</h3>
+                        <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{company.name}</h3>
                         {company.fromESocial && (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
                             <Shield className="w-3 h-3" />
                             eSocial
                           </span>
@@ -530,7 +530,7 @@ export default function CompaniesPage() {
                         <span className="font-mono">{company.cnpj}</span>
                         {company.cnae && (
                           <>
-                            <span className="w-1 h-1 rounded-full bg-slate-600" />
+                            <span className="w-1 h-1 rounded-full bg-muted-foreground" />
                             <span>CNAE: {company.cnae}</span>
                           </>
                         )}
@@ -542,15 +542,15 @@ export default function CompaniesPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t border-slate-700/50">
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t border-border/50">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-slate-500" />
+                      <Users className="w-4 h-4 text-muted-foreground" />
                       <span>{company.employees} funcionários</span>
                     </div>
                     {(company.city || company.state) && (
                       <div className="flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-slate-500" />
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
                         <span>
                           {company.city}{company.city && company.state ? " - " : ""}{company.state}
                         </span>
@@ -563,7 +563,7 @@ export default function CompaniesPage() {
                       size="sm"
                       variant="ghost"
                       onClick={() => setViewingCompany(company)}
-                      className="flex-1 md:flex-none text-slate-400 hover:text-white hover:bg-slate-800"
+                      className="flex-1 md:flex-none text-muted-foreground hover:text-foreground hover:bg-muted"
                     >
                       <Eye className="w-4 h-4 mr-1" />
                       Visualizar
@@ -574,7 +574,7 @@ export default function CompaniesPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => setEditingCompany(company)}
-                          className="flex-1 md:flex-none text-slate-400 hover:text-white hover:bg-slate-800"
+                          className="flex-1 md:flex-none text-muted-foreground hover:text-foreground hover:bg-muted"
                         >
                           <Edit className="w-4 h-4 mr-1" />
                           Editar
@@ -583,7 +583,7 @@ export default function CompaniesPage() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleDeleteCompany(company.id)}
-                          className="flex-1 md:flex-none text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          className="flex-1 md:flex-none text-destructive hover:text-destructive hover:bg-destructive/10"
                         >
                           <Trash2 className="w-4 h-4 mr-1" />
                           Excluir
@@ -598,11 +598,11 @@ export default function CompaniesPage() {
 
           {paginatedCompanies.length === 0 && !loading && (
             <div className="text-center py-12">
-              <div className="p-4 rounded-full bg-slate-800/50 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-slate-500" />
+              <div className="p-4 rounded-full bg-muted w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <Building2 className="w-8 h-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-white mb-1">Nenhuma empresa encontrada</h3>
-              <p className="text-slate-400">Tente ajustar seus filtros ou adicione uma nova empresa.</p>
+              <h3 className="text-lg font-medium text-foreground mb-1">Nenhuma empresa encontrada</h3>
+              <p className="text-muted-foreground">Tente ajustar seus filtros ou adicione uma nova empresa.</p>
             </div>
           )}
 

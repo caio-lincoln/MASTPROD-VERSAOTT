@@ -3,14 +3,33 @@
 import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, FileText, Download, Eye, Building2, Filter } from "lucide-react"
+import { 
+  Plus, 
+  Search, 
+  FileText, 
+  Download, 
+  Eye, 
+  Building2, 
+  Filter, 
+  MoreVertical, 
+  Trash2, 
+  Image, 
+  FileSpreadsheet,
+  Clock
+} from "lucide-react"
 import { Pagination } from "@/components/pagination"
 import { DocumentUploadModal } from "@/components/document-upload-modal"
 import { DocumentDetailsModal } from "@/components/document-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuSeparator, 
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu"
 import { supabase } from "@/lib/supabaseClient"
-import { DashboardHeader, ContentContainer, StatusBadge } from "@/app/dashboard/esocial/components/visual-components"
-import { cn } from "@/lib/utils"
+import { DashboardHeader, ContentContainer } from "@/app/dashboard/esocial/components/visual-components"
 
 type CompanyRow = { id: string; razao_social: string }
 type DocumentRow = {
@@ -36,7 +55,12 @@ export default function LibraryPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [viewingDocument, setViewingDocument] = useState<any | null>(null)
+  
+  // Filters State
   const [selectedCompany, setSelectedCompany] = useState<string>("all")
+  const [selectedType, setSelectedType] = useState<string>("all")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -45,21 +69,30 @@ export default function LibraryPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
+      
+      // Fetch companies first
       const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
-      setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
+      const companiesList = (empresas as CompanyRow[]) || []
+      setCompanies(companiesList.map((e) => ({ id: e.id, name: e.razao_social })))
+      
+      // Create a map for quick lookup
+      const companyMap = new Map(companiesList.map(c => [c.id, c.razao_social]))
+
+      // Fetch documents
       const { data: docs } = await supabase.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
-      const mapped = (docs as DocumentRow[]).map((d) => ({
+      
+      const mapped = (docs as DocumentRow[] || []).map((d) => ({
         id: d.id,
         name: d.nome_arquivo,
-        type: d.tipo || "",
-        size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(1)} MB` : "",
-        date: d.data_upload?.substring(0, 10),
-        category: d.categoria || "",
+        type: d.tipo || "Outro",
+        size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(2)} MB` : "0 MB",
+        date: d.data_upload ? new Date(d.data_upload).toLocaleDateString('pt-BR') : "-",
+        category: d.categoria || "Geral",
         companyId: d.empresa_id,
-        companyName: "",
+        companyName: companyMap.get(d.empresa_id) || "Empresa desconhecida",
         description: d.descricao || "",
         uploadedBy: "",
-        version: d.versao || "",
+        version: d.versao || "1.0",
         tags: d.tags || [],
         caminho_storage: d.caminho_storage,
       }))
@@ -69,14 +102,31 @@ export default function LibraryPage() {
     load()
   }, [])
 
+  // Derived lists for filters
+  const uniqueTypes = useMemo(() => {
+    const types = new Set(documents.map(d => d.type))
+    return Array.from(types).filter(Boolean).sort()
+  }, [documents])
+
+  const uniqueCategories = useMemo(() => {
+    const cats = new Set(documents.map(d => d.category))
+    return Array.from(cats).filter(Boolean).sort()
+  }, [documents])
+
   const filteredDocuments = useMemo(() => {
     return documents.filter((d) => {
       const matchesSearch =
-        d.name.toLowerCase().includes(search.toLowerCase()) || d.category.toLowerCase().includes(search.toLowerCase())
+        d.name.toLowerCase().includes(search.toLowerCase()) || 
+        d.category.toLowerCase().includes(search.toLowerCase()) ||
+        (d.tags && d.tags.some((tag: string) => tag.toLowerCase().includes(search.toLowerCase())))
+      
       const matchesCompany = selectedCompany === "all" || d.companyId === selectedCompany
-      return matchesSearch && matchesCompany
+      const matchesType = selectedType === "all" || d.type === selectedType
+      const matchesCategory = selectedCategory === "all" || d.category === selectedCategory
+
+      return matchesSearch && matchesCompany && matchesType && matchesCategory
     })
-  }, [documents, search, selectedCompany])
+  }, [documents, search, selectedCompany, selectedType, selectedCategory])
 
   const totalPages = Math.ceil(filteredDocuments.length / ITEMS_PER_PAGE)
 
@@ -92,6 +142,16 @@ export default function LibraryPage() {
 
   const handleCompanyChange = (value: string) => {
     setSelectedCompany(value)
+    setCurrentPage(1)
+  }
+
+  const handleTypeFilter = (value: string) => {
+    setSelectedType(value)
+    setCurrentPage(1)
+  }
+
+  const handleCategoryFilter = (value: string) => {
+    setSelectedCategory(value)
     setCurrentPage(1)
   }
 
@@ -115,19 +175,29 @@ export default function LibraryPage() {
     })
     if (!resp.ok) return
     setUploadModalOpen(false)
-    const { data: docs } = await supabase.from("documentos").select("*").order("data_upload", { ascending: false })
-    const mapped = (docs as DocumentRow[]).map((d) => ({
+    
+    // Refresh list
+    // Ideally extract the load function to reuse it, but duplicating for now to match style
+    const { data: docs } = await supabase.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
+    // Re-fetch companies or use existing state? We need the map again. 
+    // Since companies don't change often, let's just reuse the companyMap logic with current companies state if possible, 
+    // but inside this function 'companies' state might be stale closure if not careful.
+    // Simplest: just fetch docs and map using current companies state which is available in closure.
+    
+    const companyMap = new Map(companies.map(c => [c.id, c.name]))
+    
+    const mapped = (docs as DocumentRow[] || []).map((d) => ({
       id: d.id,
       name: d.nome_arquivo,
-      type: d.tipo || "",
-      size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(1)} MB` : "",
-      date: d.data_upload?.substring(0, 10),
-      category: d.categoria || "",
+      type: d.tipo || "Outro",
+      size: d.tamanho ? `${(d.tamanho / (1024 * 1024)).toFixed(2)} MB` : "0 MB",
+      date: d.data_upload ? new Date(d.data_upload).toLocaleDateString('pt-BR') : "-",
+      category: d.categoria || "Geral",
       companyId: d.empresa_id,
-      companyName: "",
+      companyName: companyMap.get(d.empresa_id) || "Empresa desconhecida",
       description: d.descricao || "",
       uploadedBy: "",
-      version: d.versao || "",
+      version: d.versao || "1.0",
       tags: d.tags || [],
       caminho_storage: d.caminho_storage,
     }))
@@ -140,128 +210,187 @@ export default function LibraryPage() {
     window.open(data.signedUrl, "_blank")
   }
 
+  const getFileIcon = (type: string) => {
+    const t = type.toLowerCase()
+    if (t.includes('pdf')) return <FileText className="w-5 h-5" />
+    if (t.includes('image') || t.includes('png') || t.includes('jpg')) return <Image className="w-5 h-5" />
+    if (t.includes('xls') || t.includes('sheet')) return <FileSpreadsheet className="w-5 h-5" />
+    return <FileText className="w-5 h-5" />
+  }
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <DashboardHeader
         title="Biblioteca Digital"
         subtitle="Documentos e normas de segurança"
       >
         <Button
           onClick={() => setUploadModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
         >
           <Plus className="w-4 h-4 mr-2" />
           Upload Documento
         </Button>
       </DashboardHeader>
 
-      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
-        <div className="mb-6 p-4 rounded-xl bg-slate-900/50 border border-slate-800">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-slate-400" />
-              <span className="text-sm font-medium text-slate-300">Filtros Avançados</span>
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none">
+        {/* Filters */}
+        <div className="mb-6 p-4 rounded-xl bg-white border border-border">
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="w-5 h-5 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">Filtros Avançados</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar documentos..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-10 bg-white border-border text-foreground focus-visible:ring-primary/50 transition-colors duration-200"
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                <Input
-                  placeholder="Buscar documentos..."
-                  value={search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
-                />
-              </div>
-
-              <div className="relative">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-10" />
-                <Select value={selectedCompany} onValueChange={handleCompanyChange}>
-                  <SelectTrigger className="pl-10 bg-slate-800 border-slate-700 text-white focus:ring-primary/50 focus:border-primary/50">
-                    <SelectValue placeholder="Filtrar por empresa" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
-                    <SelectItem value="all" className="text-white">
-                      Todas as empresas
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+              <Select value={selectedCompany} onValueChange={handleCompanyChange}>
+                <SelectTrigger className="pl-10 bg-white border-border text-foreground focus:ring-primary/50 focus:border-primary/50">
+                  <SelectValue placeholder="Filtrar por Empresa" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-border">
+                  <SelectItem value="all">Todas as Empresas</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
                     </SelectItem>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id} className="text-white">
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {selectedCompany !== "all" && (
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span>Exibindo documentos de:</span>
-                <span className="px-2 py-1 rounded bg-orange-500/10 text-orange-400 font-medium border border-orange-500/20">
-                  {companies.find((c) => c.id === selectedCompany)?.name}
-                </span>
-              </div>
-            )}
+            <Select value={selectedType} onValueChange={handleTypeFilter}>
+              <SelectTrigger className="bg-white border-border text-foreground focus:ring-primary/50 focus:border-primary/50">
+                <SelectValue placeholder="Tipo de Documento" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-border">
+                <SelectItem value="all">Todos os Tipos</SelectItem>
+                {uniqueTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedCategory} onValueChange={handleCategoryFilter}>
+              <SelectTrigger className="bg-white border-border text-foreground focus:ring-primary/50 focus:border-primary/50">
+                <SelectValue placeholder="Categoria" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-border">
+                <SelectItem value="all">Todas as Categorias</SelectItem>
+                {uniqueCategories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        <div className="space-y-3">
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
-          {paginatedDocuments.map((doc) => (
-            <div
-              key={doc.id}
-              className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all duration-300 group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-                    <FileText className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-white mb-1 text-lg">{doc.name}</h3>
-                    <div className="flex items-center gap-3 text-sm text-slate-400 flex-wrap">
-                      <span className="bg-slate-800 px-2 py-0.5 rounded text-xs">{doc.type}</span>
-                      <span className="text-slate-600">•</span>
-                      <span>{doc.size}</span>
-                      <span className="text-slate-600">•</span>
-                      <span>{doc.date}</span>
-                      <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-xs border border-slate-700">{doc.category}</span>
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-orange-500/10 text-orange-400 text-xs border border-orange-500/20">
-                        <Building2 className="w-3 h-3" />
-                        {companies.find((c) => c.id === doc.companyId)?.name || ""}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-slate-400 hover:text-white hover:bg-slate-800"
-                    onClick={() => setViewingDocument(doc)}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-slate-400 hover:text-white hover:bg-slate-800"
-                    onClick={() => handleDownload(doc)}
-                  >
-                    <Download className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Results Info */}
+        <div className="mb-4 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Exibindo documentos de:</span>
+          <span className="text-sm font-medium text-primary">
+            {filteredDocuments.length} documentos encontrados
+          </span>
         </div>
 
-        {filteredDocuments.length === 0 && !loading && (
-          <div className="text-center py-12 bg-slate-900/30 rounded-xl border border-slate-800/50">
-            <FileText className="w-16 h-16 text-slate-600 mx-auto mb-4 opacity-50" />
-            <p className="text-slate-400 text-lg">Nenhum documento encontrado</p>
+        {/* Documents Grid */}
+        {filteredDocuments.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {paginatedDocuments.map((doc) => (
+              <div
+                key={doc.id}
+                className="p-4 rounded-xl bg-white border border-border hover:border-primary/50 transition-all duration-300 group shadow-sm"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-slate-50 text-slate-500 border border-slate-200 group-hover:bg-slate-100 group-hover:text-primary group-hover:border-slate-300 transition-colors">
+                      {getFileIcon(doc.type)}
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-foreground line-clamp-1" title={doc.name}>
+                        {doc.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs border border-slate-200">{doc.type}</span>
+                        <span className="text-muted-foreground">•</span>
+                        <span>{doc.size}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border-border">
+                      <DropdownMenuItem onClick={() => setViewingDocument(doc)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        Visualizar Detalhes
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleDownload(doc)}>
+                        <Download className="w-4 h-4 mr-2" />
+                        Download
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-border" />
+                      <DropdownMenuItem className="text-destructive hover:text-destructive/80">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Excluir
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-4 pt-4 border-t border-border">
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5" />
+                    <span className="truncate max-w-[120px]" title={doc.companyName}>
+                      {doc.companyName}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{doc.date}</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="px-2 py-0.5 rounded bg-slate-50 text-slate-600 text-xs border border-slate-200">{doc.category}</span>
+                  {doc.tags.slice(0, 2).map((tag: string, i: number) => (
+                    <span key={i} className="px-2 py-0.5 rounded bg-slate-50 text-slate-600 text-xs border border-slate-200">
+                      {tag}
+                    </span>
+                  ))}
+                  {doc.tags.length > 2 && (
+                    <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-xs border border-slate-200">
+                      +{doc.tags.length - 2}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-200 border-dashed">
+            <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-600 text-lg">Nenhum documento encontrado</p>
+            <p className="text-sm text-slate-500 mt-2">
+              Tente ajustar os filtros ou fazer uma nova busca
+            </p>
           </div>
         )}
 

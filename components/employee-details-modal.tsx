@@ -22,24 +22,24 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Ativo":
-        return "bg-orange-500/10 text-orange-400 border-orange-500/30"
+        return "bg-success/10 text-success border-success/30"
       case "Férias":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/30"
+        return "bg-warning/10 text-warning border-warning/30"
       case "Cancelado":
-        return "bg-red-500/10 text-red-400 border-red-500/30"
+        return "bg-destructive/10 text-destructive border-destructive/30"
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/30"
+        return "bg-slate-50 text-muted-foreground border-border"
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw]">
+      <DialogContent className="bg-background border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:rounded-lg shadow-sm">
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-2xl font-bold mb-2">{employee.name}</DialogTitle>
-              <DialogDescription className="text-slate-400">Informações completas do funcionário</DialogDescription>
+              <DialogDescription className="text-muted-foreground">Informações completas do funcionário</DialogDescription>
             </div>
             <Badge className={getStatusColor(employee.status)}>{employee.status}</Badge>
           </div>
@@ -48,103 +48,103 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
         <div className="space-y-6 mt-4">
           {/* Informações Pessoais */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2 flex items-center gap-2">
               <User className="w-5 h-5" />
               Informações Pessoais
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <CreditCard className="w-4 h-4" />
                   <span>CPF</span>
                 </div>
-                <p className="text-white font-medium">{employee.cpf}</p>
+                <p className="text-foreground font-medium">{employee.cpf}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Calendar className="w-4 h-4" />
                   <span>Data de Nascimento</span>
                 </div>
-                <p className="text-white font-medium">{formatDate(employee.birthDate)}</p>
+                <p className="text-foreground font-medium">{formatDate(employee.birthDate)}</p>
               </div>
             </div>
           </div>
 
           {/* Contato */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2 flex items-center gap-2">
               <Mail className="w-5 h-5" />
               Contato
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Mail className="w-4 h-4" />
                   <span>Email</span>
                 </div>
-                <p className="text-white font-medium break-words">{employee.email}</p>
+                <p className="text-foreground font-medium break-words">{employee.email}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Phone className="w-4 h-4" />
                   <span>Telefone</span>
                 </div>
-                <p className="text-white font-medium">{employee.phone}</p>
+                <p className="text-foreground font-medium">{employee.phone}</p>
               </div>
             </div>
           </div>
 
           {/* Informações Profissionais */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2 flex items-center gap-2">
               <Briefcase className="w-5 h-5" />
               Informações Profissionais
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Building2 className="w-4 h-4" />
                   <span>Empresa</span>
                 </div>
-                <p className="text-white font-medium">{companyName}</p>
+                <p className="text-foreground font-medium">{companyName}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Briefcase className="w-4 h-4" />
                   <span>Cargo</span>
                 </div>
-                <p className="text-white font-medium">{employee.position}</p>
+                <p className="text-foreground font-medium">{employee.position}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Briefcase className="w-4 h-4" />
                   <span>Departamento</span>
                 </div>
-                <p className="text-white font-medium">{employee.department}</p>
+                <p className="text-foreground font-medium">{employee.department}</p>
               </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <Calendar className="w-4 h-4" />
                   <span>Data de Admissão</span>
                 </div>
-                <p className="text-white font-medium">{formatDate(employee.admission)}</p>
+                <p className="text-foreground font-medium">{formatDate(employee.admission)}</p>
               </div>
             </div>
           </div>
 
           {/* Endereço */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2 flex items-center gap-2">
               <MapPin className="w-5 h-5" />
               Endereço
             </h3>
             <div className="grid grid-cols-1 gap-4">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-                <div className="flex items-center gap-2 text-slate-400 text-sm mb-1">
+              <div className="p-3 rounded-lg bg-card border border-border">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                   <MapPin className="w-4 h-4" />
                   <span>Endereço Completo</span>
                 </div>
-                <p className="text-white font-medium">
+                <p className="text-foreground font-medium">
                   {employee.address}, {employee.city} - {employee.state}
                 </p>
               </div>
@@ -153,16 +153,16 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
 
           {/* Cancelamento */}
           {employee.status === "Cancelado" && employee.cancelReason && (
-            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30">
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-destructive mt-0.5" />
                 <div>
-                  <h4 className="text-red-400 font-semibold mb-1">Funcionário Cancelado</h4>
-                  <p className="text-slate-300 text-sm mb-2">
+                  <h4 className="text-destructive font-semibold mb-1">Funcionário Cancelado</h4>
+                  <p className="text-muted-foreground text-sm mb-2">
                     <span className="font-medium">Motivo:</span> {employee.cancelReason}
                   </p>
                   {employee.cancelDate && (
-                    <p className="text-slate-400 text-xs">Cancelado em: {formatDate(employee.cancelDate)}</p>
+                    <p className="text-muted-foreground text-xs">Cancelado em: {formatDate(employee.cancelDate)}</p>
                   )}
                 </div>
               </div>
@@ -170,8 +170,8 @@ export function EmployeeDetailsModal({ open, onOpenChange, employee, companyName
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-slate-700">
-          <Button onClick={() => onOpenChange(false)} className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg shadow-orange-500/20">
+        <div className="flex justify-end pt-4 border-t border-border">
+          <Button onClick={() => onOpenChange(false)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             Fechar
           </Button>
         </div>

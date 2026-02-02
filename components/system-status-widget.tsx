@@ -52,32 +52,32 @@ export function SystemStatusWidget() {
   const getStatusInfo = (status: number) => {
     switch (status) {
       case 2:
-        return { label: "Operacional", color: "bg-green-500/10 text-green-500 hover:bg-green-500/20", icon: CheckCircle2 }
+        return { label: "Operacional", color: "bg-green-50 text-green-700 hover:bg-green-100", icon: CheckCircle2 }
       case 8:
       case 9:
-        return { label: "Indisponível", color: "bg-red-500/10 text-red-500 hover:bg-red-500/20", icon: XCircle }
+        return { label: "Indisponível", color: "bg-red-50 text-red-700 hover:bg-red-100", icon: XCircle }
       case 0:
-        return { label: "Pausado", color: "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20", icon: Clock }
+        return { label: "Pausado", color: "bg-amber-50 text-amber-700 hover:bg-amber-100", icon: Clock }
       default:
-        return { label: "Desconhecido", color: "bg-slate-500/10 text-slate-500 hover:bg-slate-500/20", icon: AlertCircle }
+        return { label: "Desconhecido", color: "bg-slate-50 text-slate-600 hover:bg-slate-100", icon: AlertCircle }
     }
   }
 
   return (
-    <Card className="col-span-1 border-slate-800 bg-slate-900/50">
+    <Card className="col-span-1 border-border bg-white shadow-none">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-slate-200">
+        <CardTitle className="text-sm font-medium text-card-foreground">
           Status dos Serviços
         </CardTitle>
-        <Activity className="h-4 w-4 text-orange-500" />
+        <Activity className="h-4 w-4 text-primary" />
       </CardHeader>
       <CardContent>
         {loading ? (
           <div className="flex items-center justify-center py-4">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         ) : error ? (
-          <div className="text-xs text-red-400 py-2">{error}</div>
+          <div className="text-xs text-destructive py-2">{error}</div>
         ) : (
           <div className="space-y-4 pt-2">
             {monitors.map((monitor) => {
@@ -89,7 +89,7 @@ export function SystemStatusWidget() {
                     <div className={`p-1.5 rounded-full ${statusInfo.color.split(" ")[0]}`}>
                       <Icon className={`h-3 w-3 ${statusInfo.color.split(" ")[1]}`} />
                     </div>
-                    <span className="text-sm font-medium text-slate-300 truncate max-w-[120px] sm:max-w-[150px]">
+                    <span className="text-sm font-medium text-muted-foreground truncate max-w-[120px] sm:max-w-[150px]">
                       {monitor.friendly_name}
                     </span>
                   </div>
@@ -100,7 +100,7 @@ export function SystemStatusWidget() {
               )
             })}
             {monitors.length === 0 && (
-              <div className="text-xs text-slate-500 text-center py-2">
+              <div className="text-xs text-muted-foreground text-center py-2">
                 Nenhum monitor configurado
               </div>
             )}

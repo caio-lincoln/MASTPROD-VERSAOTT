@@ -216,50 +216,50 @@ export default function RisksPage() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case "Crítico":
-        return "bg-red-500/10 text-red-400 border-red-500/20"
+        return "bg-destructive/10 text-destructive border-destructive/20"
       case "Alto":
-        return "bg-orange-500/10 text-orange-400 border-orange-500/20"
+        return "bg-primary/10 text-primary border-primary/20"
       case "Médio":
-        return "bg-amber-500/10 text-amber-400 border-amber-500/20"
+        return "bg-warning/10 text-warning border-warning/20"
       case "Baixo":
-        return "bg-green-500/10 text-green-400 border-green-500/20"
+        return "bg-success/10 text-success border-success/20"
       default:
-        return "bg-slate-500/10 text-slate-400 border-slate-500/20"
+        return "bg-slate-100 text-slate-600 border-slate-200"
     }
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="space-y-8 pb-10">
       <DashboardHeader 
         title="Riscos Ocupacionais" 
         subtitle="Identificação e controle de riscos"
       >
         <Button 
           onClick={() => setCreateModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Risco
         </Button>
       </DashboardHeader>
 
-      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar riscos por nome ou tipo..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+              className="pl-10 bg-white border-border text-foreground placeholder:text-muted-foreground focus:ring-primary/20 focus:border-primary transition-all duration-200"
             />
           </div>
           <Select value={selectedCompany} onValueChange={handleCompanyFilter}>
-            <SelectTrigger className="w-full md:w-[250px] bg-slate-800/50 border-slate-700 text-white">
-              <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+            <SelectTrigger className="w-full md:w-[250px] bg-white border-border text-foreground">
+              <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="Filtrar por empresa" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+            <SelectContent className="bg-popover border-border text-popover-foreground">
               <SelectItem value="all">Todas as empresas</SelectItem>
               {companies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>
@@ -273,10 +273,10 @@ export default function RisksPage() {
         {loading ? (
           <div className="text-center py-20">
             <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-400 animate-pulse">Carregando riscos...</p>
+            <p className="text-muted-foreground animate-pulse">Carregando riscos...</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+          <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive mb-4">
             {error}
           </div>
         ) : (
@@ -284,19 +284,19 @@ export default function RisksPage() {
             {paginatedRisks.map((risk) => (
               <div
                 key={risk.id}
-                className="glass-card p-5 rounded-xl hover:bg-slate-800/60 transition-all duration-300 group border border-slate-700/50 hover:border-primary/30"
+                className="bg-white p-5 rounded-lg hover:shadow-sm transition-all duration-300 group border border-border"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-                      <AlertTriangle className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+                    <div className="p-3 rounded-lg bg-white border border-slate-200 group-hover:border-primary/30 group-hover:bg-slate-50 transition-colors">
+                      <AlertTriangle className="w-6 h-6 text-slate-500 group-hover:text-primary transition-colors" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{risk.name}</h3>
+                      <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{risk.name}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                         <Building2 className="w-3 h-3" />
                         <span>{companies.find((c) => c.id === risk.companyId)?.name || ""}</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span className="w-1 h-1 rounded-full bg-border" />
                         <span>Setor: {risk.sector}</span>
                       </div>
                     </div>
@@ -305,23 +305,23 @@ export default function RisksPage() {
                     <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium border", getSeverityColor(risk.severity))}>
                       {risk.severity}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-700/50 text-slate-300 border border-slate-600/50">
+                    <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-white text-slate-600 border border-slate-200">
                       {risk.type}
                     </span>
                     <StatusBadge status={risk.status} />
                   </div>
                 </div>
 
-                <div className="bg-slate-900/20 rounded-lg p-4 mb-4 border border-slate-700/30">
-                  <p className="text-sm text-slate-300 mb-2"><span className="text-slate-500 font-medium">Medidas de Controle:</span> {risk.measures}</p>
-                  <p className="text-sm text-slate-300"><span className="text-slate-500 font-medium">Descrição:</span> {risk.description}</p>
+                <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-border/50">
+                  <p className="text-sm text-muted-foreground mb-2"><span className="text-muted-foreground font-medium">Medidas de Controle:</span> {risk.measures}</p>
+                  <p className="text-sm text-muted-foreground"><span className="text-muted-foreground font-medium">Descrição:</span> {risk.description}</p>
                 </div>
 
                 <div className="flex justify-end gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-white hover:bg-slate-700"
+                    className="text-muted-foreground hover:text-foreground hover:bg-slate-100"
                     onClick={() => setViewingRisk(risk)}
                   >
                     <Eye className="w-4 h-4 mr-2" />
@@ -330,7 +330,7 @@ export default function RisksPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-primary hover:bg-primary/10"
+                    className="text-muted-foreground hover:text-primary hover:bg-blue-50"
                     onClick={() => setEditingRisk(risk)}
                   >
                     <Edit className="w-4 h-4 mr-2" />
@@ -339,7 +339,7 @@ export default function RisksPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                    className="text-muted-foreground hover:text-red-700 hover:bg-red-50"
                     onClick={() => handleDeleteRisk(risk.id)}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />

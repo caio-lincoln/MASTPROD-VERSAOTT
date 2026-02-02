@@ -433,19 +433,19 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Nova Empresa" : "Editar Empresa"}</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             {mode === "create" ? "Preencha os dados da nova empresa" : "Atualize as informações da empresa"}
           </DialogDescription>
         </DialogHeader>
 
         {step === 0 ? (
           <div className="space-y-6 py-4">
-            <div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700">
-              <div className="mb-6 p-4 bg-slate-800 rounded border border-slate-700">
-                <Label className="text-orange-400 font-semibold mb-2 block">Tipo de Empregador</Label>
+            <div className="bg-white p-4 rounded-lg border border-border">
+              <div className="mb-6 p-4 bg-white rounded-lg border border-border">
+                <Label className="text-primary font-semibold mb-2 block">Tipo de Empregador</Label>
                 <Select 
                   value={isCPF ? "cpf" : "cnpj"} 
                   onValueChange={(value) => {
@@ -466,18 +466,18 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     }
                   }}
                 >
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white w-full">
+                  <SelectTrigger className="bg-white border-border text-foreground w-full">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-foreground">
                     <SelectItem value="cnpj">Pessoa Jurídica (CNPJ)</SelectItem>
                     <SelectItem value="cpf">Pessoa Física (CPF)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <h3 className="text-lg font-medium text-orange-400 mb-2">Classificação eSocial</h3>
-              <p className="text-slate-400 text-sm mb-4">
+              <h3 className="text-lg font-medium text-primary mb-2">Classificação eSocial</h3>
+              <p className="text-muted-foreground text-sm mb-4">
                 {isCPF 
                   ? "Para empregador Pessoa Física (CPF), selecione apenas se for Produtor Rural."
                   : "Responda as perguntas abaixo para configurar corretamente o perfil da empresa."}
@@ -488,7 +488,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 {!isCPF && (
                   <>
                 {/* 1. Cooperativa */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors">
                   <Checkbox 
                     id="indCoop" 
                     checked={indicators.indCoop}
@@ -496,17 +496,17 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor="indCoop" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indCoop" className="text-foreground font-medium cursor-pointer">
                       É uma Cooperativa?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Se marcado, será enviado &lt;indCoop&gt;1&lt;/indCoop&gt; no XML.
                     </p>
                   </div>
                 </div>
 
                 {/* 2. Construtora */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors">
                   <Checkbox 
                     id="indConstr" 
                     checked={indicators.indConstr}
@@ -514,17 +514,17 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor="indConstr" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indConstr" className="text-foreground font-medium cursor-pointer">
                       É uma Construtora?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Se marcado, será enviado &lt;indConstr&gt;1&lt;/indConstr&gt; no XML.
                     </p>
                   </div>
                 </div>
 
                 {/* 3. Desoneração */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors">
                   <Checkbox 
                     id="indDesFolha" 
                     checked={indicators.indDesFolha}
@@ -532,17 +532,17 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor="indDesFolha" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indDesFolha" className="text-foreground font-medium cursor-pointer">
                       Possui Desoneração da Folha?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Se marcado, será enviado &lt;indDesFolha&gt;1&lt;/indDesFolha&gt; no XML.
                     </p>
                   </div>
                 </div>
 
                 {/* 4. Entidade Educativa */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors">
                   <Checkbox 
                     id="indEntEd" 
                     checked={indicators.indEntEd}
@@ -550,17 +550,17 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor="indEntEd" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indEntEd" className="text-foreground font-medium cursor-pointer">
                       É uma Entidade Educativa?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Se marcado, será enviado &lt;indEntEd&gt;1&lt;/indEntEd&gt; no XML.
                     </p>
                   </div>
                 </div>
 
                 {/* 5. ETT */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors">
                   <Checkbox 
                     id="indEtt" 
                     checked={indicators.indEtt}
@@ -568,10 +568,10 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none">
-                    <Label htmlFor="indEtt" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indEtt" className="text-foreground font-medium cursor-pointer">
                       É uma Empresa de Trabalho Temporário?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Se marcado, será enviado &lt;indEtt&gt;1&lt;/indEtt&gt; no XML.
                     </p>
                   </div>
@@ -580,7 +580,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 )}
 
                 {/* 6. Produtor Rural */}
-                <div className="flex items-start space-x-3 p-3 rounded hover:bg-slate-800/80 transition-colors bg-slate-800/30">
+                <div className="flex items-start space-x-3 p-3 rounded hover:bg-accent transition-colors bg-white border border-border">
                   <Checkbox 
                     id="indProdRural" 
                     checked={indicators.indProdRural}
@@ -588,22 +588,22 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     className="mt-1"
                   />
                   <div className="grid gap-1.5 leading-none w-full">
-                    <Label htmlFor="indProdRural" className="text-white font-medium cursor-pointer">
+                    <Label htmlFor="indProdRural" className="text-foreground font-medium cursor-pointer">
                       É Produtor Rural?
                     </Label>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       Habilita campos específicos de Produtor Rural (infoProdRural).
                     </p>
 
                     {indicators.indProdRural && (
-                      <div className="mt-3 ml-1 pl-3 border-l-2 border-slate-600 space-y-3">
+                      <div className="mt-3 ml-1 pl-3 border-l-2 border-border space-y-3">
                         <div className="flex items-start space-x-3">
                           <Checkbox 
                             id="indPPS" 
                             checked={indicators.indPPS}
                             onCheckedChange={(checked) => setIndicators({...indicators, indPPS: !!checked})}
                           />
-                          <Label htmlFor="indPPS" className="text-slate-300 text-sm cursor-pointer">
+                          <Label htmlFor="indPPS" className="text-muted-foreground text-sm cursor-pointer">
                             Indicativo de Previdência Social (indPPS)?
                           </Label>
                         </div>
@@ -613,7 +613,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                             checked={indicators.indCPF}
                             onCheckedChange={(checked) => setIndicators({...indicators, indCPF: !!checked})}
                           />
-                          <Label htmlFor="indCPF" className="text-slate-300 text-sm cursor-pointer">
+                          <Label htmlFor="indCPF" className="text-muted-foreground text-sm cursor-pointer">
                             Indicativo de Contratação (indCPF)?
                           </Label>
                         </div>
@@ -625,8 +625,8 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
               </div>
             </div>
             
-            <div className="flex justify-end pt-6 border-t border-slate-800">
-              <Button onClick={() => setStep(1)} className="bg-orange-600 hover:bg-orange-700 text-white">
+            <div className="flex justify-end pt-6 border-t border-border">
+              <Button onClick={() => setStep(1)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 Próximo <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -634,13 +634,13 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
         ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex items-center gap-2 mb-4">
-            <Button type="button" variant="ghost" size="sm" onClick={() => setStep(0)} className="text-slate-400 hover:text-white -ml-2">
+            <Button type="button" variant="ghost" size="sm" onClick={() => setStep(0)} className="text-muted-foreground hover:text-foreground -ml-2">
               <ArrowLeft className="mr-2 h-4 w-4" /> Voltar para Classificação
             </Button>
           </div>
           {/* Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Informações Básicas
             </h3>
@@ -653,7 +653,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Nome da empresa"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                   required
                 />
               </div>
@@ -666,14 +666,14 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     placeholder={isCPF ? "000.000.000-00" : "00.000.000/0000-00"}
                     value={formData.cnpj}
                     onChange={(e) => setFormData({ ...formData, cnpj: formatCNPJ(e.target.value) })}
-                    className="bg-slate-800/50 border-slate-700 text-white flex-1"
+                    className="bg-white border-border text-foreground flex-1"
                     required
                   />
                   <Button 
                     type="button" 
                     variant="outline" 
                     size="icon" 
-                    className="border-slate-700 bg-slate-800 hover:bg-slate-700"
+                    className="border-border bg-white hover:bg-accent"
                     onClick={handleSearchCNPJ}
                     disabled={loadingCnpj || isCPF}
                     title={isCPF ? "Busca automática indisponível para CPF" : "Buscar dados do CNPJ"}
@@ -691,7 +691,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="0000-0/00"
                   value={formData.cnae}
                   onChange={(e) => setFormData({ ...formData, cnae: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                   required
                 />
               </div>
@@ -706,7 +706,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                       variant="outline"
                       role="combobox"
                       aria-expanded={openLegalNature}
-                      className="w-full justify-between bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
+                      className="w-full justify-between bg-white border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                     >
                       {formData.legalNature
                         ? formData.legalNature
@@ -715,21 +715,21 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-[400px] p-0 bg-slate-900 border-slate-700" 
+                    className="w-[400px] p-0 bg-popover border-border" 
                     side="bottom" 
                     align="start"
                     sideOffset={4}
                     avoidCollisions={false}
                   >
-                    <Command className="bg-slate-900 text-white" filter={(value, search) => {
+                    <Command className="bg-popover text-foreground" filter={(value, search) => {
                       if (value.toLowerCase().includes(search.toLowerCase())) return 1
                       return 0
                     }}>
-                      <CommandInput placeholder="Buscar por código ou descrição..." className="text-white" />
+                      <CommandInput placeholder="Buscar por código ou descrição..." className="text-foreground" />
                       <CommandList className="max-h-[300px] overflow-y-auto pointer-events-auto">
                         <CommandEmpty>Nenhuma natureza jurídica encontrada.</CommandEmpty>
                         {legalNatureOptions.map((group) => (
-                          <CommandGroup key={group.heading} heading={group.heading} className="text-slate-400">
+                          <CommandGroup key={group.heading} heading={group.heading} className="text-muted-foreground">
                             {group.items.map((item) => (
                               <CommandItem
                                 key={item.value}
@@ -738,7 +738,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                                   setFormData({ ...formData, legalNature: item.value })
                                   setOpenLegalNature(false)
                                 }}
-                                className="text-white data-[selected=true]:bg-slate-800"
+                                className="text-foreground data-[selected=true]:bg-accent"
                               >
                                 <Check
                                   className={cn(
@@ -766,7 +766,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                       variant="outline"
                       role="combobox"
                       aria-expanded={openTaxClassification}
-                      className="w-full justify-between bg-slate-800/50 border-slate-700 text-white hover:bg-slate-700 hover:text-white"
+                      className="w-full justify-between bg-white border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                     >
                       {formData.taxClassification
                         ? formData.taxClassification
@@ -775,20 +775,20 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent 
-                    className="w-[400px] p-0 bg-slate-900 border-slate-700" 
+                    className="w-[400px] p-0 bg-popover border-border" 
                     side="bottom" 
                     align="start"
                     sideOffset={4}
                     avoidCollisions={false}
                   >
-                    <Command className="bg-slate-900 text-white" filter={(value, search) => {
+                    <Command className="bg-popover text-foreground" filter={(value, search) => {
                       if (value.toLowerCase().includes(search.toLowerCase())) return 1
                       return 0
                     }}>
-                      <CommandInput placeholder="Buscar por código ou descrição..." className="text-white" />
+                      <CommandInput placeholder="Buscar por código ou descrição..." className="text-foreground" />
                       <CommandList className="max-h-[300px] overflow-y-auto pointer-events-auto">
                         <CommandEmpty>Nenhuma classificação tributária encontrada.</CommandEmpty>
-                        <CommandGroup className="text-slate-400">
+                        <CommandGroup className="text-muted-foreground">
                           {(isCPF ? taxClassificationOptionsCPF : taxClassificationOptions).map((item) => (
                             <CommandItem
                               key={item.value}
@@ -797,7 +797,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                                 setFormData({ ...formData, taxClassification: item.value })
                                 setOpenTaxClassification(false)
                               }}
-                              className="text-white data-[selected=true]:bg-slate-800"
+                              className="text-foreground data-[selected=true]:bg-accent"
                             >
                               <Check
                                 className={cn(
@@ -823,10 +823,10 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     type="month"
                     value={formData.validityStartDate}
                     onChange={(e) => setFormData({ ...formData, validityStartDate: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white pl-10"
+                    className="bg-white border-border text-foreground pl-10"
                     required
                   />
-                  <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                  <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
 
@@ -838,7 +838,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="0"
                   value={formData.employees || ""}
                   onChange={(e) => setFormData({ ...formData, employees: Number.parseInt(e.target.value) || 0 })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
             </div>
@@ -850,7 +850,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                 placeholder="Descreva a atividade principal da empresa"
                 value={formData.activityDescription}
                 onChange={(e) => setFormData({ ...formData, activityDescription: e.target.value })}
-                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
+                className="bg-white border-border text-foreground min-h-[80px]"
                 required
               />
             </div>
@@ -858,7 +858,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
           {/* Endereço */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               Endereço
             </h3>
@@ -871,7 +871,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Rua, número, complemento"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                   required
                 />
               </div>
@@ -884,7 +884,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     placeholder="Cidade"
                     value={formData.city}
                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
@@ -897,7 +897,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                     maxLength={2}
                     value={formData.state}
                     onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-                    className="bg-slate-800/50 border-slate-700 text-white"
+                    className="bg-white border-border text-foreground"
                     required
                   />
                 </div>
@@ -907,7 +907,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
               <Phone className="w-4 h-4" />
               Contato
             </h3>
@@ -920,7 +920,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="(00) 0000-0000"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
 
@@ -932,7 +932,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="contato@empresa.com.br"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
 
@@ -943,14 +943,14 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   placeholder="Nome do responsável"
                   value={formData.responsible}
                   onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-orange-400 flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
               Certificado A1
             </h3>
 
@@ -964,7 +964,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   const file = e.target.files && e.target.files[0] ? e.target.files[0] : null
                   setCertificateFile(file)
                 }}
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-border text-foreground"
               />
             </div>
 
@@ -975,7 +975,7 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
               type="password"
               value={certificatePassword}
               onChange={(e) => setCertificatePassword(e.target.value)}
-              className="bg-slate-800/50 border-slate-700 text-white"
+              className="bg-white border-border text-foreground"
             />
           </div>
 
@@ -985,22 +985,22 @@ export function CompanyModal({ open, onOpenChange, onSubmit, initialData, mode, 
                   id="removeCertificate"
                   checked={removeCertificate}
                   onCheckedChange={(checked) => setRemoveCertificate(!!checked)}
-                  className="border-slate-700"
+                  className="border-border"
                 />
-                <Label htmlFor="removeCertificate" className="text-sm text-slate-300">
+                <Label htmlFor="removeCertificate" className="text-sm text-muted-foreground">
                   Remover certificado padrão atual desta empresa
                 </Label>
               </div>
             )}
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-slate-700 hover:bg-slate-800 text-slate-300 hover:text-white">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-border hover:bg-accent text-muted-foreground hover:text-foreground">
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
               disabled={isLoading}
             >
               {isLoading ? (

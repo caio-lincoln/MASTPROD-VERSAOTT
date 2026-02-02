@@ -90,37 +90,37 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle>{mode === "create" ? "Novo Risco Ocupacional" : "Editar Risco Ocupacional"}</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Preencha as informações detalhadas sobre o risco identificado
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Seção: Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400 flex items-center gap-2">Informações Básicas</h3>
+            <h3 className="text-lg font-semibold text-primary flex items-center gap-2">Informações Básicas</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-slate-300">
-                  Empresa <span className="text-red-400">*</span>
+                <Label className="text-muted-foreground">
+                  Empresa <span className="text-destructive">*</span>
                 </Label>
                 <Select value={formData.companyId} onValueChange={handleCompanyChange}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-white border-border text-foreground">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {companies.map((company) => (
                       <SelectItem
                         key={company.id}
                         value={company.id.toString()}
-                        className="text-white hover:bg-slate-700"
+                        className="text-popover-foreground hover:bg-muted"
                       >
                         <div className="flex flex-col">
                           <span className="font-medium">{company.name}</span>
-                          <span className="text-xs text-slate-400">{company.cnpj}</span>
+                          <span className="text-xs text-muted-foreground">{company.cnpj}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -129,41 +129,41 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
               </div>
 
               <div>
-                <Label className="text-slate-300">
-                  Nome do Risco <span className="text-red-400">*</span>
+                <Label className="text-muted-foreground">
+                  Nome do Risco <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Ruído excessivo"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label className="text-slate-300">
-                  Tipo <span className="text-red-400">*</span>
+                <Label className="text-muted-foreground">
+                  Tipo <span className="text-destructive">*</span>
                 </Label>
                 <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-white border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                    <SelectItem value="Físico" className="text-white hover:bg-slate-700">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="Físico" className="text-popover-foreground hover:bg-muted">
                       Físico
                     </SelectItem>
-                    <SelectItem value="Químico" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Químico" className="text-popover-foreground hover:bg-muted">
                       Químico
                     </SelectItem>
-                    <SelectItem value="Biológico" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Biológico" className="text-popover-foreground hover:bg-muted">
                       Biológico
                     </SelectItem>
-                    <SelectItem value="Ergonômico" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Ergonômico" className="text-popover-foreground hover:bg-muted">
                       Ergonômico
                     </SelectItem>
-                    <SelectItem value="Acidente" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Acidente" className="text-popover-foreground hover:bg-muted">
                       Acidente
                     </SelectItem>
                   </SelectContent>
@@ -171,27 +171,27 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
               </div>
 
               <div>
-                <Label className="text-slate-300">
-                  Severidade <span className="text-red-400">*</span>
+                <Label className="text-muted-foreground">
+                  Severidade <span className="text-destructive">*</span>
                 </Label>
                 <Select
                   value={formData.severity}
                   onValueChange={(value) => setFormData({ ...formData, severity: value })}
                 >
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-white border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                    <SelectItem value="Baixo" className="text-white hover:bg-slate-700">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="Baixo" className="text-popover-foreground hover:bg-muted">
                       Baixo
                     </SelectItem>
-                    <SelectItem value="Médio" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Médio" className="text-popover-foreground hover:bg-muted">
                       Médio
                     </SelectItem>
-                    <SelectItem value="Alto" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Alto" className="text-popover-foreground hover:bg-muted">
                       Alto
                     </SelectItem>
-                    <SelectItem value="Crítico" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Crítico" className="text-popover-foreground hover:bg-muted">
                       Crítico
                     </SelectItem>
                   </SelectContent>
@@ -199,22 +199,22 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
               </div>
 
               <div>
-                <Label className="text-slate-300">Probabilidade</Label>
+                <Label className="text-muted-foreground">Probabilidade</Label>
                 <Select
                   value={formData.probability}
                   onValueChange={(value) => setFormData({ ...formData, probability: value })}
                 >
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-white border-border text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
-                    <SelectItem value="Baixa" className="text-white hover:bg-slate-700">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
+                    <SelectItem value="Baixa" className="text-popover-foreground hover:bg-muted">
                       Baixa
                     </SelectItem>
-                    <SelectItem value="Média" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Média" className="text-popover-foreground hover:bg-muted">
                       Média
                     </SelectItem>
-                    <SelectItem value="Alta" className="text-white hover:bg-slate-700">
+                    <SelectItem value="Alta" className="text-popover-foreground hover:bg-muted">
                       Alta
                     </SelectItem>
                   </SelectContent>
@@ -224,24 +224,24 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label className="text-slate-300">Setor</Label>
+                <Label className="text-muted-foreground">Setor</Label>
                 <Input
                   value={formData.sector}
                   onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                   placeholder="Ex: Produção"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-border text-foreground"
                 />
               </div>
 
               <div>
-                <Label className="text-slate-300">Data de Identificação</Label>
+                <Label className="text-muted-foreground">Data de Identificação</Label>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     type="date"
                     value={formData.identifiedDate}
                     onChange={(e) => setFormData({ ...formData, identifiedDate: e.target.value })}
-                    className="pl-10 bg-slate-800/50 border-slate-700 text-white"
+                    className="pl-10 bg-white border-border text-foreground"
                   />
                 </div>
               </div>
@@ -250,82 +250,82 @@ export function RiskModal({ open, onOpenChange, onSubmit, initialData, mode, com
 
           {/* Seção: Detalhamento */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400">Detalhamento do Risco</h3>
+            <h3 className="text-lg font-semibold text-primary">Detalhamento do Risco</h3>
 
             <div>
-              <Label className="text-slate-300">
-                Descrição <span className="text-red-400">*</span>
+              <Label className="text-muted-foreground">
+                Descrição <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descreva detalhadamente o risco identificado"
-                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
+                className="bg-white border-border text-foreground min-h-[80px]"
               />
             </div>
 
             <div>
-              <Label className="text-slate-300">Fonte Geradora</Label>
+              <Label className="text-muted-foreground">Fonte Geradora</Label>
               <Input
                 value={formData.source}
                 onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                 placeholder="Ex: Máquinas industriais em operação"
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-border text-foreground"
               />
             </div>
 
             <div>
-              <Label className="text-slate-300">Possíveis Consequências</Label>
+              <Label className="text-muted-foreground">Possíveis Consequências</Label>
               <Textarea
                 value={formData.consequences}
                 onChange={(e) => setFormData({ ...formData, consequences: e.target.value })}
                 placeholder="Descreva as possíveis consequências da exposição ao risco"
-                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
+                className="bg-white border-border text-foreground min-h-[80px]"
               />
             </div>
           </div>
 
           {/* Seção: Controle e Medidas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400">Controle e Medidas</h3>
+            <h3 className="text-lg font-semibold text-primary">Controle e Medidas</h3>
 
             <div>
-              <Label className="text-slate-300">
-                Medidas de Controle <span className="text-red-400">*</span>
+              <Label className="text-muted-foreground">
+                Medidas de Controle <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 value={formData.measures}
                 onChange={(e) => setFormData({ ...formData, measures: e.target.value })}
                 placeholder="Descreva as medidas de controle implementadas ou recomendadas"
-                className="bg-slate-800/50 border-slate-700 text-white min-h-[80px]"
+                className="bg-white border-border text-foreground min-h-[80px]"
               />
             </div>
 
             <div>
-              <Label className="text-slate-300">
-                Responsável <span className="text-red-400">*</span>
+              <Label className="text-muted-foreground">
+                Responsável <span className="text-destructive">*</span>
               </Label>
               <Input
                 value={formData.responsibleName}
                 onChange={(e) => setFormData({ ...formData, responsibleName: e.target.value })}
                 placeholder="Nome do responsável pela gestão do risco"
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-border text-foreground"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-border text-muted-foreground hover:bg-muted hover:text-foreground bg-transparent"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+              className="bg-primary hover:bg-primary/90"
             >
               {mode === "create" ? "Criar Risco" : "Salvar Alterações"}
             </Button>

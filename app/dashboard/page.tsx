@@ -70,21 +70,21 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-10">
+    <div className="space-y-8 pb-10">
       <DashboardHeader 
         title="Dashboard" 
         subtitle="Visão geral do sistema de gestão SST"
       >
-        <div className="flex items-center gap-2 bg-slate-900/50 p-1 rounded-lg border border-slate-800">
-          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-800 text-slate-400">7D</Button>
-          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-800 text-slate-400">30D</Button>
-          <Button variant="secondary" size="sm" className="text-xs h-7 bg-primary/10 text-primary hover:bg-primary/20">90D</Button>
+        <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-border">
+          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-100 text-muted-foreground">7D</Button>
+          <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-100 text-muted-foreground">30D</Button>
+          <Button variant="secondary" size="sm" className="text-xs h-7 bg-blue-50 text-blue-700 hover:bg-blue-100">90D</Button>
         </div>
       </DashboardHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={stat.title} className="animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
+          <div key={stat.title}>
             <KpiCard
               title={stat.title}
               value={stat.value}
@@ -109,18 +109,18 @@ export default function DashboardPage() {
                 recentTrainings.map((training, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-slate-800/50 transition-colors group border border-transparent hover:border-slate-700/50"
+                    className="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors group border border-transparent hover:border-border/50"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 rounded-lg bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-                        <GraduationCap className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-slate-100 text-slate-500 group-hover:text-primary transition-colors">
+                        <GraduationCap className="w-4 h-4" />
                       </div>
                       <div>
-                        <h4 className="font-medium text-white group-hover:text-primary transition-colors">{training.name}</h4>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                        <h4 className="font-medium text-foreground text-sm">{training.name}</h4>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
                           <Users className="w-3 h-3" />
                           <span>{training.employees} participantes</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-600" />
+                          <span className="w-0.5 h-0.5 rounded-full bg-muted-foreground" />
                           <Calendar className="w-3 h-3" />
                           <span>{training.date}</span>
                         </div>
@@ -132,10 +132,10 @@ export default function DashboardPage() {
               )}
             </div>
             
-            <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">
-              <Button variant="ghost" className="text-sm text-muted-foreground hover:text-white group">
-                Ver todos os treinamentos
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <div className="mt-4 pt-3 border-t border-border flex justify-end">
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
+                Ver todos
+                <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
             </div>
           </ContentContainer>
@@ -143,27 +143,25 @@ export default function DashboardPage() {
 
         <div className="space-y-6">
           <ContentContainer title="Ações Rápidas">
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 gap-2">
               {[
-                { label: "Novo Funcionário", href: "/dashboard/employees", icon: Users, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-                { label: "Agendar Treinamento", href: "/dashboard/trainings", icon: GraduationCap, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-                { label: "Registrar EPI", href: "/dashboard/ppe", icon: HardHat, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-                { label: "Enviar e-Social", href: "/dashboard/esocial", icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
+                { label: "Novo Funcionário", href: "/dashboard/employees", icon: Users },
+                { label: "Agendar Treinamento", href: "/dashboard/trainings", icon: GraduationCap },
+                { label: "Registrar EPI", href: "/dashboard/ppe", icon: HardHat },
+                { label: "Enviar e-Social", href: "/dashboard/esocial", icon: TrendingUp },
               ].map((action, index) => {
                 const Icon = action.icon
                 return (
                   <Link
                     key={index}
                     href={action.href}
-                    className="flex items-center gap-4 p-4 rounded-xl glass-card hover:bg-slate-800/80 transition-all duration-300 group relative overflow-hidden"
+                    className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-slate-50 hover:border-primary/20 transition-all duration-200 group"
                   >
-                    <div className={`p-3 rounded-lg ${action.bg} ${action.border} border group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className={`w-5 h-5 ${action.color}`} />
+                    <div className="p-2 rounded-md bg-slate-100 text-slate-600 group-hover:text-primary transition-colors">
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <span className="font-medium text-slate-200 group-hover:text-white transition-colors">{action.label}</span>
-                    <div className="absolute right-4 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                      <ArrowRight className="w-4 h-4 text-slate-400" />
-                    </div>
+                    <span className="font-medium text-foreground text-sm">{action.label}</span>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
                 )
               })}
@@ -172,15 +170,14 @@ export default function DashboardPage() {
 
           <SystemStatusWidget />
           
-          <div className="glass-card rounded-2xl p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-orange-600/10 opacity-50" />
+          <div className="bg-white border border-border rounded-lg p-5 relative overflow-hidden">
             <div className="relative z-10">
-              <h3 className="text-lg font-semibold text-white mb-2">Precisa de ajuda?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+              <h3 className="text-sm font-semibold text-foreground mb-1">Suporte Técnico</h3>
+              <p className="text-xs text-muted-foreground mb-3">
                 Consulte nossa documentação ou entre em contato com o suporte técnico.
               </p>
               <Link href="/dashboard/help" className="w-full">
-                <Button className="w-full bg-slate-900 border border-slate-700 hover:bg-slate-800">
+                <Button variant="outline" size="sm" className="w-full text-xs h-8">
                   Central de Ajuda
                 </Button>
               </Link>

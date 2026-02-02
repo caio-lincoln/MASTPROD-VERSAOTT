@@ -23,10 +23,10 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
 
   return (
     <div className="flex items-center justify-between px-2 py-4">
-      <div className="text-sm text-slate-400">
-        Mostrando <span className="font-medium text-white">{startItem}</span> a{" "}
-        <span className="font-medium text-white">{endItem}</span> de{" "}
-        <span className="font-medium text-white">{safeTotalItems}</span> resultados
+      <div className="text-sm text-muted-foreground">
+        Mostrando <span className="font-medium text-foreground">{startItem}</span> a{" "}
+        <span className="font-medium text-foreground">{endItem}</span> de{" "}
+        <span className="font-medium text-foreground">{safeTotalItems}</span> resultados
       </div>
 
       <div className="flex items-center gap-2">
@@ -35,7 +35,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
           size="sm"
           onClick={() => onPageChange(1)}
           disabled={safeCurrentPage === 1}
-          className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+          className="bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           <ChevronsLeft className="w-4 h-4" />
         </Button>
@@ -45,7 +45,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
           size="sm"
           onClick={() => onPageChange(safeCurrentPage - 1)}
           disabled={safeCurrentPage === 1}
-          className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+          className="bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           <ChevronLeft className="w-4 h-4" />
         </Button>
@@ -71,8 +71,8 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
                 onClick={() => onPageChange(pageNum)}
                 className={
                   safeCurrentPage === pageNum
-                    ? "bg-orange-500 text-white hover:bg-orange-600"
-                    : "bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    : "bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }
               >
                 {pageNum}
@@ -86,7 +86,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
           size="sm"
           onClick={() => onPageChange(safeCurrentPage + 1)}
           disabled={safeCurrentPage === safeTotalPages}
-          className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+          className="bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           <ChevronRight className="w-4 h-4" />
         </Button>
@@ -96,7 +96,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, itemsPerPage
           size="sm"
           onClick={() => onPageChange(safeTotalPages)}
           disabled={safeCurrentPage === safeTotalPages}
-          className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50"
+          className="bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
         >
           <ChevronsRight className="w-4 h-4" />
         </Button>

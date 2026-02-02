@@ -74,32 +74,22 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-background relative overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background via-muted/20 to-background pointer-events-none z-0" />
-      
-      {/* Decorative blobs */}
-      <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0" />
-
       <div className="relative z-10 flex h-full w-full">
         <Sidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-background/80 backdrop-blur-md border-b border-border px-6 py-4 flex items-center justify-between z-20">
+          <header className="bg-white border-b border-border h-14 px-6 flex items-center justify-between z-20">
             <div>
-              <h1 className="text-xl font-semibold text-foreground tracking-tight">Sistema SST</h1>
-              <p className="text-sm text-muted-foreground">Gestão de Saúde e Segurança do Trabalho</p>
+              <h1 className="text-sm font-semibold text-foreground tracking-tight">SST System</h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <ModeToggle />
-              <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-muted border border-border hover:bg-muted/80 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center text-white font-bold text-xs">
+              <div className="flex items-center gap-3 px-3 py-1.5 rounded-md hover:bg-slate-100 transition-colors cursor-pointer">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-[10px]">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-right hidden sm:block">
-                  <p className="text-sm font-medium text-foreground">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
+                  <p className="text-xs font-medium text-foreground">{user.name}</p>
                 </div>
               </div>
 
@@ -107,14 +97,14 @@ export default function DashboardLayout({
                 onClick={handleLogout}
                 variant="ghost"
                 size="icon"
-                className="text-slate-400 hover:text-white hover:bg-white/10 rounded-full"
+                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md w-8 h-8"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
               </Button>
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto bg-transparent p-6 relative">
+          <main className="flex-1 overflow-y-auto bg-slate-50 p-6 relative">
              {children}
           </main>
         </div>

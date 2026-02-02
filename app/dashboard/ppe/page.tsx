@@ -184,22 +184,22 @@ export default function PPEPage() {
             setEditingPPE(null)
             setIsModalOpen(true)
           }}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo EPI
         </Button>
       </DashboardHeader>
 
-      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar EPIs por nome, CA ou tipo..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+              className="pl-10 bg-white border-border text-foreground placeholder:text-muted-foreground focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
             />
           </div>
           <Select
@@ -209,11 +209,11 @@ export default function PPEPage() {
               setCurrentPage(1)
             }}
           >
-            <SelectTrigger className="w-full md:w-[250px] bg-slate-800/50 border-slate-700 text-white">
-              <Building2 className="w-4 h-4 mr-2 text-slate-400" />
+            <SelectTrigger className="w-full md:w-[250px] bg-white border-border text-foreground">
+              <Building2 className="w-4 h-4 mr-2 text-muted-foreground" />
               <SelectValue placeholder="Filtrar por empresa" />
             </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700 text-white">
+            <SelectContent className="bg-white border-border text-popover-foreground">
               <SelectItem value="all">Todas as empresas</SelectItem>
               {companies.map((company) => (
                 <SelectItem key={company.id} value={company.id}>
@@ -227,10 +227,10 @@ export default function PPEPage() {
         {loading ? (
           <div className="text-center py-20">
             <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-400 animate-pulse">Carregando EPIs...</p>
+            <p className="text-muted-foreground animate-pulse">Carregando EPIs...</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 mb-4">
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 mb-4">
             {error}
           </div>
         ) : (
@@ -238,20 +238,20 @@ export default function PPEPage() {
             {paginatedPPE.map((item) => (
               <div
                 key={item.id}
-                className="glass-card p-5 rounded-xl hover:bg-slate-800/60 transition-all duration-300 group border border-slate-700/50 hover:border-primary/30"
+                className="bg-white p-5 rounded-lg hover:bg-slate-50 transition-all duration-300 group border border-border hover:border-primary/30"
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-slate-800 border border-slate-700 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-                      <Package className="w-6 h-6 text-slate-400 group-hover:text-primary transition-colors" />
+                    <div className="p-3 rounded-xl bg-white border border-border group-hover:border-primary/30 group-hover:bg-blue-50 transition-colors shadow-sm">
+                      <Package className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">{item.name}</h3>
+                      <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</h3>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                        <span className="font-medium text-slate-400">CA: {item.ca}</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span className="font-medium text-muted-foreground">CA: {item.ca}</span>
+                        <span className="w-1 h-1 rounded-full bg-border" />
                         <span>{item.type}</span>
-                        <span className="w-1 h-1 rounded-full bg-slate-600" />
+                        <span className="w-1 h-1 rounded-full bg-border" />
                         <div className="flex items-center gap-1">
                           <Building2 className="w-3 h-3" />
                           <span>{companies.find((c) => c.id === item.companyId)?.name || ""}</span>
@@ -265,18 +265,18 @@ export default function PPEPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-y border-slate-700/50 mb-4 bg-slate-900/20 rounded-lg px-4 mx-[-0.5rem]">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-4 border-y border-border/50 mb-4 bg-white rounded-lg px-4 mx-[-0.5rem]">
                   <div className="flex items-center gap-3">
-                    <Package className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-300">Estoque: <span className={cn("font-medium", item.quantity <= item.minQuantity ? "text-red-400" : "text-white")}>{item.quantity}</span></span>
+                    <Package className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Estoque: <span className={cn("font-medium", item.quantity <= item.minQuantity ? "text-destructive" : "text-foreground")}>{item.quantity}</span></span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Package className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-300">Mínimo: <span className="text-white">{item.minQuantity}</span></span>
+                    <Package className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Mínimo: <span className="text-foreground">{item.minQuantity}</span></span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Calendar className="w-4 h-4 text-slate-500" />
-                    <span className="text-sm text-slate-300">Validade: {item.validity}</span>
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Validade: {item.validity}</span>
                   </div>
                 </div>
 
@@ -284,7 +284,7 @@ export default function PPEPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:text-white hover:bg-slate-700"
+                    className="text-muted-foreground hover:text-foreground hover:bg-slate-100"
                     onClick={() => setDetailsPPE(item)}
                   >
                     <Eye className="w-4 h-4 mr-2" />
@@ -295,7 +295,7 @@ export default function PPEPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-400 hover:text-orange-400 hover:bg-orange-500/10"
+                        className="text-muted-foreground hover:text-primary hover:bg-blue-50"
                         onClick={() => {
                           setEditingPPE(item)
                           setIsModalOpen(true)
@@ -307,7 +307,7 @@ export default function PPEPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                        className="text-muted-foreground hover:text-destructive hover:bg-red-50"
                         onClick={() => setCancelPPE(item)}
                       >
                         <XCircle className="w-4 h-4 mr-2" />
@@ -335,8 +335,8 @@ export default function PPEPage() {
 
         {filteredPPE.length === 0 && !loading && (
           <div className="text-center py-12">
-            <Package className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-400">Nenhum EPI encontrado para os filtros selecionados</p>
+            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">Nenhum EPI encontrado para os filtros selecionados</p>
           </div>
         )}
       </ContentContainer>

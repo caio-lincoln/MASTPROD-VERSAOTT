@@ -38,31 +38,30 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "bg-sidebar/95 backdrop-blur-xl border-r border-white/5 flex flex-col transition-all duration-300 relative z-50 h-screen sticky top-0",
-        collapsed ? "w-20" : "w-72",
+        "bg-white border-r border-border flex flex-col transition-all duration-300 relative z-50 h-screen sticky top-0",
+        collapsed ? "w-20" : "w-64",
       )}
     >
-      <div className="p-6 flex items-center justify-between">
+      <div className="p-4 flex items-center justify-between border-b border-border/40 h-16">
         {!collapsed && (
           <div className="flex items-center gap-3 animate-in fade-in duration-300">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <Shield className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="font-bold text-white text-lg tracking-tight">SST</h2>
-              <p className="text-xs text-muted-foreground font-medium tracking-wide">ENTERPRISE</p>
+              <h2 className="font-semibold text-foreground text-sm tracking-tight">SST System</h2>
             </div>
           </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="p-2 rounded-lg hover:bg-white/5 text-muted-foreground hover:text-white transition-all duration-200"
+          className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-all duration-200"
         >
-          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => {
           const Icon = item.icon
           const isActive = pathname === item.href
@@ -72,30 +71,26 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden",
+                "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200 group relative",
                 isActive
-                  ? "bg-gradient-to-r from-primary/10 to-transparent text-primary font-medium"
-                  : "text-muted-foreground hover:text-white hover:bg-white/5",
+                  ? "bg-slate-100 text-primary font-medium"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-50",
               )}
               title={collapsed ? item.label : undefined}
             >
               {isActive && (
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
               )}
               
               <Icon className={cn(
-                "w-5 h-5 flex-shrink-0 transition-colors duration-200",
-                isActive ? "text-primary drop-shadow-sm" : "text-muted-foreground group-hover:text-white"
+                "w-4 h-4 flex-shrink-0 transition-colors duration-200",
+                isActive ? "text-primary" : "text-slate-500 group-hover:text-slate-700"
               )} />
               
               {!collapsed && (
-                <span className="text-sm tracking-wide truncate animate-in fade-in duration-200">
+                <span className="text-sm truncate animate-in fade-in duration-200">
                   {item.label}
                 </span>
-              )}
-              
-              {isActive && !collapsed && (
-                <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               )}
             </Link>
           )
@@ -103,12 +98,12 @@ export function Sidebar() {
       </nav>
       
       {!collapsed && (
-        <div className="p-6 mt-auto">
-          <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-4 border border-white/5">
-            <h4 className="text-sm font-semibold text-white mb-1">Precisa de ajuda?</h4>
-            <p className="text-xs text-muted-foreground mb-3">Consulte a documentação oficial ou fale com o suporte.</p>
-            <button className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
-              Abrir Central de Ajuda &rarr;
+        <div className="p-4 mt-auto border-t border-border">
+          <div className="bg-slate-50 rounded-lg p-4 border border-border/50">
+            <h4 className="text-xs font-semibold text-foreground mb-1">Suporte Técnico</h4>
+            <p className="text-[10px] text-muted-foreground mb-2">Dúvidas? Consulte o manual.</p>
+            <button className="text-[10px] font-medium text-primary hover:underline">
+              Acessar Ajuda
             </button>
           </div>
         </div>

@@ -104,7 +104,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-background border-border text-foreground max-w-3xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {mode === "create" ? "Novo Funcionário" : "Editar Funcionário"}
@@ -114,33 +114,33 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Informações Básicas */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">
               Informações Básicas
             </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-slate-300">
+              <Label htmlFor="name" className="text-muted-foreground">
                 Nome Completo *
               </Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-input text-foreground"
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="cpf" className="text-slate-300">
+                <Label htmlFor="cpf" className="text-muted-foreground">
                   CPF *
                 </Label>
                 <Input
                   id="cpf"
                   value={formData.cpf}
                   onChange={(e) => setFormData({ ...formData, cpf: formatCPF(e.target.value) })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   placeholder="000.000.000-00"
                   maxLength={14}
                   required
@@ -148,7 +148,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="birthDate" className="text-slate-300">
+                <Label htmlFor="birthDate" className="text-muted-foreground">
                   Data de Nascimento *
                 </Label>
                 <Input
@@ -156,7 +156,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   type="date"
                   value={formData.birthDate}
                   onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   required
                 />
               </div>
@@ -165,11 +165,11 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">Contato</h3>
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">Contato</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">
+                <Label htmlFor="email" className="text-muted-foreground">
                   Email *
                 </Label>
                 <Input
@@ -177,20 +177,20 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-slate-300">
+                <Label htmlFor="phone" className="text-muted-foreground">
                   Telefone *
                 </Label>
                 <Input
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: formatPhone(e.target.value) })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   placeholder="(00) 00000-0000"
                   maxLength={15}
                   required
@@ -201,22 +201,22 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Informações Profissionais */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">
               Informações Profissionais
             </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="company" className="text-slate-300">
+              <Label htmlFor="company" className="text-muted-foreground">
                 Empresa *
               </Label>
               <Select
                 value={formData.companyId}
                 onValueChange={(value) => setFormData({ ...formData, companyId: value })}
               >
-                <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                <SelectTrigger className="bg-white border-input text-foreground">
                   <SelectValue placeholder="Selecione a empresa" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                <SelectContent className="bg-popover border-border text-popover-foreground">
                   {companies.map((company) => (
                     <SelectItem key={company.id} value={company.id.toString()}>
                       {company.name} - {company.cnpj}
@@ -228,34 +228,34 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="position" className="text-slate-300">
+                <Label htmlFor="position" className="text-muted-foreground">
                   Cargo *
                 </Label>
                 <Input
                   id="position"
                   value={formData.position}
                   onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="department" className="text-slate-300">
+                <Label htmlFor="department" className="text-muted-foreground">
                   Departamento *
                 </Label>
                 <Input
                   id="department"
                   value={formData.department}
                   onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="admission" className="text-slate-300">
+              <Label htmlFor="admission" className="text-muted-foreground">
                 Data de Admissão *
               </Label>
               <Input
@@ -263,7 +263,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 type="date"
                 value={formData.admission}
                 onChange={(e) => setFormData({ ...formData, admission: e.target.value })}
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-input text-foreground"
                 required
               />
             </div>
@@ -271,44 +271,44 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
 
           {/* Endereço */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-orange-400 border-b border-slate-700 pb-2">Endereço</h3>
+            <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">Endereço</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="address" className="text-slate-300">
+              <Label htmlFor="address" className="text-muted-foreground">
                 Endereço *
               </Label>
               <Input
                 id="address"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="bg-slate-800/50 border-slate-700 text-white"
+                className="bg-white border-input text-foreground"
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city" className="text-slate-300">
+                <Label htmlFor="city" className="text-muted-foreground">
                   Cidade *
                 </Label>
                 <Input
                   id="city"
                   value={formData.city}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="state" className="text-slate-300">
+                <Label htmlFor="state" className="text-muted-foreground">
                   Estado *
                 </Label>
                 <Input
                   id="state"
                   value={formData.state}
                   onChange={(e) => setFormData({ ...formData, state: e.target.value.toUpperCase() })}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-white border-input text-foreground"
                   placeholder="SP"
                   maxLength={2}
                   required
@@ -317,20 +317,20 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground bg-transparent"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+              className="bg-primary hover:bg-primary/90 w-full md:w-auto"
             >
-              {mode === "create" ? "Criar Funcionário" : "Salvar Alterações"}
+              {mode === "create" ? "Cadastrar Funcionário" : "Salvar Alterações"}
             </Button>
           </div>
         </form>

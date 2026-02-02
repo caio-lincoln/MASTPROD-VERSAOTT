@@ -25,6 +25,7 @@ import {
   CheckCircle
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Pagination } from "@/components/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -53,8 +54,8 @@ import {
 const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
           <div className="p-6 border-b border-border">
             <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2240</h3>
             <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2240.</p>
@@ -66,7 +67,7 @@ const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
             >
               Cancelar
             </Button>
@@ -79,8 +80,8 @@ const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
           <div className="p-6 border-b border-border">
             <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2220</h3>
             <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2220.</p>
@@ -92,7 +93,7 @@ const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
             >
               Cancelar
             </Button>
@@ -105,8 +106,8 @@ const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
 const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-card border border-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
+        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
           <div className="p-6 border-b border-border">
             <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2210</h3>
             <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2210.</p>
@@ -118,7 +119,7 @@ const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             <Button
               onClick={onClose}
               variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-muted bg-transparent"
+              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
             >
               Cancelar
             </Button>
@@ -156,36 +157,36 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
   if (!isOpen) return null
 
   return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
-        <div className="bg-card border border-border rounded-xl max-w-md w-full p-6 shadow-2xl">
+      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+        <div className="bg-white border border-border rounded-lg max-w-md w-full p-6 shadow-sm">
           <h3 className="text-xl font-bold text-foreground mb-4">Gerar S-1000</h3>
           <p className="text-sm text-muted-foreground mb-4">Selecione a empresa para gerar o evento inicial S-1000.</p>
           
           {error && (
-            <Alert className="mb-4 bg-destructive/10 border-destructive/20">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <AlertTitle className="text-destructive">Erro de Validação</AlertTitle>
-              <AlertDescription className="text-destructive text-sm whitespace-pre-line mt-1">{error}</AlertDescription>
+            <Alert className="mb-4 bg-red-50 border-red-200">
+              <AlertCircle className="h-4 w-4 text-red-700" />
+              <AlertTitle className="text-red-700">Erro de Validação</AlertTitle>
+              <AlertDescription className="text-red-700 text-sm whitespace-pre-line mt-1">{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-muted-foreground">Selecione a Empresa</Label>
-              <select 
-                className="w-full bg-muted border-border text-foreground rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
-                value={selectedCompany}
-                onChange={(e) => setSelectedCompany(e.target.value)}
-              >
-                <option value="">Selecione...</option>
-                {companies.map(c => (
-                  <option key={c.id} value={c.id}>{c.razao_social} ({c.cnpj})</option>
-                ))}
-              </select>
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-full bg-white border-border text-foreground">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.razao_social} ({c.cnpj})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={onClose} disabled={loading} className="border-border text-muted-foreground hover:bg-muted bg-transparent">
+              <Button variant="outline" onClick={onClose} disabled={loading} className="border-border text-muted-foreground hover:bg-slate-50 bg-white">
                 Cancelar
               </Button>
               <Button onClick={handleCreate} disabled={!selectedCompany || loading} className="bg-primary hover:bg-primary/90 text-primary-foreground">
@@ -380,11 +381,11 @@ export default function ESocialContent() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Enviado":
-        return <CheckCircle2 className="w-4 h-4 text-orange-400" />
+        return <CheckCircle2 className="w-4 h-4 text-success" />
       case "Pendente":
-        return <Clock className="w-4 h-4 text-amber-400" />
+        return <Clock className="w-4 h-4 text-warning" />
       case "Erro":
-        return <XCircle className="w-4 h-4 text-red-400" />
+        return <XCircle className="w-4 h-4 text-destructive" />
       default:
         return null
     }
@@ -393,13 +394,13 @@ export default function ESocialContent() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Enviado":
-        return "bg-orange-500/10 text-orange-400"
+        return "bg-green-50 text-green-700"
       case "Pendente":
-        return "bg-amber-500/10 text-amber-400"
+        return "bg-amber-50 text-amber-700"
       case "Erro":
-        return "bg-red-500/10 text-red-400"
+        return "bg-red-50 text-red-700"
       default:
-        return "bg-slate-500/10 text-slate-400"
+        return "bg-slate-100 text-slate-600"
     }
   }
 
@@ -655,11 +656,11 @@ export default function ESocialContent() {
     const canConsult = event.protocol && (event.status === "Enviado" || event.status === "Processando")
 
     return (
-      <div key={event.id} className="glass-card rounded-xl p-5 group hover:border-primary/30 transition-all duration-300">
+      <div key={event.id} className="bg-white border border-border rounded-lg p-5 group hover:border-primary/30 transition-all duration-300 shadow-sm">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h4 className="font-bold text-white mb-1.5 text-lg group-hover:text-primary transition-colors">{event.employee}</h4>
-            <div className="flex items-center gap-2 text-sm text-slate-400">
+            <h4 className="font-bold text-foreground mb-1.5 text-lg group-hover:text-primary transition-colors">{event.employee}</h4>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Building2 className="w-3.5 h-3.5" />
               <span>{event.company}</span>
             </div>
@@ -667,12 +668,12 @@ export default function ESocialContent() {
           <StatusBadge status={event.status} />
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-slate-400 mb-4 bg-slate-950/30 p-2 rounded-lg border border-slate-800/50">
+        <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4 bg-slate-50 p-2 rounded-lg border border-border">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-primary" />
             <span>{event.date}</span>
           </div>
-          <div className="w-px h-3 bg-slate-700" />
+          <div className="w-px h-3 bg-border" />
           <span>
             {type === "s2240" && `Risco: ${event.risk}`}
             {type === "s2220" && `Exame: ${event.exam}`}
@@ -684,24 +685,24 @@ export default function ESocialContent() {
         </div>
 
         {event.protocol && (
-          <div className="text-xs text-slate-500 mb-4 font-mono bg-slate-950/50 p-1.5 rounded border border-slate-800 inline-block">
+          <div className="text-xs text-muted-foreground mb-4 font-mono bg-slate-50 p-1.5 rounded border border-border inline-block">
             Protocolo: {event.protocol}
           </div>
         )}
 
         {hasError && (
-          <Alert className="mb-4 bg-red-500/5 border-red-500/20 backdrop-blur-sm">
-            <AlertCircle className="h-4 w-4 text-red-400" />
-            <AlertTitle className="text-red-400 text-xs font-bold">Erro no envio</AlertTitle>
-            <AlertDescription className="text-red-300/80 text-xs mt-1">{event.errorMessage}</AlertDescription>
+          <Alert className="mb-4 bg-red-50 border-red-200">
+            <AlertCircle className="h-4 w-4 text-red-700" />
+            <AlertTitle className="text-red-700 text-xs font-bold">Erro no envio</AlertTitle>
+            <AlertDescription className="text-red-700 text-xs mt-1">{event.errorMessage}</AlertDescription>
           </Alert>
         )}
 
-        <div className="flex flex-wrap gap-2 pt-2 border-t border-white/5">
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
           <Button
             size="sm"
             variant="ghost"
-            className="text-slate-300 hover:text-white hover:bg-white/5 h-8"
+            className="text-muted-foreground hover:text-foreground hover:bg-slate-100 h-8"
             onClick={() => setDetailsModal(event)}
           >
             <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -712,7 +713,7 @@ export default function ESocialContent() {
             <>
               <Button
                 size="sm"
-                className="bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 h-8"
+                className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 h-8"
                 onClick={() => handleGenerateXML(event)}
               >
                 <FileCode className="w-3.5 h-3.5 mr-1.5" />
@@ -720,7 +721,7 @@ export default function ESocialContent() {
               </Button>
               <Button
                 size="sm"
-                className="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 h-8"
+                className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 h-8"
                 onClick={() => handleSendEventClick(event)}
               >
                 <Send className="w-3.5 h-3.5 mr-1.5" />
@@ -732,7 +733,7 @@ export default function ESocialContent() {
           {canConsult && (
             <Button
               size="sm"
-              className="bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 border border-orange-500/20 h-8"
+              className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 h-8"
               onClick={() => handleConsultProcessing(event)}
             >
               <Clock className="w-3.5 h-3.5 mr-1.5" />
@@ -744,7 +745,7 @@ export default function ESocialContent() {
             <Button
               size="sm"
               variant="ghost"
-              className="text-slate-300 hover:text-white hover:bg-white/5 h-8"
+              className="text-muted-foreground hover:text-foreground hover:bg-slate-100 h-8"
               onClick={() => handleDownloadXML(event)}
             >
               <Download className="w-3.5 h-3.5 mr-1.5" />
@@ -755,7 +756,7 @@ export default function ESocialContent() {
           {hasError && (
             <Button
               size="sm"
-              className="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/20 h-8"
+              className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 h-8"
               onClick={() => handleResendEventClick(event)}
             >
               <Send className="w-3.5 h-3.5 mr-1.5" />
@@ -767,7 +768,7 @@ export default function ESocialContent() {
              <Button
               size="sm"
               variant="ghost"
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
+              className="text-red-700 hover:text-red-800 hover:bg-red-50 h-8 px-2"
               onClick={() => handleDeleteEvent(event)}
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -790,11 +791,11 @@ export default function ESocialContent() {
         subtitle="Gestão de Eventos e Transmissão Governamental"
       >
         <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="hidden md:flex h-8 bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white">
-                <Calendar className="w-3.5 h-3.5 mr-2 text-slate-400" />
+            <Button variant="outline" size="sm" className="hidden md:flex h-8 bg-white border-border text-muted-foreground hover:bg-slate-50 hover:text-foreground">
+                <Calendar className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
                 Últimos 30 dias
             </Button>
-            <span className="text-xs px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center h-8">
+            <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-primary border border-blue-100 flex items-center h-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
                 Ambiente de Homologação
             </span>
@@ -817,7 +818,7 @@ export default function ESocialContent() {
           icon={AlertTriangle} 
           trend="-5% essa semana" 
           trendUp={true}
-          className="from-red-950/50 to-red-900/10 border-red-900/20"
+          className="bg-red-50 border-red-200"
           description="Eventos retornados com erro pelo governo"
         />
         <KpiCard 
@@ -873,7 +874,7 @@ export default function ESocialContent() {
                 <Button
                   size="sm"
                   onClick={() => setShowLinkCompanyModal(true)}
-                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Vincular Empresa
@@ -881,12 +882,12 @@ export default function ESocialContent() {
             }
           >
               <div className="relative mt-2 mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar empresas vinculadas..."
                   value={companySearch}
                   onChange={(e) => handleCompanySearch(e.target.value)}
-                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                  className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
               
@@ -895,15 +896,15 @@ export default function ESocialContent() {
                   paginatedLinkedCompanies.map((company) => (
                     <div
                       key={company.id}
-                      className="flex items-center gap-4 p-4 rounded-xl bg-slate-900/40 border border-white/5 hover:border-primary/30 hover:bg-slate-800/60 transition-all duration-300 group"
+                      className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group"
                     >
-                      <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 border border-white/5 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 group-hover:scale-105 transition-transform">
                         <Building2 className="w-6 h-6 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-bold text-white text-lg">{company.razao_social}</h4>
-                        <p className="text-sm text-slate-400 flex items-center gap-2 mt-1">
-                          <span className="bg-slate-800 px-1.5 py-0.5 rounded text-xs font-mono">{company.cnpj}</span>
+                        <h4 className="font-bold text-foreground text-lg">{company.razao_social}</h4>
+                        <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
+                          <span className="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono border border-slate-200">{company.cnpj}</span>
                           <span>•</span>
                           <span>{company.total_funcionarios || 0} funcionários</span>
                           <span>•</span>
@@ -914,7 +915,7 @@ export default function ESocialContent() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-slate-400 hover:text-white hover:bg-white/5"
+                          className="text-muted-foreground hover:text-foreground hover:bg-accent"
                         >
                           <Settings className="w-4 h-4" />
                         </Button>
@@ -922,7 +923,7 @@ export default function ESocialContent() {
                           size="sm"
                           variant="ghost"
                           onClick={() => handleUnlinkCompany(company.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                          className="text-red-700 hover:text-red-800 hover:bg-red-50"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -930,7 +931,7 @@ export default function ESocialContent() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                  <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                     <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     {companySearch ? "Nenhuma empresa encontrada" : "Nenhuma empresa vinculada"}
                   </div>
@@ -953,26 +954,26 @@ export default function ESocialContent() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
              {/* Small Stat Cards for Event Types */}
              {[
-                { title: "S-2240 - Riscos", events: s2240Events, icon: AlertTriangle, color: "text-orange-400" },
-                { title: "S-2220 - ASO", events: s2220Events, icon: Activity, color: "text-blue-400" },
-                { title: "S-2210 - CAT", events: s2210Events, icon: AlertCircle, color: "text-red-400" }
+                { title: "S-2240 - Riscos", events: s2240Events, icon: AlertTriangle, color: "text-primary" },
+                { title: "S-2220 - ASO", events: s2220Events, icon: Activity, color: "text-info" },
+                { title: "S-2210 - CAT", events: s2210Events, icon: AlertCircle, color: "text-destructive" }
              ].map((item, idx) => (
-                <div key={idx} className="glass-card rounded-xl p-5 hover:bg-slate-800/40 transition-colors">
+                <div key={idx} className="bg-white border border-border rounded-lg p-5 hover:border-primary/30 hover:shadow-sm transition-all duration-300">
                     <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-medium text-slate-400">{item.title}</h4>
+                        <h4 className="text-sm font-medium text-muted-foreground">{item.title}</h4>
                         <item.icon className={`w-4 h-4 ${item.color}`} />
                     </div>
-                    <div className="text-2xl font-bold text-white mb-3">{item.events.length}</div>
-                    <div className="flex gap-3 text-xs">
-                        <span className="flex items-center gap-1 text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-500/20">
-                            <CheckCircle2 className="w-3 h-3" />
-                            {item.events.filter((e) => e.status === "Enviado").length}
-                        </span>
-                        <span className="flex items-center gap-1 text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
-                            <XCircle className="w-3 h-3" />
-                            {item.events.filter((e) => e.status === "Erro").length}
-                        </span>
-                    </div>
+                <div className="text-2xl font-bold text-foreground mb-3">{item.events.length}</div>
+                <div className="flex gap-3 text-xs">
+                    <span className="flex items-center gap-1 text-success bg-white px-2 py-0.5 rounded-full border border-border">
+                        <CheckCircle2 className="w-3 h-3 text-success" />
+                        <span className="text-slate-600">{item.events.filter((e) => e.status === "Enviado").length}</span>
+                    </span>
+                    <span className="flex items-center gap-1 text-destructive bg-white px-2 py-0.5 rounded-full border border-border">
+                        <XCircle className="w-3 h-3 text-destructive" />
+                        <span className="text-slate-600">{item.events.filter((e) => e.status === "Erro").length}</span>
+                    </span>
+                </div>
                 </div>
              ))}
           </div>
@@ -985,7 +986,7 @@ export default function ESocialContent() {
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2240Modal(true)}
-                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
@@ -993,7 +994,7 @@ export default function ESocialContent() {
             }
           >
               <div className="relative mt-2 mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por funcionário ou risco..."
                   value={searchS2240}
@@ -1001,7 +1002,7 @@ export default function ESocialContent() {
                     setSearchS2240(e.target.value)
                     setCurrentPageS2240(1)
                   }}
-                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                  className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
               <div className="space-y-4">{paginatedS2240.map((event) => renderEventCard(event, "s2240"))}</div>
@@ -1017,7 +1018,7 @@ export default function ESocialContent() {
                 </div>
               )}
               {filteredS2240.length === 0 && (
-                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                  <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                     <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     Nenhum evento encontrado
                   </div>
@@ -1032,7 +1033,7 @@ export default function ESocialContent() {
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2220Modal(true)}
-                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
@@ -1040,7 +1041,7 @@ export default function ESocialContent() {
             }
           >
               <div className="relative mt-2 mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por funcionário ou exame..."
                   value={searchS2220}
@@ -1048,7 +1049,7 @@ export default function ESocialContent() {
                     setSearchS2220(e.target.value)
                     setCurrentPageS2220(1)
                   }}
-                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                  className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
               <div className="space-y-4">{paginatedS2220.map((event) => renderEventCard(event, "s2220"))}</div>
@@ -1064,7 +1065,7 @@ export default function ESocialContent() {
                 </div>
               )}
                {filteredS2220.length === 0 && (
-                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                  <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                     <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     Nenhum evento encontrado
                   </div>
@@ -1079,7 +1080,7 @@ export default function ESocialContent() {
                 <Button
                   size="sm"
                   onClick={() => setShowCreateS2210Modal(true)}
-                  className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                  className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Novo Evento
@@ -1087,7 +1088,7 @@ export default function ESocialContent() {
             }
           >
               <div className="relative mt-2 mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por funcionário..."
                   value={searchS2210}
@@ -1095,7 +1096,7 @@ export default function ESocialContent() {
                     setSearchS2210(e.target.value)
                     setCurrentPageS2210(1)
                   }}
-                  className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                  className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                 />
               </div>
               <div className="space-y-4">{paginatedS2210.map((event) => renderEventCard(event, "s2210"))}</div>
@@ -1111,7 +1112,7 @@ export default function ESocialContent() {
                 </div>
               )}
                {filteredS2210.length === 0 && (
-                  <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                  <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                     <FileText className="w-12 h-12 mx-auto mb-3 opacity-20" />
                     Nenhum evento encontrado
                   </div>
@@ -1120,15 +1121,15 @@ export default function ESocialContent() {
         </TabsContent>
 
         <TabsContent value="mandatory" className="space-y-6 animate-in slide-in-from-bottom-2 duration-300">
-          <div className="glass-card p-1 rounded-xl inline-flex mb-6 bg-slate-900/50 border border-white/5">
+          <div className="p-1 rounded-xl inline-flex mb-6 bg-slate-100 border border-border">
              {['s1000', 's1005', 's1020'].map((tab) => (
                  <button
                     key={tab}
                     onClick={() => setMandatoryTab(tab)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                         mandatoryTab === tab 
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20' 
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-primary text-white shadow-sm' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`}
                  >
                     {tab.toUpperCase()}
@@ -1143,7 +1144,7 @@ export default function ESocialContent() {
                     <Button
                       size="sm"
                       onClick={() => setShowCreateS1000Modal(true)}
-                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
@@ -1151,7 +1152,7 @@ export default function ESocialContent() {
                 }
             >
                  <div className="relative mt-2 mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar por empresa..."
                       value={searchS1000}
@@ -1159,7 +1160,7 @@ export default function ESocialContent() {
                         setSearchS1000(e.target.value)
                         setCurrentPageS1000(1)
                       }}
-                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                      className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                   <div className="space-y-4">{paginatedS1000.map((event) => renderEventCard(event, "s1000"))}</div>
@@ -1175,7 +1176,7 @@ export default function ESocialContent() {
                     </div>
                   )}
                   {filteredS1000.length === 0 && (
-                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                         <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         Nenhum evento S-1000 encontrado
                     </div>
@@ -1190,7 +1191,7 @@ export default function ESocialContent() {
                     <Button
                       size="sm"
                       onClick={() => alert("Funcionalidade de criar S-1005 em desenvolvimento")}
-                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
@@ -1198,7 +1199,7 @@ export default function ESocialContent() {
                 }
             >
                  <div className="relative mt-2 mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar por empresa..."
                       value={searchS1005}
@@ -1206,7 +1207,7 @@ export default function ESocialContent() {
                         setSearchS1005(e.target.value)
                         setCurrentPageS1005(1)
                       }}
-                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                      className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                   <div className="space-y-4">{paginatedS1005.map((event) => renderEventCard(event, "s1005"))}</div>
@@ -1222,7 +1223,7 @@ export default function ESocialContent() {
                     </div>
                   )}
                   {filteredS1005.length === 0 && (
-                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                         <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         Nenhum evento S-1005 encontrado
                     </div>
@@ -1237,7 +1238,7 @@ export default function ESocialContent() {
                     <Button
                       size="sm"
                       onClick={() => alert("Funcionalidade de criar S-1020 em desenvolvimento")}
-                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
+                      className="bg-primary hover:bg-primary/90 text-white shadow-sm"
                     >
                       <Plus className="w-4 h-4 mr-2" />
                       Novo Evento
@@ -1245,7 +1246,7 @@ export default function ESocialContent() {
                 }
             >
                  <div className="relative mt-2 mb-6">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       placeholder="Buscar por empresa..."
                       value={searchS1020}
@@ -1253,7 +1254,7 @@ export default function ESocialContent() {
                         setSearchS1020(e.target.value)
                         setCurrentPageS1020(1)
                       }}
-                      className="pl-10 bg-slate-950/50 border-slate-800 text-white focus:ring-primary focus:border-primary transition-all"
+                      className="pl-10 bg-white border-border text-foreground focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                   <div className="space-y-4">{paginatedS1020.map((event) => renderEventCard(event, "s1020"))}</div>
@@ -1269,7 +1270,7 @@ export default function ESocialContent() {
                     </div>
                   )}
                   {filteredS1020.length === 0 && (
-                    <div className="text-center py-12 text-slate-500 bg-slate-900/20 rounded-xl border border-dashed border-slate-800">
+                    <div className="text-center py-12 text-muted-foreground bg-slate-50 rounded-xl border border-dashed border-border">
                         <Building2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
                         Nenhum evento S-1020 encontrado
                     </div>
@@ -1280,68 +1281,71 @@ export default function ESocialContent() {
       </Tabs>
 
       {showSendModal && sendModalEvent && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-xl max-w-md w-full p-6 shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-4">Enviar evento eSocial</h3>
-            <p className="text-sm text-slate-400 mb-4">
+        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-popover border border-border rounded-lg max-w-md w-full p-6 shadow-sm">
+            <h3 className="text-xl font-bold text-foreground mb-4">Enviar evento eSocial</h3>
+            <p className="text-sm text-muted-foreground mb-4">
               Selecione o certificado A1 para transmissão do evento.
             </p>
 
             {sendError && (
-              <Alert className="mb-4 bg-red-500/10 border-red-500/20">
-                <AlertCircle className="h-4 w-4 text-red-400" />
-                <AlertTitle className="text-red-400">Erro</AlertTitle>
-                <AlertDescription className="text-red-300 text-sm whitespace-pre-line mt-1">
+              <Alert className="mb-4 bg-red-50 border-red-200">
+                <AlertCircle className="h-4 w-4 text-red-700" />
+                <AlertTitle className="text-red-700">Erro</AlertTitle>
+                <AlertDescription className="text-red-700 text-sm whitespace-pre-line mt-1">
                   {sendError}
                 </AlertDescription>
               </Alert>
             )}
 
             <div className="space-y-4">
-              <div className="space-y-1 text-sm bg-slate-950/50 p-3 rounded-lg border border-slate-800">
-                <div className="text-slate-400 text-xs uppercase tracking-wider font-bold mb-1">Empresa</div>
-                <div className="text-white font-medium">{sendModalEvent.company}</div>
-                <div className="text-slate-500 text-xs mt-1 border-t border-slate-800 pt-1">
+              <div className="space-y-1 text-sm bg-white p-3 rounded-lg border border-border">
+                <div className="text-muted-foreground text-xs uppercase tracking-wider font-bold mb-1">Empresa</div>
+                <div className="text-foreground font-medium">{sendModalEvent.company}</div>
+                <div className="text-muted-foreground text-xs mt-1 border-t border-border pt-1">
                   Evento {sendModalEvent.eventType} • ID {sendModalEvent.id}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-slate-400">Certificado da empresa</Label>
-                <select
-                  className="w-full bg-slate-800 border-slate-700 text-white rounded-md p-2 focus:ring-2 focus:ring-primary focus:outline-none"
+                <Label className="text-muted-foreground">Certificado da empresa</Label>
+                <Select
                   value={selectedCertificateId}
-                  onChange={(e) => handleChangeSelectedCertificate(e.target.value)}
+                  onValueChange={handleChangeSelectedCertificate}
                   disabled={sendModalCertificates.length === 0 || sendLoading}
                 >
-                  <option value="">Selecione...</option>
-                  {sendModalCertificates.map((cert) => (
-                    <option key={cert.id} value={cert.id}>
-                      {cert.name}
-                      {cert.valid_to
-                        ? ` • válido até ${new Date(cert.valid_to).toLocaleDateString("pt-BR")}`
-                        : ""}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger className="w-full bg-white border-border text-foreground">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sendModalCertificates.map((cert) => (
+                      <SelectItem key={cert.id} value={cert.id}>
+                        {cert.name}
+                        {cert.valid_to
+                          ? ` • válido até ${new Date(cert.valid_to).toLocaleDateString("pt-BR")}`
+                          : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {sendModalCertificates.length === 0 && (
-                  <p className="text-xs text-amber-400">
+                  <p className="text-xs text-amber-600">
                     Nenhum certificado cadastrado para esta empresa. Cadastre um certificado antes de enviar.
                   </p>
                 )}
               </div>
 
               {sendModalDefaultCertificate && (
-                <div className="flex items-center gap-2 text-sm bg-primary/5 p-2 rounded border border-primary/10">
+                <div className="flex items-center gap-2 text-sm bg-blue-50 p-2 rounded border border-blue-100">
                   <input
                     id="use-default-cert"
                     type="checkbox"
-                    className="rounded border-slate-700 bg-slate-800 text-primary focus:ring-primary"
+                    className="rounded border-blue-300 bg-white text-blue-600 focus:ring-blue-500"
                     checked={useDefaultCertificate}
                     onChange={handleToggleUseDefaultCertificate}
                     disabled={sendLoading}
                   />
-                  <label htmlFor="use-default-cert" className="text-slate-300 cursor-pointer">
+                  <label htmlFor="use-default-cert" className="text-muted-foreground cursor-pointer">
                     Usar certificado padrão da empresa ({sendModalDefaultCertificate.name})
                   </label>
                 </div>
@@ -1352,7 +1356,7 @@ export default function ESocialContent() {
                   variant="outline"
                   onClick={handleCloseSendModal}
                   disabled={sendLoading}
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                  className="border-border text-muted-foreground hover:bg-accent bg-transparent"
                 >
                   Cancelar
                 </Button>
@@ -1398,16 +1402,16 @@ export default function ESocialContent() {
 
       {showLinkCompanyModal && (
         <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200"
           onClick={() => setShowLinkCompanyModal(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+            className="bg-background border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-slate-800">
-              <h3 className="text-xl font-bold text-white mb-2">Vincular Empresa ao e-Social</h3>
-              <p className="text-sm text-slate-400">Selecione uma empresa para vincular aos eventos e-Social</p>
+            <div className="p-6 border-b border-border">
+              <h3 className="text-xl font-bold text-foreground mb-2">Vincular Empresa ao e-Social</h3>
+              <p className="text-sm text-muted-foreground">Selecione uma empresa para vincular aos eventos e-Social</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
@@ -1416,21 +1420,21 @@ export default function ESocialContent() {
                   availableCompanies.map((company) => (
                     <div
                       key={company.id}
-                      className="flex items-center gap-3 p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-primary transition-all cursor-pointer group"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-white border border-border hover:border-primary transition-all cursor-pointer group"
                       onClick={() => handleLinkCompany(company.id)}
                     >
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                      <div className="p-2 rounded-lg bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-white">{company.razao_social}</h4>
-                        <p className="text-sm text-slate-400">
+                        <h4 className="font-semibold text-foreground">{company.razao_social}</h4>
+                        <p className="text-sm text-muted-foreground">
                           CNPJ: {company.cnpj} • {company.total_funcionarios || 0} funcionários • {company.cidade || 'N/A'}/{company.estado || 'UF'}
                         </p>
                       </div>
                       <Button
                         size="sm"
-                        className="bg-primary hover:bg-primary/90 text-white"
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
                         <Plus className="w-4 h-4 mr-1" />
                         Vincular
@@ -1438,16 +1442,16 @@ export default function ESocialContent() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-slate-400">Todas as empresas já estão vinculadas</div>
+                  <div className="text-center py-8 text-muted-foreground">Todas as empresas já estão vinculadas</div>
                 )}
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-800">
+            <div className="p-6 border-t border-border">
               <Button
                 onClick={() => setShowLinkCompanyModal(false)}
                 variant="outline"
-                className="w-full border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                className="w-full border-border text-muted-foreground hover:bg-accent hover:text-foreground bg-transparent"
               >
                 Fechar
               </Button>
@@ -1457,76 +1461,76 @@ export default function ESocialContent() {
       )}
 
       <Dialog open={!!detailsModal} onOpenChange={() => setDetailsModal(null)}>
-        <DialogContent className="bg-slate-900 border-slate-800 text-white w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl backdrop-blur-md">
+        <DialogContent className="bg-background border-border text-foreground w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto shadow-sm">
           <DialogHeader>
             <DialogTitle>Detalhes do Evento</DialogTitle>
-            <DialogDescription className="text-slate-400">Informações completas do evento e-Social</DialogDescription>
+            <DialogDescription className="text-muted-foreground">Informações completas do evento e-Social</DialogDescription>
           </DialogHeader>
 
           {detailsModal && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-slate-400">Funcionário</label>
-                  <p className="text-white font-medium break-words">{detailsModal.employee}</p>
+                  <label className="text-sm text-muted-foreground">Funcionário</label>
+                  <p className="text-foreground font-medium break-words">{detailsModal.employee}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-400">Status</label>
+                  <label className="text-sm text-muted-foreground">Status</label>
                   <div className="flex items-center gap-2 mt-1">
                     <StatusBadge status={detailsModal.status} />
                     {detailsModal.receipt && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-500/10 text-orange-400 border border-orange-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-success/10 text-success border border-success/20">
                         Processado (recibo recebido)
                       </span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-400">Data</label>
-                  <p className="text-white">{detailsModal.date}</p>
+                  <label className="text-sm text-muted-foreground">Data</label>
+                  <p className="text-foreground">{detailsModal.date}</p>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-400">Empresa</label>
-                  <p className="text-white break-words">{detailsModal.company}</p>
+                  <label className="text-sm text-muted-foreground">Empresa</label>
+                  <p className="text-foreground break-words">{detailsModal.company}</p>
                 </div>
                 {detailsModal.risk && (
                   <div className="sm:col-span-2">
-                    <label className="text-sm text-slate-400">Risco</label>
-                    <p className="text-white break-words">{detailsModal.risk}</p>
+                    <label className="text-sm text-muted-foreground">Risco</label>
+                    <p className="text-foreground break-words">{detailsModal.risk}</p>
                   </div>
                 )}
                 {detailsModal.exam && (
                   <div className="sm:col-span-2">
-                    <label className="text-sm text-slate-400">Exame</label>
-                    <p className="text-white break-words">{detailsModal.exam}</p>
+                    <label className="text-sm text-muted-foreground">Exame</label>
+                    <p className="text-foreground break-words">{detailsModal.exam}</p>
                   </div>
                 )}
                 {detailsModal.type && (
                   <div className="sm:col-span-2">
-                    <label className="text-sm text-slate-400">Tipo</label>
-                    <p className="text-white break-words">{detailsModal.type}</p>
+                    <label className="text-sm text-muted-foreground">Tipo</label>
+                    <p className="text-foreground break-words">{detailsModal.type}</p>
                   </div>
                 )}
                 {detailsModal.protocol && (
                   <div className="sm:col-span-2">
-                    <label className="text-sm text-slate-400">Protocolo</label>
-                    <p className="text-white font-mono text-sm break-all bg-slate-950 p-2 rounded border border-slate-800">{detailsModal.protocol}</p>
+                    <label className="text-sm text-muted-foreground">Protocolo</label>
+                    <p className="text-foreground font-mono text-sm break-all bg-slate-50 p-2 rounded border border-border">{detailsModal.protocol}</p>
                   </div>
                 )}
               </div>
 
               {detailsModal.receipt && (
                 <div className="sm:col-span-2">
-                  <label className="text-sm text-slate-400">Recibo</label>
-                  <p className="text-white font-mono text-sm break-all bg-slate-950 p-2 rounded border border-slate-800">{detailsModal.receipt}</p>
+                  <label className="text-sm text-muted-foreground">Recibo</label>
+                  <p className="text-foreground font-mono text-sm break-all bg-slate-50 p-2 rounded border border-border">{detailsModal.receipt}</p>
                 </div>
               )}
 
         {detailsModal.errorMessage && (
-                <Alert className="bg-red-500/10 border-red-500/20">
-                  <AlertCircle className="h-4 w-4 text-red-400" />
-                  <AlertTitle className="text-red-400">Erro no envio</AlertTitle>
-                  <AlertDescription className="text-red-300/80 break-words mt-1">
+                <Alert className="bg-destructive/10 border-destructive/20">
+                  <AlertCircle className="h-4 w-4 text-destructive" />
+                  <AlertTitle className="text-destructive">Erro no envio</AlertTitle>
+                  <AlertDescription className="text-destructive/90 break-words mt-1">
                     {detailsModal.errorMessage}
                   </AlertDescription>
                 </Alert>
@@ -1534,8 +1538,8 @@ export default function ESocialContent() {
 
               {detailsModal.xml && (
                 <div>
-                  <label className="text-sm text-slate-400 mb-2 block">XML do Evento</label>
-                  <pre className="bg-black/30 backdrop-blur-sm p-4 rounded-lg border border-white/10 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto shadow-inner">
+                  <label className="text-sm text-muted-foreground mb-2 block">XML do Evento</label>
+                  <pre className="bg-slate-50 p-4 rounded-lg border border-border text-xs text-muted-foreground overflow-x-auto max-h-60 overflow-y-auto">
                     <code className="break-all whitespace-pre-wrap font-mono">{detailsModal.xml}</code>
                   </pre>
                 </div>
@@ -1543,17 +1547,17 @@ export default function ESocialContent() {
 
               {detailsModal.xmlReturn && (
                 <div>
-                  <label className="text-sm text-slate-400 mb-2 block">XML de Retorno</label>
-                  <pre className="bg-black/30 backdrop-blur-sm p-4 rounded-lg border border-white/10 text-xs text-slate-300 overflow-x-auto max-h-60 overflow-y-auto shadow-inner">
+                  <label className="text-sm text-muted-foreground mb-2 block">XML de Retorno</label>
+                  <pre className="bg-card p-4 rounded-lg border border-border text-xs text-muted-foreground overflow-x-auto max-h-60 overflow-y-auto shadow-inner">
                     <code className="break-all whitespace-pre-wrap font-mono">{detailsModal.xmlReturn}</code>
                   </pre>
                 </div>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-slate-700">
+              <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-border">
                 {detailsModal.xml && (
                   <Button
-                    className="bg-primary hover:bg-primary/90 text-white w-full sm:w-auto"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto"
                     onClick={() => handleDownloadXML(detailsModal)}
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -1562,7 +1566,7 @@ export default function ESocialContent() {
                 )}
                 {detailsModal.xmlReturn && (
                   <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                    className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto shadow-sm"
                     onClick={() => handleDownloadXML(detailsModal, "retorno")}
                   >
                     <Download className="w-4 h-4 mr-2" />
@@ -1571,7 +1575,7 @@ export default function ESocialContent() {
                 )}
                 <Button
                   variant="outline"
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800 w-full sm:w-auto bg-transparent"
+                  className="border-border text-muted-foreground hover:bg-accent hover:text-foreground w-full sm:w-auto bg-transparent"
                   onClick={() => setDetailsModal(null)}
                 >
                   Fechar

@@ -25,22 +25,22 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-md">
+      <DialogContent className="bg-white border-border text-foreground max-w-md sm:rounded-lg shadow-sm">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-red-500/10 rounded-lg">
-              <AlertTriangle className="w-6 h-6 text-red-400" />
+            <div className="p-2 bg-red-50 rounded-lg">
+              <AlertTriangle className="w-6 h-6 text-red-700" />
             </div>
             <DialogTitle className="text-xl font-bold">Cancelar Treinamento</DialogTitle>
           </div>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             O treinamento não será apagado, apenas marcado como cancelado. Informe o motivo do cancelamento.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="reason" className="text-slate-300">
+            <Label htmlFor="reason" className="text-foreground">
               Motivo do Cancelamento *
             </Label>
             <Textarea
@@ -49,7 +49,7 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Descreva o motivo do cancelamento..."
-              className="bg-slate-800/50 border-slate-700 text-white resize-none"
+              className="bg-white border-border text-foreground resize-none"
               required
             />
           </div>
@@ -58,14 +58,14 @@ export function TrainingCancelModal({ open, onClose, onConfirm }: TrainingCancel
             <Button
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-border text-foreground hover:bg-muted"
             >
               Voltar
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!reason.trim()}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:opacity-50"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground disabled:opacity-50"
             >
               Confirmar Cancelamento
             </Button>

@@ -9,7 +9,7 @@ import Link from "next/link"
 
 export default function HelpPage() {
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Central de Ajuda</h1>
         <p className="text-muted-foreground">
@@ -25,7 +25,7 @@ export default function HelpPage() {
         <Input 
           type="text" 
           placeholder="Busque por dúvidas, tutoriais ou códigos de erro..." 
-          className="pl-10 h-12 bg-muted/50 border-border text-foreground focus-visible:ring-primary/50"
+          className="pl-10 h-12 bg-white border-border text-foreground focus-visible:ring-primary/50"
         />
       </div>
 
@@ -37,42 +37,42 @@ export default function HelpPage() {
             icon: BookOpen, 
             desc: "Manuais e guias completos", 
             href: "/dashboard/library",
-            color: "text-blue-400", 
-            bg: "bg-blue-500/10",
-            border: "border-blue-500/20"
+            color: "text-slate-600", 
+            bg: "bg-slate-50",
+            border: "border-slate-200"
           },
           { 
             title: "Vídeo Aulas", 
             icon: Video, 
             desc: "Tutoriais passo a passo", 
             href: "#",
-            color: "text-purple-400", 
-            bg: "bg-purple-500/10",
-            border: "border-purple-500/20"
+            color: "text-slate-600", 
+            bg: "bg-slate-50",
+            border: "border-slate-200"
           },
           { 
             title: "Chamados", 
             icon: LifeBuoy, 
             desc: "Acompanhe suas solicitações", 
             href: "#",
-            color: "text-orange-400", 
-            bg: "bg-orange-500/10",
-            border: "border-orange-500/20"
+            color: "text-slate-600", 
+            bg: "bg-slate-50",
+            border: "border-slate-200"
           },
           { 
             title: "Chat Online", 
             icon: MessageCircle, 
             desc: "Fale com um atendente", 
             href: "#",
-            color: "text-emerald-400", 
-            bg: "bg-emerald-500/10",
-            border: "border-emerald-500/20"
+            color: "text-slate-600", 
+            bg: "bg-slate-50",
+            border: "border-slate-200"
           },
         ].map((item, index) => {
           const Icon = item.icon
           return (
             <Link key={index} href={item.href} className="block group">
-              <Card className="h-full bg-muted/50 border-border hover:border-primary/20 transition-all hover:bg-muted/80">
+              <Card className="h-full bg-white border-border hover:border-primary/20 transition-all hover:bg-slate-50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-foreground group-hover:text-primary">
                     {item.title}
@@ -95,7 +95,7 @@ export default function HelpPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* FAQ Section */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-muted/50 border-border">
+          <Card className="bg-white border-border shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl text-foreground">Perguntas Frequentes</CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -132,7 +132,7 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-border">
             <CardHeader>
               <CardTitle className="text-xl text-foreground">Tutoriais em Destaque</CardTitle>
             </CardHeader>
@@ -143,7 +143,7 @@ export default function HelpPage() {
                 "Gerenciando EPIs e vencimentos",
                 "Relatórios de absenteísmo e afastamentos"
               ].map((tutorial, i) => (
-                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border hover:border-primary/30 transition-colors group cursor-pointer">
+                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-primary/30 transition-colors group cursor-pointer">
                   <div className="flex items-center gap-3">
                     <FileText className="h-4 w-4 text-primary" />
                     <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">{tutorial}</span>
@@ -157,7 +157,7 @@ export default function HelpPage() {
 
         {/* Contact Sidebar */}
         <div className="space-y-6">
-          <Card className="bg-card border-border">
+          <Card className="bg-white border-border">
             <CardHeader>
               <CardTitle className="text-lg text-foreground">Canais de Atendimento</CardTitle>
               <CardDescription className="text-muted-foreground">
@@ -165,7 +165,7 @@ export default function HelpPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <div className="text-sm font-medium text-foreground">Telefone</div>
@@ -174,7 +174,7 @@ export default function HelpPage() {
                 </div>
               </div>
               
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 border border-border">
+              <div className="flex items-start gap-3 p-3 rounded-lg bg-white border border-border">
                 <Mail className="h-5 w-5 text-primary mt-0.5" />
                 <div>
                   <div className="text-sm font-medium text-foreground">Email</div>
@@ -190,20 +190,19 @@ export default function HelpPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-card to-muted border-border overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-10 -mt-10" />
+          <Card className="bg-white border-border overflow-hidden relative shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg text-foreground relative z-10">Status do Sistema</CardTitle>
             </CardHeader>
             <CardContent className="relative z-10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-sm font-medium text-emerald-500">Todos os sistemas operacionais</span>
+                <div className="h-2.5 w-2.5 rounded-full bg-success animate-pulse" />
+                <span className="text-sm font-medium text-success">Todos os sistemas operacionais</span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-muted-foreground">
                 Última verificação: Agora mesmo
               </p>
-              <Button variant="link" className="text-orange-400 p-0 h-auto text-xs mt-2 hover:text-orange-300">
+              <Button variant="link" className="text-primary p-0 h-auto text-xs mt-2 hover:text-primary/80">
                 Ver histórico de disponibilidade &rarr;
               </Button>
             </CardContent>

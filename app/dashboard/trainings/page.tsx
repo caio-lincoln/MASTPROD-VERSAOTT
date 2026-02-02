@@ -161,45 +161,45 @@ export default function TrainingsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <DashboardHeader
         title="Treinamentos"
         subtitle="Gerencie os treinamentos de segurança"
       >
         <Button
           onClick={() => setModalOpen(true)}
-          className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200"
         >
           <Plus className="w-4 h-4 mr-2" />
           Novo Treinamento
         </Button>
       </DashboardHeader>
 
-      <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+      <ContentContainer className="border-0 bg-transparent p-0 shadow-none">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Buscar treinamentos..."
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300"
+              className="pl-10 bg-white border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-primary/50 transition-colors duration-200"
             />
           </div>
         </div>
 
         <div className="space-y-3">
-          {loading && <div className="text-slate-400">Carregando...</div>}
-          {error && <div className="text-red-400">{error}</div>}
+          {loading && <div className="text-muted-foreground">Carregando...</div>}
+          {error && <div className="text-destructive">{error}</div>}
           {paginatedTrainings.map((training) => (
             <div
               key={training.id}
-              className="p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-slate-700 transition-all duration-300"
+              className="p-4 rounded-xl bg-white border border-border hover:border-primary/30 transition-colors duration-200"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-white mb-1">{training.name}</h3>
-                  <p className="text-sm text-slate-400">Instrutor: {training.instructor}</p>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">{training.name}</h3>
+                  <p className="text-sm text-muted-foreground">Instrutor: {training.instructor}</p>
                 </div>
                 <StatusBadge 
                   status={training.status} 
@@ -213,14 +213,14 @@ export default function TrainingsPage() {
               </div>
 
               {training.cancelReason && (
-                <div className="mb-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                  <p className="text-sm text-red-400">
+                <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">
                     <strong>Motivo do cancelamento:</strong> {training.cancelReason}
                   </p>
                 </div>
               )}
 
-              <div className="flex items-center gap-6 text-sm text-slate-400 mb-4">
+              <div className="flex items-center gap-6 text-sm text-muted-foreground mb-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>{training.date}</span>
@@ -240,7 +240,7 @@ export default function TrainingsPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => setDetailsModal(training.id)}
-                  className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                  className="border-border text-muted-foreground hover:bg-slate-100 bg-transparent"
                 >
                   <Eye className="w-3 h-3 mr-1" />
                   Visualizar
@@ -251,7 +251,7 @@ export default function TrainingsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleStatusChange(training.id, "Em andamento")}
-                    className="border-blue-700 text-blue-400 hover:bg-blue-900/20 bg-transparent"
+                    className="border-primary text-primary hover:bg-primary/20 bg-transparent"
                   >
                     <PlayCircle className="w-3 h-3 mr-1" />
                     Iniciar
@@ -263,7 +263,7 @@ export default function TrainingsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleStatusChange(training.id, "Concluído")}
-                    className="border-orange-700 text-orange-400 hover:bg-orange-900/20 bg-transparent"
+                    className="border-success text-success hover:bg-success/20 bg-transparent"
                   >
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Concluir
@@ -275,7 +275,7 @@ export default function TrainingsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => setCancelModal(training.id)}
-                    className="border-red-700 text-red-400 hover:bg-red-900/20 bg-transparent"
+                    className="border-destructive text-destructive hover:bg-destructive/20 bg-transparent"
                   >
                     <XCircle className="w-3 h-3 mr-1" />
                     Cancelar
@@ -287,7 +287,7 @@ export default function TrainingsPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => handleStatusChange(training.id, "Agendado")}
-                    className="border-amber-700 text-amber-400 hover:bg-amber-900/20 bg-transparent"
+                    className="border-warning text-warning hover:bg-warning/20 bg-transparent"
                   >
                     <Clock className="w-3 h-3 mr-1" />
                     Reagendar

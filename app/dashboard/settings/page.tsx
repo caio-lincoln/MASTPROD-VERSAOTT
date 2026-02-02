@@ -9,38 +9,38 @@ import { cn } from "@/lib/utils"
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <DashboardHeader
         title="Configurações"
         subtitle="Gerencie as configurações do sistema"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none h-full">
-          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 h-full">
+        <ContentContainer className="border-0 bg-transparent p-0 shadow-none h-full">
+          <div className="p-6 rounded-xl bg-white border border-border h-full">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white flex items-center gap-2 mb-1">
+              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2 mb-1">
                 <Shield className="w-5 h-5 text-primary" />
                 Certificado e-Social
               </h3>
-              <p className="text-slate-400 text-sm">Configure o certificado digital para envio de eventos</p>
+              <p className="text-muted-foreground text-sm">Configure o certificado digital para envio de eventos</p>
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50">
+              <div className="p-4 rounded-xl bg-slate-50 border border-border">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 rounded-lg bg-red-500/10">
-                    <XCircle className="w-5 h-5 text-red-400" />
+                  <div className="p-2 rounded-lg bg-destructive/10">
+                    <XCircle className="w-5 h-5 text-destructive" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">Certificado não configurado</p>
-                    <p className="text-xs text-slate-400">Faça upload do certificado A1 (.pfx)</p>
+                    <p className="text-sm font-medium text-foreground">Certificado não configurado</p>
+                    <p className="text-xs text-muted-foreground">Faça upload do certificado A1 (.pfx)</p>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-2">
-                    <Label htmlFor="certificate" className="text-slate-300">
+                    <Label htmlFor="certificate" className="text-muted-foreground">
                       Arquivo do Certificado
                     </Label>
                     <div className="flex gap-2">
@@ -48,24 +48,24 @@ export default function SettingsPage() {
                         id="certificate"
                         type="file"
                         accept=".pfx,.p12"
-                        className="bg-slate-800 border-slate-700 text-white file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90 cursor-pointer"
+                        className="bg-white border-border text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-slate-300">
+                    <Label htmlFor="password" className="text-muted-foreground">
                       Senha do Certificado
                     </Label>
                     <Input
                       id="password"
                       type="password"
                       placeholder="Digite a senha"
-                      className="bg-slate-800 border-slate-700 text-white focus:ring-primary/50 focus:border-primary/50"
+                      className="bg-white border-border text-foreground focus-visible:ring-primary/50"
                     />
                   </div>
 
-                  <Button className="w-full bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:scale-[1.02]">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200">
                     <Upload className="w-4 h-4 mr-2" />
                     Configurar Certificado
                   </Button>
@@ -75,34 +75,34 @@ export default function SettingsPage() {
           </div>
         </ContentContainer>
 
-        <ContentContainer className="border-0 bg-transparent p-0 shadow-none backdrop-blur-none h-full">
-          <div className="p-6 rounded-xl bg-slate-900/50 border border-slate-800 h-full">
+        <ContentContainer className="border-0 bg-transparent p-0 shadow-none h-full">
+          <div className="p-6 rounded-xl bg-white border border-border h-full">
             <div className="mb-6">
-              <h3 className="text-xl font-semibold text-white mb-1">Informações do Sistema</h3>
-              <p className="text-slate-400 text-sm">Dados sobre o sistema e ambiente</p>
+              <h3 className="text-xl font-semibold text-foreground mb-1">Informações do Sistema</h3>
+              <p className="text-muted-foreground text-sm">Dados sobre o sistema e ambiente</p>
             </div>
 
             <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 flex justify-between items-center">
-                <span className="text-sm text-slate-400">Versão do Sistema</span>
-                <span className="text-sm font-medium text-white">1.0.0</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-border flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Versão do Sistema</span>
+                <span className="text-sm font-medium text-foreground">1.0.0</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 flex justify-between items-center">
-                <span className="text-sm text-slate-400">Ambiente</span>
-                <span className="text-sm font-medium text-white">Produção</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-border flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Ambiente</span>
+                <span className="text-sm font-medium text-foreground">Produção</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 flex justify-between items-center">
-                <span className="text-sm text-slate-400">Última Atualização</span>
-                <span className="text-sm font-medium text-white">15/01/2024 10:30</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-border flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Última Atualização</span>
+                <span className="text-sm font-medium text-foreground">15/01/2024 10:30</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-800/30 border border-slate-700/50 flex justify-between items-center">
-                <span className="text-sm text-slate-400">Status do Servidor</span>
+              <div className="p-4 rounded-xl bg-slate-50 border border-border flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Status do Servidor</span>
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-orange-400" />
-                  <span className="text-sm font-medium text-orange-400">Online</span>
+                  <CheckCircle2 className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">Online</span>
                 </div>
               </div>
             </div>

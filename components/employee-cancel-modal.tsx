@@ -26,26 +26,26 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-md">
+      <DialogContent className="bg-white border-border text-foreground max-w-md sm:rounded-lg shadow-sm">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-red-400 flex items-center gap-2">
+          <DialogTitle className="text-2xl font-bold text-destructive flex items-center gap-2">
             <AlertCircle className="w-6 h-6" />
             Cancelar Funcionário
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Esta ação irá marcar o funcionário como cancelado, mas não apagará seus dados do sistema.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 mt-4">
-          <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-            <p className="text-slate-300 text-sm">
+          <div className="p-3 rounded-lg bg-white border border-border">
+            <p className="text-muted-foreground text-sm">
               <span className="font-medium">Funcionário:</span> {employeeName}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reason" className="text-slate-300">
+            <Label htmlFor="reason" className="text-foreground">
               Motivo do Cancelamento *
             </Label>
             <Textarea
@@ -53,7 +53,7 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Descreva o motivo do cancelamento..."
-              className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
+              className="bg-white border-border text-foreground min-h-[100px]"
               required
             />
           </div>
@@ -66,14 +66,14 @@ export function EmployeeCancelModal({ open, onOpenChange, onConfirm, employeeNam
                 onOpenChange(false)
                 setReason("")
               }}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-border text-foreground hover:bg-muted"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleConfirm}
               disabled={!reason.trim()}
-              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               Confirmar Cancelamento
             </Button>

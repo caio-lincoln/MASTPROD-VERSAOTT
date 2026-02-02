@@ -50,75 +50,55 @@ export default function LoginPage() {
   return (
     <div className="w-full h-screen lg:grid lg:grid-cols-2 overflow-hidden bg-background">
       {/* Left Panel - Visual & Branding */}
-      <div className="hidden lg:flex relative flex-col justify-between p-12 bg-muted text-foreground">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
+      <div className="hidden lg:flex relative flex-col justify-between p-12 bg-slate-50 border-r border-border text-foreground">
         
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-muted/50 to-background pointer-events-none" />
-
         {/* Logo Area */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
-            <Shield className="h-6 w-6 text-primary-foreground" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+            <Shield className="h-6 w-6 text-primary" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-foreground">Mastprod SST</span>
+          <span className="text-xl font-semibold tracking-tight text-foreground">MASTPROD SST</span>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-lg space-y-8">
-          <h1 className="text-4xl font-bold leading-tight tracking-tight lg:text-5xl text-foreground">
-            Gestão inteligente de <span className="text-primary">Saúde e Segurança</span> do Trabalho
+        <div className="relative z-10 max-w-lg space-y-6">
+          <h1 className="text-3xl font-semibold leading-tight tracking-tight text-foreground">
+            Gestão Corporativa de SST
           </h1>
           
-          <div className="space-y-4">
-            {[
-              "Conformidade total com o eSocial",
-              "Gestão de EPIs, Treinamentos e Riscos",
-              "Emissão de certificados digitais",
-              "Relatórios e Dashboards em tempo real"
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 text-muted-foreground">
-                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
-                <span className="text-lg">{item}</span>
-              </div>
-            ))}
-          </div>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            Plataforma integrada para gestão de Saúde e Segurança do Trabalho, em conformidade com o eSocial e normas regulamentadoras.
+          </p>
         </div>
 
         {/* Footer Info */}
-        <div className="relative z-10 text-sm text-muted-foreground">
-          <p>© 2024 Mastprod Tecnologia. Todos os direitos reservados.</p>
+        <div className="relative z-10 text-xs text-muted-foreground">
+          <p>© 2024 Mastprod Tecnologia. Uso restrito.</p>
         </div>
       </div>
 
       {/* Right Panel - Login Form */}
-      <div className="flex flex-col items-center justify-center p-6 lg:p-12 bg-background relative">
-        <div className="absolute top-4 right-4">
-          <ModeToggle />
-        </div>
+      <div className="flex flex-col items-center justify-center p-6 lg:p-12 bg-white relative">
         {/* Mobile Header (Visible only on small screens) */}
         <div className="absolute top-6 left-6 flex items-center gap-2 lg:hidden">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Shield className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-bold text-foreground">Mastprod SST</span>
+          <span className="font-semibold text-foreground">MASTPROD SST</span>
         </div>
 
-        <div className="w-full max-w-[400px] space-y-8">
+        <div className="w-full max-w-[360px] space-y-8">
           <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Bem-vindo de volta</h2>
-            <p className="text-muted-foreground">
-              Entre com suas credenciais para acessar o painel.
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">Acesso ao Sistema</h2>
+            <p className="text-sm text-muted-foreground">
+              Insira suas credenciais corporativas.
             </p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-muted-foreground">Email corporativo</Label>
+                <Label htmlFor="email" className="text-foreground font-medium text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -126,18 +106,18 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-11"
+                  className="bg-white border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-10"
                 />
               </div>
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-muted-foreground">Senha</Label>
+                  <Label htmlFor="password" className="text-foreground font-medium text-sm">Senha</Label>
                   <Link 
                     href="/forgot-password" 
-                    className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    className="text-xs font-medium text-primary hover:underline"
                   >
-                    Esqueceu a senha?
+                    Esqueceu?
                   </Link>
                 </div>
                 <Input
@@ -147,14 +127,14 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="bg-muted/50 border-input text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-11"
+                  className="bg-white border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-10"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
+              <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 shrink-0" />
                 {error}
               </div>
             )}
@@ -162,7 +142,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 shadow-lg shadow-primary/20"
+              className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200 rounded-lg"
             >
               {isLoading ? (
                 <>
@@ -171,25 +151,14 @@ export default function LoginPage() {
                 </>
               ) : (
                 <div className="flex items-center justify-center gap-2">
-                  Acessar plataforma
-                  <ArrowRight className="h-4 w-4" />
+                  Entrar
                 </div>
               )}
             </Button>
           </form>
 
-          <div className="text-center text-sm text-muted-foreground">
-            Ainda não tem acesso?{" "}
-            <Link href="/support" className="font-medium text-primary hover:text-primary/80 transition-colors">
-              Entre em contato com o suporte
-            </Link>
-          </div>
-          
-          <div className="text-center">
-             <Link href="/support" className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1">
-               <Shield className="h-3 w-3" />
-               Central de Ajuda e Documentação
-             </Link>
+          <div className="text-center text-xs text-muted-foreground">
+            Acesso restrito a colaboradores autorizados.
           </div>
         </div>
       </div>

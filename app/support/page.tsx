@@ -10,15 +10,15 @@ import { ModeToggle } from "@/components/theme-toggle"
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-12">
+    <div className="min-h-screen bg-slate-50 text-foreground p-6 md:p-12">
       <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Header with Back Button */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
              <Link href="/login">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-colors">
-                <Shield className="h-6 w-6 text-white" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+                <Shield className="h-6 w-6 text-primary" />
               </div>
             </Link>
             <div>
@@ -45,7 +45,7 @@ export default function SupportPage() {
           <Input 
             type="text" 
             placeholder="Como podemos ajudar você hoje?" 
-            className="pl-10 h-14 bg-muted/50 border-border text-foreground focus-visible:ring-orange-500/50 text-lg rounded-xl"
+            className="pl-10 h-12 bg-white border-border text-foreground focus-visible:ring-primary/50 text-base rounded-lg shadow-none"
           />
         </div>
 
@@ -57,52 +57,52 @@ export default function SupportPage() {
               icon: BookOpen, 
               desc: "Manuais e guias completos", 
               href: "#",
-              color: "text-blue-400", 
-              bg: "bg-blue-500/10",
-              border: "border-blue-500/20"
+              color: "text-sky-700", 
+              bg: "bg-sky-50",
+              border: "border-sky-200"
             },
             { 
               title: "Vídeo Aulas", 
               icon: Video, 
               desc: "Tutoriais passo a passo", 
               href: "#",
-              color: "text-purple-400", 
-              bg: "bg-purple-500/10",
-              border: "border-purple-500/20"
+              color: "text-blue-700", 
+              bg: "bg-blue-50",
+              border: "border-blue-200"
             },
             { 
               title: "Recuperar Acesso", 
               icon: LifeBuoy, 
               desc: "Problemas com login?", 
               href: "/forgot-password",
-              color: "text-orange-400", 
-              bg: "bg-orange-500/10",
-              border: "border-orange-500/20"
+              color: "text-blue-700", 
+              bg: "bg-blue-50",
+              border: "border-blue-200"
             },
             { 
               title: "Chat Comercial", 
               icon: MessageCircle, 
               desc: "Fale com vendas", 
               href: "#",
-              color: "text-emerald-400", 
-              bg: "bg-emerald-500/10",
-              border: "border-emerald-500/20"
+              color: "text-green-700", 
+              bg: "bg-green-50",
+              border: "border-green-200"
             },
           ].map((item, index) => {
             const Icon = item.icon
             return (
               <Link key={index} href={item.href} className="block group">
-                <Card className="h-full bg-muted/50 border-border hover:border-foreground/20 transition-all hover:bg-muted/80">
+                <Card className="h-full bg-white border-border shadow-sm hover:shadow-sm hover:border-primary/30 transition-all duration-300">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-foreground group-hover:text-primary">
+                    <CardTitle className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       {item.title}
                     </CardTitle>
-                    <div className={`p-2 rounded-lg ${item.bg} ${item.border} border`}>
+                    <div className={`p-2 rounded-lg bg-white border border-border group-hover:border-primary/20 transition-colors`}>
                       <Icon className={`h-4 w-4 ${item.color}`} />
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-xs text-slate-500 group-hover:text-slate-400">
+                    <div className="text-xs text-muted-foreground group-hover:text-muted-foreground">
                       {item.desc}
                     </div>
                   </CardContent>
@@ -115,35 +115,35 @@ export default function SupportPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* FAQ Section */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card className="bg-white border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl text-white">Dúvidas Comuns de Acesso</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-xl text-foreground">Dúvidas Comuns de Acesso</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Soluções para os problemas mais frequentes no login.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                   <AccordionItem value="item-1">
-                    <AccordionTrigger className="text-slate-200">Não lembro minha senha, o que fazer?</AccordionTrigger>
+                    <AccordionTrigger className="text-foreground">Não lembro minha senha, o que fazer?</AccordionTrigger>
                     <AccordionContent>
                       Clique no link "Esqueceu a senha?" na tela de login ou acesse a opção "Recuperar Acesso" nesta página. Você receberá um e-mail com instruções para redefinir sua senha.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-2">
-                    <AccordionTrigger className="text-slate-200">Meu usuário foi bloqueado</AccordionTrigger>
+                    <AccordionTrigger className="text-foreground">Meu usuário foi bloqueado</AccordionTrigger>
                     <AccordionContent>
                       Por segurança, o usuário é bloqueado após várias tentativas de acesso incorretas. Aguarde 30 minutos ou entre em contato com o suporte para desbloqueio imediato.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-3">
-                    <AccordionTrigger className="text-slate-200">Como cadastrar uma nova empresa?</AccordionTrigger>
+                    <AccordionTrigger className="text-foreground">Como cadastrar uma nova empresa?</AccordionTrigger>
                     <AccordionContent>
                       O cadastro de novas empresas é realizado através do contato com nosso time comercial. Utilize os canais de atendimento ao lado para solicitar uma proposta.
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="item-4">
-                    <AccordionTrigger className="text-slate-200">Erro de "Certificado Inválido"</AccordionTrigger>
+                    <AccordionTrigger className="text-foreground">Erro de "Certificado Inválido"</AccordionTrigger>
                     <AccordionContent>
                       Se você utiliza login via certificado digital, verifique se ele está conectado corretamente e dentro da validade. Limpe o cache do navegador e tente novamente.
                     </AccordionContent>
@@ -152,9 +152,9 @@ export default function SupportPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card className="bg-white border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-xl text-white">Links Úteis</CardTitle>
+                <CardTitle className="text-xl text-foreground">Links Úteis</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
                 {[
@@ -163,12 +163,12 @@ export default function SupportPage() {
                   "Manual do Usuário (PDF)",
                   "Status dos Serviços (Uptime)"
                 ].map((tutorial, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-950/50 border border-slate-800 hover:border-orange-500/30 transition-colors group cursor-pointer">
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 hover:border-primary/30 transition-colors group cursor-pointer">
                     <div className="flex items-center gap-3">
-                      <FileText className="h-4 w-4 text-orange-500" />
-                      <span className="text-sm text-slate-300 group-hover:text-orange-400 transition-colors">{tutorial}</span>
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span className="text-sm text-slate-600 group-hover:text-primary transition-colors">{tutorial}</span>
                     </div>
-                    <ExternalLink className="h-3 w-3 text-slate-600 group-hover:text-orange-500 transition-colors" />
+                    <ExternalLink className="h-3 w-3 text-slate-400 group-hover:text-primary transition-colors" />
                   </div>
                 ))}
               </CardContent>
@@ -177,48 +177,47 @@ export default function SupportPage() {
 
           {/* Contact Sidebar */}
           <div className="space-y-6">
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card className="bg-white border-border shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg text-white">Fale Conosco</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-lg text-foreground">Fale Conosco</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Suporte técnico especializado.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-950/50 border border-slate-800">
-                  <Phone className="h-5 w-5 text-orange-500 mt-0.5" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white border border-border">
+                  <Phone className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <div className="text-sm font-medium text-slate-200">Telefone</div>
-                    <div className="text-xs text-slate-400">0800 123 4567</div>
+                    <div className="text-sm font-medium text-foreground">Telefone</div>
+                    <div className="text-xs text-muted-foreground">0800 123 4567</div>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-950/50 border border-slate-800">
-                  <Mail className="h-5 w-5 text-orange-500 mt-0.5" />
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-white border border-border">
+                  <Mail className="h-5 w-5 text-primary mt-0.5" />
                   <div>
-                    <div className="text-sm font-medium text-slate-200">Email</div>
-                    <div className="text-xs text-slate-400">suporte@mastprod.com.br</div>
+                    <div className="text-sm font-medium text-foreground">Email</div>
+                    <div className="text-xs text-muted-foreground">suporte@mastprod.com.br</div>
                   </div>
                 </div>
 
-                <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white">
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                   <MessageCircle className="mr-2 h-4 w-4" />
                   WhatsApp Suporte
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-slate-800 overflow-hidden relative">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl -mr-10 -mt-10" />
+            <Card className="bg-white border-border relative">
               <CardHeader>
-                <CardTitle className="text-lg text-white relative z-10">Status do Sistema</CardTitle>
+                <CardTitle className="text-lg text-foreground relative z-10">Status do Sistema</CardTitle>
               </CardHeader>
               <CardContent className="relative z-10">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-sm font-medium text-emerald-500">Operacional</span>
+                  <div className="h-2.5 w-2.5 rounded-full bg-success" />
+                  <span className="text-sm font-medium text-success">Operacional</span>
                 </div>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   Todos os serviços funcionando normalmente.
                 </p>
               </CardContent>

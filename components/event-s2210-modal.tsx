@@ -63,21 +63,21 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-slate-800 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-white border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-orange-400" />
+            <FileText className="w-5 h-5 text-primary" />
             Novo Evento S-2210 - Comunicação de Acidente de Trabalho
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Informe os dados sobre acidente ou doença ocupacional (CAT)
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           {/* Identificação */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400 flex items-center gap-2">
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary flex items-center gap-2">
               <Building2 className="w-4 h-4" />
               Identificação
             </h3>
@@ -86,10 +86,10 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               <div className="space-y-2">
                 <Label htmlFor="company">Empresa *</Label>
                 <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione a empresa" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {allCompanies.map((company) => (
                       <SelectItem key={company.id} value={company.id.toString()}>
                         {company.name} - {company.cnpj}
@@ -102,10 +102,10 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               <div className="space-y-2">
                 <Label htmlFor="employee">Funcionário *</Label>
                 <Select value={selectedEmployee} onValueChange={setSelectedEmployee} disabled={!selectedCompany}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione o funcionário" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     {filteredEmployees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id.toString()}>
                         {employee.name} - {employee.role}
@@ -118,8 +118,8 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
           </div>
 
           {/* Dados do Acidente */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400">Dados do Acidente</h3>
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary">Dados do Acidente</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -129,7 +129,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   type="date"
                   value={accidentDate}
                   onChange={(e) => setAccidentDate(e.target.value)}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -141,7 +141,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   type="time"
                   value={accidentTime}
                   onChange={(e) => setAccidentTime(e.target.value)}
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -149,10 +149,10 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               <div className="space-y-2">
                 <Label htmlFor="accidentType">Tipo de Acidente *</Label>
                 <Select value={accidentType} onValueChange={setAccidentType}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="tipico">Acidente Típico</SelectItem>
                     <SelectItem value="trajeto">Acidente de Trajeto</SelectItem>
                     <SelectItem value="doenca">Doença Ocupacional</SelectItem>
@@ -167,7 +167,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={bodyPart}
                   onChange={(e) => setBodyPart(e.target.value)}
                   placeholder="Ex: Mão direita, Perna esquerda..."
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -179,7 +179,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={accidentCause}
                   onChange={(e) => setAccidentCause(e.target.value)}
                   placeholder="Descreva a causa principal"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -191,7 +191,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Descreva detalhadamente como o acidente ocorreu..."
-                  className="bg-slate-800/50 border-slate-700 text-white min-h-[100px]"
+                  className="bg-background border-input text-foreground min-h-[100px]"
                   required
                 />
               </div>
@@ -199,8 +199,8 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
           </div>
 
           {/* Atendimento Médico */}
-          <div className="space-y-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700">
-            <h3 className="font-semibold text-orange-400">Atendimento Médico</h3>
+          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
+            <h3 className="font-semibold text-primary">Atendimento Médico</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 md:col-span-2">
@@ -210,7 +210,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={initialDiagnosis}
                   onChange={(e) => setInitialDiagnosis(e.target.value)}
                   placeholder="CID-10 e descrição"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -222,7 +222,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={doctorName}
                   onChange={(e) => setDoctorName(e.target.value)}
                   placeholder="Nome completo"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -234,7 +234,7 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
                   value={doctorCrm}
                   onChange={(e) => setDoctorCrm(e.target.value)}
                   placeholder="000000"
-                  className="bg-slate-800/50 border-slate-700 text-white"
+                  className="bg-background border-input text-foreground"
                   required
                 />
               </div>
@@ -242,10 +242,10 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               <div className="space-y-2">
                 <Label htmlFor="doctorUf">UF *</Label>
                 <Select value={doctorUf} onValueChange={setDoctorUf}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="UF" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="SP">SP</SelectItem>
                     <SelectItem value="RJ">RJ</SelectItem>
                     <SelectItem value="MG">MG</SelectItem>
@@ -258,10 +258,10 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               <div className="space-y-2">
                 <Label htmlFor="deathOccurred">Houve Óbito? *</Label>
                 <Select value={deathOccurred} onValueChange={setDeathOccurred}>
-                  <SelectTrigger className="bg-slate-800/50 border-slate-700 text-white">
+                  <SelectTrigger className="bg-background border-input text-foreground">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 text-white">
+                  <SelectContent className="bg-popover border-border text-popover-foreground">
                     <SelectItem value="nao">Não</SelectItem>
                     <SelectItem value="sim">Sim</SelectItem>
                   </SelectContent>
@@ -270,16 +270,16 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-red-950/30 border border-red-900/50">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <p className="text-sm text-red-300">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-200">
+            <AlertCircle className="w-5 h-5 text-red-700" />
+            <p className="text-sm text-red-700">
               A CAT deve ser comunicada ao INSS até o primeiro dia útil seguinte ao acidente
             </p>
           </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-950/30 border border-blue-900/50">
-            <AlertCircle className="w-5 h-5 text-blue-400" />
-            <p className="text-sm text-blue-300">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
+            <AlertCircle className="w-5 h-5 text-blue-700" />
+            <p className="text-sm text-blue-700">
               Este evento será gerado conforme layout oficial do eSocial S-2210 versão S-1.3
             </p>
           </div>
@@ -289,13 +289,13 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
               type="button"
               variant="outline"
               onClick={onClose}
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground bg-transparent"
             >
               Cancelar
             </Button>
             <Button
               type="submit"
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Gerar Evento
             </Button>
