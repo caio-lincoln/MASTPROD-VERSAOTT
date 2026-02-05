@@ -390,6 +390,7 @@ export default function LandingPage() {
             src="/backgrounds/diferenciais-bg.jpg" 
             alt="Background Engenharia" 
             fill 
+            priority
             className="object-cover opacity-40"
           />
         </div>
@@ -487,6 +488,7 @@ export default function LandingPage() {
             src="/backgrounds/cta-bg.jpg" 
             alt="Background Industrial" 
             fill 
+            priority
             className="object-cover opacity-40"
           />
         </div>
