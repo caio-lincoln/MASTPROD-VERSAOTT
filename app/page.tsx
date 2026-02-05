@@ -226,8 +226,13 @@ export default function LandingPage() {
             <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm p-1">
               {/* Abstract Representation of Safety/Engineering */}
               <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900">
-                <div className="absolute inset-0 opacity-30 flex items-center justify-center">
-                  <Shield className="w-64 h-64 text-primary/30" strokeWidth={0.5} />
+                <div className="absolute inset-0 opacity-80 flex items-center justify-center">
+                  <Image 
+                    src="/images/hero-safety-compliance.jpg" 
+                    alt="Engenheiro de Segurança em Inspeção" 
+                    fill 
+                    className="object-cover opacity-60 mix-blend-overlay"
+                  />
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-slate-900 to-transparent">
                   <div className="flex items-center gap-4 mb-4">
@@ -424,8 +429,14 @@ export default function LandingPage() {
               </div>
             </div>
             
-            <div className="bg-slate-800/50 p-8 rounded-2xl border border-slate-700 backdrop-blur-sm">
-              <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="relative overflow-hidden bg-slate-800/50 p-8 rounded-2xl border border-slate-700 backdrop-blur-sm">
+              <Image 
+                src="/backgrounds/stats-bg.jpg" 
+                alt="Background Statistics" 
+                fill 
+                className="object-cover opacity-10"
+              />
+              <div className="relative z-10 grid grid-cols-2 gap-4 text-center">
                 <div className="p-6 bg-slate-900/50 rounded-xl border border-slate-700">
                   <div className="text-4xl font-bold text-primary mb-2">+10</div>
                   <div className="text-sm text-slate-400">Anos de Experiência</div>
