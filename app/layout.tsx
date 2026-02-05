@@ -8,8 +8,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Sistema SST - Gestão de Saúde e Segurança",
-  description: "Sistema profissional de gestão de Saúde e Segurança do Trabalho",
+  title: "MASTPROD | Engenharia de Segurança e Produção",
+  description: "Consultoria em Gestão, Produção e Saúde Ocupacional. Preservando a vida e a saúde dos trabalhadores sem abrir mão da produtividade.",
   generator: "v0.app",
   icons: {
     icon: [
