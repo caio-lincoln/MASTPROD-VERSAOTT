@@ -242,7 +242,7 @@ export default function PPEPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-white border border-border group-hover:border-primary/30 group-hover:bg-blue-50 transition-colors shadow-sm">
+                    <div className="p-3 rounded-xl bg-white border border-border group-hover:border-primary/30 group-hover:bg-[#FFE2CF] transition-colors shadow-sm">
                       <Package className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                     <div>
@@ -295,7 +295,7 @@ export default function PPEPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-muted-foreground hover:text-primary hover:bg-blue-50"
+                        className="text-muted-foreground hover:text-primary hover:bg-[#FFE2CF]"
                         onClick={() => {
                           setEditingPPE(item)
                           setIsModalOpen(true)

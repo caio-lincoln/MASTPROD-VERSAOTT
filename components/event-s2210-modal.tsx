@@ -277,9 +277,9 @@ export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProp
             </p>
           </div>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-200">
-            <AlertCircle className="w-5 h-5 text-blue-700" />
-            <p className="text-sm text-blue-700">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FFE2CF] border border-[#FD671A]/20">
+            <AlertCircle className="w-5 h-5 text-[#E85C14]" />
+            <p className="text-sm text-[#E85C14]">
               Este evento será gerado conforme layout oficial do eSocial S-2210 versão S-1.3
             </p>
           </div>

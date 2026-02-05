@@ -330,7 +330,7 @@ export default function RisksPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary hover:bg-blue-50"
+                    className="text-muted-foreground hover:text-primary hover:bg-[#FFE2CF]"
                     onClick={() => setEditingRisk(risk)}
                   >
                     <Edit className="w-4 h-4 mr-2" />

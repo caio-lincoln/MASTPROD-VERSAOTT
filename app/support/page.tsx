@@ -17,7 +17,7 @@ export default function SupportPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
              <Link href="/login">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
             </Link>
@@ -57,27 +57,27 @@ export default function SupportPage() {
               icon: BookOpen, 
               desc: "Manuais e guias completos", 
               href: "#",
-              color: "text-sky-700", 
-              bg: "bg-sky-50",
-              border: "border-sky-200"
+              color: "text-slate-700", 
+              bg: "bg-slate-50",
+              border: "border-slate-200"
             },
             { 
               title: "Vídeo Aulas", 
               icon: Video, 
               desc: "Tutoriais passo a passo", 
               href: "#",
-              color: "text-blue-700", 
-              bg: "bg-blue-50",
-              border: "border-blue-200"
+              color: "text-primary", 
+              bg: "bg-primary/10",
+              border: "border-primary/20"
             },
             { 
               title: "Recuperar Acesso", 
               icon: LifeBuoy, 
               desc: "Problemas com login?", 
               href: "/forgot-password",
-              color: "text-blue-700", 
-              bg: "bg-blue-50",
-              border: "border-blue-200"
+              color: "text-primary", 
+              bg: "bg-primary/10",
+              border: "border-primary/20"
             },
             { 
               title: "Chat Comercial", 

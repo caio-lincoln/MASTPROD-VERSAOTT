@@ -78,7 +78,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-2 bg-white p-1 rounded-lg border border-border">
           <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-100 text-muted-foreground">7D</Button>
           <Button variant="ghost" size="sm" className="text-xs h-7 hover:bg-slate-100 text-muted-foreground">30D</Button>
-          <Button variant="secondary" size="sm" className="text-xs h-7 bg-blue-50 text-blue-700 hover:bg-blue-100">90D</Button>
+          <Button variant="secondary" size="sm" className="text-xs h-7 bg-primary/10 text-primary hover:bg-primary/20">90D</Button>
         </div>
       </DashboardHeader>
 

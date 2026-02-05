@@ -18,6 +18,7 @@ import {
   Activity
 } from "lucide-react"
 import { useState } from "react"
+import { BrandLogo } from "@/components/brand-logo"
 
 const menuItems = [
   { href: "/dashboard", label: "Dashboard", icon: Activity },
@@ -44,13 +45,8 @@ export function Sidebar() {
     >
       <div className="p-4 flex items-center justify-between border-b border-border/40 h-16">
         {!collapsed && (
-          <div className="flex items-center gap-3 animate-in fade-in duration-300">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Shield className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-foreground text-sm tracking-tight">SST System</h2>
-            </div>
+          <div className="animate-in fade-in duration-300 pl-1">
+            <BrandLogo variant="original" width={140} height={36} />
           </div>
         )}
         <button

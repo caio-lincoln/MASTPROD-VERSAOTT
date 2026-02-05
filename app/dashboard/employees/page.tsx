@@ -291,7 +291,7 @@ export default function EmployeesPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary hover:bg-blue-50"
+                    className="text-muted-foreground hover:text-primary hover:bg-[#FFE2CF]"
                     onClick={() => {
                       setEditingEmployee(employee)
                       setModalOpen(true)

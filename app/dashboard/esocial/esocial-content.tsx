@@ -721,7 +721,7 @@ export default function ESocialContent() {
               </Button>
               <Button
                 size="sm"
-                className="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 h-8"
+                className="bg-[#FFE2CF] text-[#E85C14] hover:bg-[#FFD6B3] border border-[#FD671A]/20 h-8"
                 onClick={() => handleSendEventClick(event)}
               >
                 <Send className="w-3.5 h-3.5 mr-1.5" />
@@ -795,7 +795,7 @@ export default function ESocialContent() {
                 <Calendar className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
                 Últimos 30 dias
             </Button>
-            <span className="text-xs px-3 py-1 rounded-full bg-blue-50 text-primary border border-blue-100 flex items-center h-8">
+            <span className="text-xs px-3 py-1 rounded-full bg-[#FFE2CF] text-primary border border-[#FD671A]/20 flex items-center h-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
                 Ambiente de Homologação
             </span>
@@ -898,7 +898,7 @@ export default function ESocialContent() {
                       key={company.id}
                       className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border hover:border-primary/30 hover:bg-slate-50 transition-all duration-300 group"
                     >
-                      <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 group-hover:scale-105 transition-transform">
+                      <div className="p-3 rounded-lg bg-[#FFE2CF] border border-[#FD671A]/20 group-hover:scale-105 transition-transform">
                         <Building2 className="w-6 h-6 text-primary" />
                       </div>
                       <div className="flex-1">
@@ -1336,11 +1336,11 @@ export default function ESocialContent() {
               </div>
 
               {sendModalDefaultCertificate && (
-                <div className="flex items-center gap-2 text-sm bg-blue-50 p-2 rounded border border-blue-100">
+                <div className="flex items-center gap-2 text-sm bg-[#FFE2CF] p-2 rounded border border-[#FD671A]/20">
                   <input
                     id="use-default-cert"
                     type="checkbox"
-                    className="rounded border-blue-300 bg-white text-blue-600 focus:ring-blue-500"
+                    className="rounded border-[#FD671A]/30 bg-white text-primary focus:ring-primary"
                     checked={useDefaultCertificate}
                     onChange={handleToggleUseDefaultCertificate}
                     disabled={sendLoading}
@@ -1423,7 +1423,7 @@ export default function ESocialContent() {
                       className="flex items-center gap-3 p-4 rounded-lg bg-white border border-border hover:border-primary transition-all cursor-pointer group"
                       onClick={() => handleLinkCompany(company.id)}
                     >
-                      <div className="p-2 rounded-lg bg-blue-50 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                      <div className="p-2 rounded-lg bg-[#FFE2CF] text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
@@ -1566,7 +1566,7 @@ export default function ESocialContent() {
                 )}
                 {detailsModal.xmlReturn && (
                   <Button
-                    className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto shadow-sm"
+                    className="bg-primary hover:bg-[#E85C14] text-white w-full sm:w-auto shadow-sm"
                     onClick={() => handleDownloadXML(detailsModal, "retorno")}
                   >
                     <Download className="w-4 h-4 mr-2" />

@@ -162,10 +162,10 @@ export function RiskDetailsModal({ open, onOpenChange, risk }: RiskDetailsModalP
           </div>
 
           {/* Status */}
-          <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-            <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-blue-700" />
-              <span className="text-blue-700 font-medium">Status: {risk.status}</span>
+          <div className="p-4 rounded-lg bg-[#FFE2CF] border border-[#FD671A]/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-5 h-5 text-[#E85C14]" />
+              <span className="text-[#E85C14] font-medium">Status: {risk.status}</span>
             </div>
           </div>
         </div>

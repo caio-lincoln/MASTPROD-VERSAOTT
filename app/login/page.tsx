@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { Shield, Loader2, ArrowRight, CheckCircle2 } from "lucide-react"
 import { toast } from "sonner"
 import { ModeToggle } from "@/components/theme-toggle"
+import { BrandLogo } from "@/components/brand-logo"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -53,11 +54,8 @@ export default function LoginPage() {
       <div className="hidden lg:flex relative flex-col justify-between p-12 bg-slate-50 border-r border-border text-foreground">
         
         {/* Logo Area */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-            <Shield className="h-6 w-6 text-primary" />
-          </div>
-          <span className="text-xl font-semibold tracking-tight text-foreground">MASTPROD SST</span>
+        <div className="relative z-10">
+          <BrandLogo variant="original" width={180} height={50} />
         </div>
 
         {/* Hero Content */}
@@ -80,11 +78,8 @@ export default function LoginPage() {
       {/* Right Panel - Login Form */}
       <div className="flex flex-col items-center justify-center p-6 lg:p-12 bg-white relative">
         {/* Mobile Header (Visible only on small screens) */}
-        <div className="absolute top-6 left-6 flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="font-semibold text-foreground">MASTPROD SST</span>
+        <div className="absolute top-6 left-6 lg:hidden">
+          <BrandLogo variant="original" width={140} height={40} />
         </div>
 
         <div className="w-full max-w-[360px] space-y-8">

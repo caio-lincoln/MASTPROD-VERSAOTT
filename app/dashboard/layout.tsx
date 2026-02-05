@@ -78,7 +78,7 @@ export default function DashboardLayout({
         <Sidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden">
-          <header className="bg-white border-b border-border h-14 px-6 flex items-center justify-between z-20">
+          <header className="bg-white border-b border-[#FD671A]/15 h-14 px-6 flex items-center justify-between z-20">
             <div>
               <h1 className="text-sm font-semibold text-foreground tracking-tight">SST System</h1>
             </div>

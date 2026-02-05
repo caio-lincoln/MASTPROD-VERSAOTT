@@ -513,14 +513,14 @@ export default function CompaniesPage() {
               >
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-slate-50 border border-border group-hover:border-primary/30 group-hover:bg-blue-50 transition-colors">
+                    <div className="p-3 rounded-xl bg-slate-50 border border-border group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
                       <Building2 className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{company.name}</h3>
                         {company.fromESocial && (
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                             <Shield className="w-3 h-3" />
                             eSocial
                           </span>

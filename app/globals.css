@@ -7,100 +7,100 @@
 
 :root {
   /* Enterprise Light Theme */
-  --background: #F8FAFC; /* Slate 50 */
-  --foreground: #0F172A; /* Slate 900 */
+  --background: #FFFFFF; /* White */
+  --foreground: #1C252C; /* Graphite Dark */
 
   --card: #FFFFFF;
-  --card-foreground: #0F172A;
+  --card-foreground: #1C252C;
 
   --popover: #FFFFFF;
-  --popover-foreground: #0F172A;
+  --popover-foreground: #1C252C;
 
-  --primary: #2563EB; /* Blue 600 */
+  --primary: #FD671A; /* MASTPROD Orange */
   --primary-foreground: #FFFFFF;
 
-  --secondary: #F1F5F9; /* Slate 100 */
-  --secondary-foreground: #0F172A;
+  --secondary: #F1F5F9; /* Slate 100 - kept for neutral backgrounds */
+  --secondary-foreground: #1C252C;
 
-  --muted: #F1F5F9; /* Slate 100 */
-  --muted-foreground: #64748B; /* Slate 500 */
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B; /* Slate 500 - kept for muted text */
 
-  --accent: #F1F5F9;
-  --accent-foreground: #0F172A;
+  --accent: #FFE2CF; /* Light Orange */
+  --accent-foreground: #E85C14; /* Dark Orange */
 
-  --destructive: #DC2626; /* Red 600 */
+  --destructive: #DC2626;
   --destructive-foreground: #FFFFFF;
 
-  --border: #E5E7EB; /* Slate 200 */
+  --border: #E5E7EB;
   --input: #E5E7EB;
-  --ring: #2563EB;
+  --ring: #FD671A;
 
-  --radius: 0.5rem; /* Reduced radius for professional look */
+  --radius: 0.5rem;
 
   /* Sidebar */
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #334155; /* Slate 700 */
-  --sidebar-primary: #2563EB;
+  --sidebar-foreground: #1C252C;
+  --sidebar-primary: #FD671A;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F1F5F9;
-  --sidebar-accent-foreground: #0F172A;
+  --sidebar-accent: #FFE2CF;
+  --sidebar-accent-foreground: #E85C14;
   --sidebar-border: #E5E7EB;
-  --sidebar-ring: #2563EB;
+  --sidebar-ring: #FD671A;
 
   /* Status Colors */
-  --warning: #F59E0B; /* Amber 500 */
+  --warning: #F59E0B;
   --warning-foreground: #FFFFFF;
-  --success: #16A34A; /* Green 600 */
+  --success: #16A34A;
   --success-foreground: #FFFFFF;
-  --info: #3B82F6; /* Blue 500 */
+  --info: #FD671A; /* Replaced Blue with Orange */
   --info-foreground: #FFFFFF;
 
-  /* Charts */
-  --chart-1: #2563EB;
-  --chart-2: #3B82F6;
-  --chart-3: #60A5FA;
-  --chart-4: #93C5FD;
-  --chart-5: #BFDBFE;
+  /* Charts - Adjusted to Orange Spectrum */
+  --chart-1: #FD671A;
+  --chart-2: #E85C14;
+  --chart-3: #FB923C;
+  --chart-4: #FDBA74;
+  --chart-5: #FED7AA;
 }
 
 .dark {
-  /* Dark Mode - Mapped to Slate Dark */
-  --background: #020617; /* Slate 950 */
-  --foreground: #F8FAFC; /* Slate 50 */
+  /* Dark Mode */
+  --background: #1C252C; /* Graphite Dark */
+  --foreground: #FFFFFF;
 
-  --card: #0F172A; /* Slate 900 */
-  --card-foreground: #F8FAFC;
+  --card: #28323C; /* Slightly lighter graphite for cards */
+  --card-foreground: #FFFFFF;
 
-  --popover: #0F172A;
-  --popover-foreground: #F8FAFC;
+  --popover: #28323C;
+  --popover-foreground: #FFFFFF;
 
-  --primary: #3B82F6; /* Blue 500 */
+  --primary: #FD671A;
   --primary-foreground: #FFFFFF;
 
-  --secondary: #1E293B; /* Slate 800 */
-  --secondary-foreground: #F8FAFC;
+  --secondary: #28323C;
+  --secondary-foreground: #FFFFFF;
 
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8; /* Slate 400 */
+  --muted: #28323C;
+  --muted-foreground: #94A3B8;
 
-  --accent: #1E293B;
-  --accent-foreground: #F8FAFC;
+  --accent: #28323C;
+  --accent-foreground: #FFFFFF;
 
-  --destructive: #EF4444; /* Red 500 */
+  --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
 
-  --border: #1E293B;
-  --input: #1E293B;
-  --ring: #3B82F6;
+  --border: #28323C;
+  --input: #28323C;
+  --ring: #FD671A;
 
-  --sidebar: #0F172A;
+  --sidebar: #1C252C;
   --sidebar-foreground: #94A3B8;
-  --sidebar-primary: #3B82F6;
+  --sidebar-primary: #FD671A;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #F8FAFC;
-  --sidebar-border: #1E293B;
-  --sidebar-ring: #3B82F6;
+  --sidebar-accent: #28323C;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #28323C;
+  --sidebar-ring: #FD671A;
 }
 
 @theme inline {
