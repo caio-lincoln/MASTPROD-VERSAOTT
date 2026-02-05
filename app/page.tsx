@@ -285,6 +285,17 @@ export default function LandingPage() {
                 <p>
                   Entendemos que a segurança não deve ser um entrave, mas sim um pilar de sustentação para o crescimento sustentável do seu negócio.
                 </p>
+
+                <div className="pt-6">
+                  <Link href="/ver-solucao">
+                    <Button 
+                      className="bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 transform hover:-translate-y-1 rounded-full px-8 py-6 text-lg font-semibold group"
+                    >
+                      Ver uma solução na prática
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </motion.div>
 
