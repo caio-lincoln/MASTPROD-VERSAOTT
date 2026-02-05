@@ -329,34 +329,34 @@ export default function LandingPage() {
           >
             {[
               { 
-                icon: FileText, 
+                icon: "/icons/pericias.png", 
                 title: "Perícias Técnicas em SST", 
                 desc: "Assistência técnica em perícias trabalhistas de insalubridade e periculosidade, com elaboração de quesitos e pareceres fundamentados." 
               },
               { 
-                icon: Briefcase, 
+                icon: "/icons/consultoria.png", 
                 title: "Consultoria em Gestão", 
                 desc: "Implementação de GRO (Gerenciamento de Riscos Ocupacionais) e PGR, focando na eliminação e controle de riscos na fonte." 
               },
               { 
-                icon: Activity, 
+                icon: "/icons/saude.png", 
                 title: "Saúde Ocupacional", 
                 desc: "Gestão completa do PCMSO, exames ocupacionais e controle absenteísmo, integrando saúde e produtividade." 
               },
               { 
-                icon: HardHat, 
-                title: "Treinamentos", 
-                desc: "Capacitação técnica e comportamental para trabalhadores e gestores, atendendo a todas as Normas Regulamentadoras." 
+                icon: "/icons/ltcat.png", 
+                title: "LTCAT e Laudos", 
+                desc: "Elaboração de laudos técnicos para aposentadoria especial (LTCAT) e laudos de insalubridade/periculosidade." 
               },
               { 
-                icon: Shield, 
+                icon: "/icons/prevencao.png", 
                 title: "Prevenção de Acidentes", 
                 desc: "Análise de acidentes, investigação de causas raízes e planos de ação para evitar recorrências e garantir ambientes seguros." 
               },
               { 
-                icon: Factory, 
-                title: "LTCAT e Laudos", 
-                desc: "Elaboração de laudos técnicos para aposentadoria especial (LTCAT) e laudos de insalubridade/periculosidade." 
+                icon: "/icons/treinamentos.png", 
+                title: "Treinamentos", 
+                desc: "Capacitação técnica e comportamental para trabalhadores e gestores, atendendo a todas as Normas Regulamentadoras." 
               }
             ].map((card, idx) => (
               <motion.div 
@@ -366,7 +366,13 @@ export default function LandingPage() {
                 className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all duration-300 group"
               >
                 <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                  <card.icon className="w-7 h-7 text-primary group-hover:text-white transition-colors duration-300" />
+                  <Image 
+                    src={card.icon} 
+                    alt={card.title} 
+                    width={28} 
+                    height={28}
+                    className="w-7 h-7 object-contain opacity-70 group-hover:opacity-100 group-hover:brightness-0 group-hover:invert transition-all duration-300"
+                  />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 mb-3">{card.title}</h3>
                 <p className="text-slate-600 leading-relaxed text-sm">{card.desc}</p>
@@ -378,7 +384,17 @@ export default function LandingPage() {
 
       {/* Diferenciais */}
       <section id="diferenciais" className="py-24 bg-slate-900 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-slate-800/20 skew-x-12 transform origin-top-right pointer-events-none"></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/backgrounds/diferenciais-bg.jpg" 
+            alt="Background Engenharia" 
+            fill 
+            className="object-cover opacity-40"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-900/85 to-slate-900/95 z-0"></div>
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-slate-800/20 skew-x-12 transform origin-top-right pointer-events-none z-0"></div>
         
         <div className="container mx-auto px-4 md:px-6 relative z-10">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -465,8 +481,16 @@ export default function LandingPage() {
 
       {/* CTA Final */}
       <section id="contato" className="py-24 bg-[#1C252C] text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-5"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/backgrounds/cta-bg.jpg" 
+            alt="Background Industrial" 
+            fill 
+            className="object-cover opacity-40"
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1C252C]/95 via-[#1C252C]/70 to-[#1C252C]/95 z-0"></div>
         
         <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6 text-white">Sua empresa segura. Seus trabalhadores protegidos.</h2>
