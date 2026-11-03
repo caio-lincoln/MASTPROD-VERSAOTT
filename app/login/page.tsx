@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
-import { supabase } from "@/lib/supabaseClient"
+import { signIn } from "@/lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,16 +26,9 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      const user = await signIn(email, password)
 
-      if (error) {
-        throw error
-      }
-
-      if (data.user) {
+      if (user) {
         toast.success("Login realizado com sucesso!")
         router.push("/dashboard")
       }

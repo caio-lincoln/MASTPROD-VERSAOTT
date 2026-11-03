@@ -30,16 +30,12 @@ import { Pagination } from "@/components/pagination"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useESocialEvents, useESocialCompanies, ESocialEvent } from "@/hooks/use-esocial"
-import { supabase } from "@/lib/supabaseClient"
-import { createS1000Event, regenerateS1000XML } from "@/lib/esocial/events/S-1000"
+import EventS2240Modal from "@/components/event-s2240-modal"
+import { db } from "@/lib/data-client"
 import { Label } from "@/components/ui/label"
-import { transmitEvent, consultEvent } from "@/lib/esocial/transmission/gateway"
-import type {
-  ESocialTransmissionRequest,
-  ESocialTransmissionResponse,
-  ESocialConsultResponse,
-} from "@/lib/esocial/transmission/contract"
-import { listCompanyCertificates, getDefaultCompanyCertificate, attachCertificateToEvent } from "@/lib/esocial/events/repository"
+import { transmitEvent, consultEvent, createS1000Event, regenerateEventXml } from "@/lib/esocial/transmission/gateway"
+import type { ESocialTransmissionResponse } from "@/lib/esocial/transmission/contract"
+import { listCompanyCertificates, getDefaultCompanyCertificate } from "@/lib/esocial/events/repository"
 import type { Certificate } from "@/lib/esocial/events/types"
 
 // Import Visual Components
@@ -51,32 +47,6 @@ import {
 } from "./components/visual-components"
 
 // Mock modal components for demonstration purposes if actual components are not provided
-const EventS2240Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-  <>
-    {isOpen && (
-      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
-        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
-          <div className="p-6 border-b border-border">
-            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2240</h3>
-            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2240.</p>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-muted-foreground">Formulário de criação de evento S-2240 aqui...</p>
-          </div>
-          <div className="p-6 border-t border-border">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      </div>
-    )}
-  </>
-)
 const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
   <>
     {isOpen && (
@@ -202,7 +172,7 @@ const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: bo
 const ITEMS_PER_PAGE = 10
 const COMPANIES_PER_PAGE = 5
 
-export default function ESocialContent() {
+export default function ESocialContent({ environment }: { environment: "production" | "homologation" }) {
   const [activeTab, setActiveTab] = useState("overview")
   const [searchS2240, setSearchS2240] = useState("")
   const [searchS2220, setSearchS2220] = useState("")
@@ -469,18 +439,10 @@ export default function ESocialContent() {
         return
       }
 
-      if (!sendModalEvent.certificateId || sendModalEvent.certificateId !== selectedCertificateId) {
-        await attachCertificateToEvent(sendModalEvent.id, selectedCertificateId)
-      }
-
-      const payload: ESocialTransmissionRequest = {
-        eventType: sendModalEvent.eventType,
+      const result: ESocialTransmissionResponse = await transmitEvent({
         eventId: sendModalEvent.id,
-        environment: "homologation",
-        xml: sendModalEvent.xml,
-      }
-
-      const result: ESocialTransmissionResponse = await transmitEvent(payload)
+        certificateId: selectedCertificateId,
+      })
 
       await refreshEvents()
 
@@ -549,21 +511,17 @@ export default function ESocialContent() {
 
   const handleGenerateXML = async (event: any) => {
     try {
-      if (event.eventType === 'S-1000') {
-        const res = await regenerateS1000XML(event.id)
-        if (res && !res.success && res.errors) {
-          alert(res.errors.join('\n'))
-          return
-        }
+      if (event.eventType === 'S-1000' || event.eventType === 'S-2240') {
+        await regenerateEventXml(event.id)
         await refreshEvents()
-        alert('XML do evento S-1000 gerado e salvo com sucesso.')
+        alert(`XML do evento ${event.eventType} gerado e salvo com sucesso.`)
         return
       }
 
       alert('Geração automática de XML ainda não está implementada para este tipo de evento.')
-    } catch (err) {
+    } catch (err: any) {
       console.error('Erro ao gerar XML do evento:', err)
-      alert('Erro ao gerar XML do evento.')
+      alert(err.message || 'Erro ao gerar XML do evento.')
     }
   }
 
@@ -573,7 +531,7 @@ export default function ESocialContent() {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('esocial_eventos')
         .delete()
         .eq('id', event.id)
@@ -591,7 +549,7 @@ export default function ESocialContent() {
 
   const handleLinkCompany = async (companyId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('empresas')
         .update({ origem: 'esocial', esocial_status: 'REGISTRADO' })
         .eq('id', companyId)
@@ -608,7 +566,7 @@ export default function ESocialContent() {
   const handleUnlinkCompany = async (companyId: string) => {
     if (!confirm('Deseja realmente desvincular esta empresa?')) return
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from('empresas')
         .update({ esocial_status: 'NAO_REGISTRADO' })
         .eq('id', companyId)
@@ -632,15 +590,14 @@ export default function ESocialContent() {
     }
 
     try {
-      const response = await consultEvent({
-        eventId: event.id,
-        environment: "homologation",
-      })
+      const response = await consultEvent({ eventId: event.id })
 
       await refreshEvents()
 
       if (response.status === "processado") {
         alert(`Evento processado com sucesso.\nCódigo: ${response.codigo}\nRecibo: ${response.recibo}`)
+      } else if (response.status === "aguardando") {
+        alert(`Lote ainda em processamento no eSocial. Consulte novamente em alguns minutos.\n${response.mensagem}`)
       } else {
         alert(`Erro na consulta: [${response.codigo}] ${response.mensagem}`)
       }
@@ -795,10 +752,17 @@ export default function ESocialContent() {
                 <Calendar className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
                 Últimos 30 dias
             </Button>
-            <span className="text-xs px-3 py-1 rounded-full bg-[#FFE2CF] text-primary border border-[#FD671A]/20 flex items-center h-8">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
-                Ambiente de Homologação
-            </span>
+            {environment === "production" ? (
+              <span className="text-xs px-3 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 flex items-center h-8 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600 mr-2 animate-pulse"></span>
+                  Ambiente de PRODUÇÃO
+              </span>
+            ) : (
+              <span className="text-xs px-3 py-1 rounded-full bg-[#FFE2CF] text-primary border border-[#FD671A]/20 flex items-center h-8">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary mr-2 animate-pulse"></span>
+                  Produção Restrita (testes)
+              </span>
+            )}
         </div>
       </DashboardHeader>
 
@@ -1378,7 +1342,11 @@ export default function ESocialContent() {
       )}
 
       {showCreateS2240Modal && (
-        <EventS2240Modal isOpen={showCreateS2240Modal} onClose={() => setShowCreateS2240Modal(false)} />
+        <EventS2240Modal
+          isOpen={showCreateS2240Modal}
+          onClose={() => setShowCreateS2240Modal(false)}
+          onCreated={() => refreshEvents()}
+        />
       )}
 
       {showCreateS2220Modal && (

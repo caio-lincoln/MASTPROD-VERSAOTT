@@ -2,7 +2,7 @@
 
 import { Users, GraduationCap, HardHat, AlertTriangle, TrendingUp, TrendingDown, ArrowRight, Calendar, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { KpiCard, DashboardHeader, ContentContainer, StatusBadge } from "./esocial/components/visual-components"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -23,7 +23,7 @@ export default function DashboardPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data: view } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const { data: view } = await db.from("dashboard_metricas_por_empresa").select("*")
       const agg = (view || []).reduce(
         (acc, v: any) => {
           acc.funcionarios += v.total_funcionarios || 0
@@ -35,7 +35,7 @@ export default function DashboardPage() {
         { funcionarios: 0, treinamentos_ativos: 0, epis: 0, riscos: 0 },
       )
       setMetrics(agg)
-      const { data: trainings } = await supabase
+      const { data: trainings } = await db
         .from("treinamentos")
         .select("titulo, status, created_at, funcionario_id")
         .order("created_at", { ascending: false })

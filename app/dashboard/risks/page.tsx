@@ -9,7 +9,7 @@ import { RiskModal } from "@/components/risk-modal"
 import { RiskDetailsModal } from "@/components/risk-details-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 import { cn } from "@/lib/utils"
 
@@ -49,9 +49,9 @@ export default function RisksPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      const { data: empresas } = await db.from("empresas").select("id, razao_social")
       setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
-      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const { data: riscos } = await db.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
       const mapped = (riscos as RiskRow[]).map((r) => ({
         id: r.id,
         name: r.nome_risco,
@@ -103,7 +103,7 @@ export default function RisksPage() {
 
   const handleCreateRisk = (data: any) => {
     const run = async () => {
-      await supabase.from("riscos_ocupacionais").insert({
+      await db.from("riscos_ocupacionais").insert({
         nome_risco: data.name,
         tipo: data.type,
         severidade: data.severity,
@@ -119,7 +119,7 @@ export default function RisksPage() {
         status: "ativo",
       })
       setCreateModalOpen(false)
-      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const { data: riscos } = await db.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
       const mapped = (riscos as RiskRow[]).map((r) => ({
         id: r.id,
         name: r.nome_risco,
@@ -145,7 +145,7 @@ export default function RisksPage() {
   const handleEditRisk = (data: any) => {
     const run = async () => {
       if (!editingRisk) return
-      await supabase
+      await db
         .from("riscos_ocupacionais")
         .update({
           nome_risco: data.name,
@@ -163,7 +163,7 @@ export default function RisksPage() {
         })
         .eq("id", editingRisk.id)
       setEditingRisk(null)
-      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      const { data: riscos } = await db.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
       const mapped = (riscos as RiskRow[]).map((r) => ({
         id: r.id,
         name: r.nome_risco,
@@ -189,8 +189,8 @@ export default function RisksPage() {
   const handleDeleteRisk = (id: number) => {
     const run = async () => {
       if (!confirm("Tem certeza que deseja excluir este risco?")) return
-      await supabase.from("riscos_ocupacionais").delete().eq("id", id)
-      const { data: riscos } = await supabase.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
+      await db.from("riscos_ocupacionais").delete().eq("id", id)
+      const { data: riscos } = await db.from("riscos_ocupacionais").select("*").order("created_at", { ascending: false })
       const mapped = (riscos as RiskRow[]).map((r) => ({
         id: r.id,
         name: r.nome_risco,

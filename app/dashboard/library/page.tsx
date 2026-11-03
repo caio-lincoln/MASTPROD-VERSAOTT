@@ -28,7 +28,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { DashboardHeader, ContentContainer } from "@/app/dashboard/esocial/components/visual-components"
 
 type CompanyRow = { id: string; razao_social: string }
@@ -71,7 +71,7 @@ export default function LibraryPage() {
       setError(null)
       
       // Fetch companies first
-      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      const { data: empresas } = await db.from("empresas").select("id, razao_social")
       const companiesList = (empresas as CompanyRow[]) || []
       setCompanies(companiesList.map((e) => ({ id: e.id, name: e.razao_social })))
       
@@ -79,7 +79,7 @@ export default function LibraryPage() {
       const companyMap = new Map(companiesList.map(c => [c.id, c.razao_social]))
 
       // Fetch documents
-      const { data: docs } = await supabase.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
+      const { data: docs } = await db.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
       
       const mapped = (docs as DocumentRow[] || []).map((d) => ({
         id: d.id,
@@ -156,11 +156,9 @@ export default function LibraryPage() {
   }
 
   const handleUploadDocument = async (data: any) => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token || ""
-    const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
-    const resp = await fetch(`${base}/upload-document`, {
+    const resp = await fetch("/api/documents", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         empresa_id: data.companyId,
         file_name: data.name,
@@ -173,12 +171,16 @@ export default function LibraryPage() {
         tags: data.tags,
       }),
     })
-    if (!resp.ok) return
+    if (!resp.ok) {
+      const result = await resp.json().catch(() => null)
+      alert(result?.error?.message || "Erro ao enviar documento.")
+      return
+    }
     setUploadModalOpen(false)
     
     // Refresh list
     // Ideally extract the load function to reuse it, but duplicating for now to match style
-    const { data: docs } = await supabase.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
+    const { data: docs } = await db.from("biblioteca_documentos").select("*").order("data_upload", { ascending: false })
     // Re-fetch companies or use existing state? We need the map again. 
     // Since companies don't change often, let's just reuse the companyMap logic with current companies state if possible, 
     // but inside this function 'companies' state might be stale closure if not careful.
@@ -205,9 +207,7 @@ export default function LibraryPage() {
   }
 
   const handleDownload = async (doc: any) => {
-    const { data, error } = await supabase.storage.from("documentos").createSignedUrl(doc.caminho_storage, 60)
-    if (error || !data) return
-    window.open(data.signedUrl, "_blank")
+    window.open(`/api/documents/${doc.id}`, "_blank")
   }
 
   const getFileIcon = (type: string) => {

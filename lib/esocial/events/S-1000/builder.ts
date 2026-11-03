@@ -1,4 +1,5 @@
 import { S1000Props } from './schema';
+import { ambienteAtual, eventNamespace, generateEventId } from '../common';
 
 export function buildS1000XML(data: S1000Props): string {
   // 1) Fail-fast: obrigatórios mínimos para montar o evento
@@ -73,31 +74,17 @@ export function buildS1000XML(data: S1000Props): string {
     throw new Error("S-1000: 'indOptRegEletron' é obrigatório.");
   }
 
-  // 4) Geração de ID (ID + tpInsc + nrInsc + timestamp + seq)
-  // Conforme solicitação: nrInsc deve ter 8 (Raiz CNPJ) ou 14 (CNPJ Completo) ou 11 (CPF), sem padding forçado para 14.
-  const idDoc = onlyDigitsNrInsc; 
-  const now = new Date();
+  // 4) Id do evento (36 caracteres, nrInsc completado com zeros à direita)
+  const id = generateEventId({ tpInsc: data.tpInsc, nrInsc: onlyDigitsNrInsc, documento: onlyDigitsNrInsc });
 
-  // timestamp: YYYYMMDDHHMMSS
-  const yyyy = String(now.getUTCFullYear());
-  const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const dd = String(now.getUTCDate()).padStart(2, '0');
-  const HH = String(now.getUTCHours()).padStart(2, '0');
-  const MM = String(now.getUTCMinutes()).padStart(2, '0');
-  const SS = String(now.getUTCSeconds()).padStart(2, '0');
-  const timestamp = `${yyyy}${mm}${dd}${HH}${MM}${SS}`;
-
-  const seq = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
-  const id = `ID${data.tpInsc}${idDoc}${timestamp}${seq}`;
-
-  // 5) Montagem do XML (somente tags permitidas no XSD do S-1.2)
+  // 5) Montagem do XML (leiaute S-1.3)
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-  xml += `<eSocial xmlns="http://www.esocial.gov.br/schema/evt/evtInfoEmpregador/v_S_01_02_00">\n`;
+  xml += `<eSocial xmlns="${eventNamespace('evtInfoEmpregador')}">\n`;
   xml += `  <evtInfoEmpregador Id="${id}">\n`;
 
   // ideEvento
   xml += `    <ideEvento>\n`;
-  xml += `      <tpAmb>1</tpAmb>\n`; // 1=Produção | (ajuste se você tiver homologação)
+  xml += `      <tpAmb>${ambienteAtual().tpAmb}</tpAmb>\n`;
   xml += `      <procEmi>1</procEmi>\n`;
   xml += `      <verProc>1.0.0</verProc>\n`;
   xml += `    </ideEvento>\n`;
@@ -122,7 +109,7 @@ export function buildS1000XML(data: S1000Props): string {
   xml += `        <infoCadastro>\n`;
   xml += `          <classTrib>${data.classTrib}</classTrib>\n`;
 
-  // natJurid: PROIBIDO no S-1.2 do S-1000 -> não gerar
+  // natJurid não faz parte do infoCadastro do S-1000
 
   // opcionais: só se existirem
   if (data.indCoop !== undefined) {

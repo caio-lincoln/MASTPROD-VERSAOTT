@@ -42,20 +42,12 @@ Implementa o padrão *Fail-Fast*. Antes de gerar qualquer XML, valida as regras 
 ### C. Builder (`lib/esocial/events/S-1000/builder.ts`)
 Motor de geração do XML. Implementa a construção do ID e da estrutura hierárquica.
 
-#### Padrão de Geração do ID (Corrigido)
-O ID do evento segue estritamente a concatenação dos dados reais do evento, sem padding artificial, garantindo unicidade e rastreabilidade:
+#### Padrão de Geração do ID
+Gerado por `generateEventId` em `lib/esocial/events/common.ts` (compartilhado por todos os eventos).
 
-**Formato:** `ID + tpInsc + nrInsc + Timestamp + Sequencial`
+**Formato (sempre 36 caracteres):** `ID + tpInsc(1) + nrInsc(14) + AAAAMMDDHHMMSS + sequencial(5)`
 
-| Componente | Tamanho | Descrição |
-|:--- |:--- |:--- |
-| **ID** | 2 chars | Literal fixo "ID" |
-| **tpInsc** | 1 char | `1` (CNPJ) ou `2` (CPF) |
-| **nrInsc** | **8, 11 ou 14** | Valor exato usado na tag `<nrInsc>` (Raiz, CPF ou Completo) |
-| **Timestamp** | 14 chars | `AAAAMMDDHHMMSS` (UTC) |
-| **Seq** | 5 chars | Sequencial numérico aleatório/incremental |
-
-> **Nota:** Diferente do padrão genérico de 36 caracteres fixos, este ID se adapta ao tamanho real da inscrição (CNPJ Raiz vs Completo), conforme requisitos do projeto.
+O `nrInsc` é o mesmo valor de `ideEmpregador/nrInsc` (raiz de 8 dígitos, CNPJ completo de 14 ou CPF de 11), **completado com zeros à direita até 14 posições**, conforme o MOS.
 
 ### D. Gateway de Transmissão (`lib/esocial/transmission/gateway.ts`)
 Atua como um *Smart Proxy* para o envio:
@@ -97,4 +89,5 @@ Para manutenção ou evolução deste módulo, siga este checklist:
 - [ ] **Sempre** validar regras no `Validator` antes de mexer no `Builder`.
 - [ ] **Nunca** alterar a lógica de 8 vs 14 dígitos do CNPJ sem consultar as Notas Técnicas (Tabela de Naturezas Jurídicas).
 - [ ] **Monitorar** logs do Gateway para erros de conexão (`Failed to fetch`), que geralmente indicam problemas de rota/DNS no ambiente servidor.
-- [ ] **Testar** a geração do ID para garantir que o `nrInsc` do ID bate com o `nrInsc` da tag XML.
+- [ ] **Testar** a geração do ID: 36 caracteres, com o `nrInsc` da tag XML completado com zeros à direita.
+- [ ] Leiaute em produção: **S-1.3** (`v_S_01_03_00`), em `LEIAUTE_VERSION` (`lib/esocial/events/common.ts`).

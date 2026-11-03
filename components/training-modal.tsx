@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Search, Building2, User } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 
 interface TrainingModalProps {
   open: boolean
@@ -38,9 +38,9 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
 
   useEffect(() => {
     const load = async () => {
-      const { data: empresas } = await supabase.from("empresas").select("id, razao_social, cnpj")
+      const { data: empresas } = await db.from("empresas").select("id, razao_social, cnpj")
       setCompanies((empresas as CompanyRow[]).map((c) => ({ id: c.id, name: c.razao_social, cnpj: c.cnpj })))
-      const { data: funcs } = await supabase.from("funcionarios").select("id, nome, cargo, departamento, empresa_id")
+      const { data: funcs } = await db.from("funcionarios").select("id, nome, cargo, departamento, empresa_id")
       setEmployees(
         (funcs as EmployeeRow[]).map((f) => ({
           id: f.id,
@@ -71,7 +71,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
     e.preventDefault()
     const run = async () => {
       for (const empId of selectedEmployees) {
-        await supabase.from("treinamentos").insert({
+        await db.from("treinamentos").insert({
           titulo: formData.name,
           descricao: formData.description,
           status: "agendado",
