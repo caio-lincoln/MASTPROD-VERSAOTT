@@ -1,4 +1,4 @@
-import { ambienteAtual, escapeXml, eventNamespace, formatDecimal, generateEventId, onlyDigits } from "../common"
+import { ambienteAtual, cleanInscricao, escapeXml, eventNamespace, formatDecimal, generateEventId, onlyDigits } from "../common"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "./types"
 
 const tag = (name: string, value: unknown) => `<${name}>${escapeXml(value)}</${name}>`
@@ -44,7 +44,7 @@ export function buildS2240XML(d: S2240Data, verProc = process.env.ESOCIAL_VER_PR
     x += tag("localAmb", a.localAmb)
     x += tag("dscSetor", a.dscSetor.trim())
     x += tag("tpInsc", a.tpInsc)
-    x += tag("nrInsc", onlyDigits(a.nrInsc))
+    x += tag("nrInsc", cleanInscricao(a.nrInsc))
     x += "</infoAmb>"
   }
 

@@ -2,6 +2,7 @@ import { queryOne } from "@/lib/server/db"
 import { HttpError, assertCompanyAccess, errorResponse, requireUser } from "@/lib/server/access"
 import { regenerateS1000XML } from "@/lib/esocial/events/S-1000"
 import { ValidationError, regenerateS2240Xml } from "@/lib/esocial/server/s2240"
+import { regenerateSstXml } from "@/lib/esocial/server/sst-events"
 
 export const runtime = "nodejs"
 
@@ -23,6 +24,10 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
     }
     if (ev.tipo_evento === "S-2240") {
       await regenerateS2240Xml(id)
+      return Response.json({ success: true })
+    }
+    if (ev.tipo_evento === "S-2220" || ev.tipo_evento === "S-2210") {
+      await regenerateSstXml(id)
       return Response.json({ success: true })
     }
     throw new HttpError(400, `Regeração não suportada para ${ev.tipo_evento}.`)

@@ -55,6 +55,8 @@ const TABLES: Record<string, TableConfig> = {
   exposicao_responsaveis: { scope: { kind: "subquery", sql: (p) => `exposicao_id IN (${EXPOSICOES_DA_EMPRESA(p)})` } },
   dashboard_metricas_por_empresa: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
   estabelecimentos: { scope: { kind: "column", column: "empresa_id" } },
+  asos: { scope: { kind: "column", column: "empresa_id" }, noInsert: true },
+  cats: { scope: { kind: "column", column: "empresa_id" }, noInsert: true },
   esocial_importacoes: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
 }
 

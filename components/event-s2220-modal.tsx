@@ -1,264 +1,246 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useMemo } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useEffect, useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, FileText, Building2 } from "lucide-react"
+import { Activity, Plus, Trash2 } from "lucide-react"
+import { db } from "@/lib/data-client"
+import { createSstEvent } from "@/lib/esocial/transmission/gateway"
+import { TIPOS_EXAME } from "@/lib/esocial/events/S-2220"
+import { Choice, ErrorList, Field, Section, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
 
-interface EventS2220ModalProps {
+interface Props {
   isOpen: boolean
   onClose: () => void
+  onCreated?: () => void
 }
 
-export default function EventS2220Modal({ isOpen, onClose }: EventS2220ModalProps) {
-  const [selectedCompany, setSelectedCompany] = useState("")
-  const [selectedEmployee, setSelectedEmployee] = useState("")
-  const [examDate, setExamDate] = useState("")
-  const [examType, setExamType] = useState("")
-  const [examResult, setExamResult] = useState("")
-  const [doctorName, setDoctorName] = useState("")
-  const [doctorCrm, setDoctorCrm] = useState("")
-  const [doctorUf, setDoctorUf] = useState("")
-  const [pcmsoCoordinator, setPcmsoCoordinator] = useState("")
-  const [observations, setObservations] = useState("")
+// Audiometria tonal (Tabela 27): pede ordem do exame e resultado
+const AUDIOMETRIA = "0281"
 
-  const allCompanies = useMemo(
-    () => [
-      { id: 1, name: "TechCorp Solutions", cnpj: "12.345.678/0001-90" },
-      { id: 2, name: "IndustrialMax Ltda", cnpj: "98.765.432/0001-10" },
-      { id: 3, name: "ServiçoPro Brasil", cnpj: "11.222.333/0001-44" },
-    ],
-    [],
-  )
+interface ExameForm {
+  dtExm: string
+  procRealizado: string
+  obsProc: string
+  ordExame: string
+  indResult: string
+}
 
-  const allEmployees = useMemo(
-    () => [
-      { id: 1, name: "Carlos Silva", cpf: "123.456.789-00", role: "Operador de Máquinas", companyId: 1 },
-      { id: 2, name: "Maria Santos", cpf: "987.654.321-00", role: "Técnica de Segurança", companyId: 1 },
-      { id: 3, name: "João Oliveira", cpf: "456.789.123-00", role: "Soldador", companyId: 2 },
-      { id: 4, name: "Ana Costa", cpf: "321.654.987-00", role: "Eletricista", companyId: 2 },
-    ],
-    [],
-  )
+const novoExame = (dt = ""): ExameForm => ({ dtExm: dt, procRealizado: "", obsProc: "", ordExame: "", indResult: "" })
+const vazio = (v: string) => (v.trim() ? v.trim() : null)
 
-  const filteredEmployees = useMemo(() => {
-    if (!selectedCompany) return []
-    return allEmployees.filter((emp) => emp.companyId === Number.parseInt(selectedCompany))
-  }, [selectedCompany, allEmployees])
+export default function EventS2220Modal({ isOpen, onClose, onCreated }: Props) {
+  const t = useTrabalhador(isOpen)
+  const [tpExame, setTpExame] = useState("")
+  const [dtAso, setDtAso] = useState("")
+  const [resAso, setResAso] = useState("1")
+  const [exames, setExames] = useState<ExameForm[]>([novoExame()])
+  const [medico, setMedico] = useState({ nmMed: "", nrCRM: "", ufCRM: "" })
+  const [temResp, setTemResp] = useState(false)
+  const [resp, setResp] = useState({ nmResp: "", cpfResp: "", nrCRM: "", ufCRM: "" })
+  const [saving, setSaving] = useState(false)
+  const [errors, setErrors] = useState<string[]>([])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Criando evento S-2220...")
+  // Sugere médico emitente e coordenador do PCMSO a partir do último ASO da empresa
+  useEffect(() => {
+    if (!t.empresaId) return
+    db.from("asos")
+      .select("dados")
+      .eq("empresa_id", t.empresaId)
+      .order("dt_aso", { ascending: false })
+      .limit(1)
+      .then(({ data }) => {
+        const d = data?.[0]?.dados
+        if (!d) return
+        setMedico({ nmMed: d.medico?.nmMed ?? "", nrCRM: d.medico?.nrCRM ?? "", ufCRM: d.medico?.ufCRM ?? "" })
+        if (d.respMonit) {
+          setTemResp(true)
+          setResp({ nmResp: d.respMonit.nmResp ?? "", cpfResp: d.respMonit.cpfResp ?? "", nrCRM: d.respMonit.nrCRM ?? "", ufCRM: d.respMonit.ufCRM ?? "" })
+        }
+      })
+  }, [t.empresaId])
+
+  const updateExame = (i: number, patch: Partial<ExameForm>) =>
+    setExames((list) => list.map((x, idx) => (idx === i ? { ...x, ...patch } : x)))
+
+  const reset = () => {
+    t.reset()
+    setTpExame("")
+    setDtAso("")
+    setResAso("1")
+    setExames([novoExame()])
+    setErrors([])
+  }
+
+  const handleClose = () => {
+    if (saving) return
+    reset()
     onClose()
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!t.empresaId || !t.funcionarioId) {
+      setErrors(["Selecione a empresa e o funcionário."])
+      return
+    }
+    const dados = {
+      tpExameOcup: tpExame,
+      dtAso,
+      resAso,
+      exames: exames.map((x) => ({
+        dtExm: x.dtExm || dtAso,
+        procRealizado: x.procRealizado.trim(),
+        obsProc: vazio(x.obsProc),
+        ordExame: x.ordExame || null,
+        indResult: x.indResult || null,
+      })),
+      medico: { nmMed: medico.nmMed.trim(), nrCRM: vazio(medico.nrCRM), ufCRM: medico.ufCRM || null },
+      respMonit: temResp
+        ? { nmResp: resp.nmResp.trim(), cpfResp: vazio(resp.cpfResp)?.replace(/\D/g, "") ?? null, nrCRM: resp.nrCRM.trim(), ufCRM: resp.ufCRM }
+        : null,
+    }
+    try {
+      setSaving(true)
+      setErrors([])
+      await createSstEvent("S-2220", { empresaId: t.empresaId, funcionarioId: t.funcionarioId, matricula: t.matricula || null, dados })
+      reset()
+      onCreated?.()
+      onClose()
+    } catch (err: any) {
+      setErrors(err.errors?.length ? err.errors : [err.message || "Erro ao gerar o evento."])
+      document.getElementById("s2220-erros")?.scrollIntoView({ behavior: "smooth" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="bg-background border-border text-foreground w-[calc(100vw-2rem)] max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            Novo Evento S-2220 - Monitoramento da Saúde do Trabalhador
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <Activity className="w-5 h-5 text-primary" />
+            Evento S-2220: Monitoramento da Saúde do Trabalhador (ASO)
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Informe os dados sobre exames médicos ocupacionais (ASO)
+            Leiaute S-1.3. O XML é gerado e validado ao salvar; o envio é feito depois, na lista de eventos.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* Identificação da Empresa */}
-        <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              Identificação
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company">Empresa *</Label>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {allCompanies.map((company) => (
-                      <SelectItem key={company.id} value={company.id.toString()}>
-                        {company.name} - {company.cnpj}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="employee">Funcionário *</Label>
-                <Select value={selectedEmployee} onValueChange={setSelectedEmployee} disabled={!selectedCompany}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione o funcionário" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {filteredEmployees.map((employee) => (
-                      <SelectItem key={employee.id} value={employee.id.toString()}>
-                        {employee.name} - {employee.role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <div id="s2220-erros">
+            <ErrorList errors={errors} />
           </div>
 
-          {/* Dados do Exame */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary">Dados do Exame</h3>
+          <TrabalhadorSection t={t} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="examDate">Data do Exame *</Label>
-                <Input
-                  id="examDate"
-                  type="date"
-                  value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="examType">Tipo de Exame *</Label>
-                <Select value={examType} onValueChange={setExamType}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="admissional">Admissional</SelectItem>
-                    <SelectItem value="periodico">Periódico</SelectItem>
-                    <SelectItem value="retorno">Retorno ao Trabalho</SelectItem>
-                    <SelectItem value="mudanca">Mudança de Função</SelectItem>
-                    <SelectItem value="demissional">Demissional</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="examResult">Resultado *</Label>
-                <Select value={examResult} onValueChange={setExamResult}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione o resultado" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="apto">Apto</SelectItem>
-                    <SelectItem value="inapto">Inapto</SelectItem>
-                    <SelectItem value="apto_restricao">Apto com Restrição</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          {/* Médico Examinador */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary">Médico Examinador</h3>
-
+          <Section title="Atestado de saúde ocupacional">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="doctorName">Nome do Médico *</Label>
-                <Input
-                  id="doctorName"
-                  value={doctorName}
-                  onChange={(e) => setDoctorName(e.target.value)}
-                  placeholder="Nome completo"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="doctorCrm">CRM *</Label>
-                <Input
-                  id="doctorCrm"
-                  value={doctorCrm}
-                  onChange={(e) => setDoctorCrm(e.target.value)}
-                  placeholder="000000"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="doctorUf">UF *</Label>
-                <Select value={doctorUf} onValueChange={setDoctorUf}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="UF" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="SP">SP</SelectItem>
-                    <SelectItem value="RJ">RJ</SelectItem>
-                    <SelectItem value="MG">MG</SelectItem>
-                    <SelectItem value="RS">RS</SelectItem>
-                    <SelectItem value="BA">BA</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2 md:col-span-3">
-                <Label htmlFor="pcmsoCoordinator">Médico Coordenador do PCMSO *</Label>
-                <Input
-                  id="pcmsoCoordinator"
-                  value={pcmsoCoordinator}
-                  onChange={(e) => setPcmsoCoordinator(e.target.value)}
-                  placeholder="Nome do médico coordenador"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
+              <Field label="Tipo de exame *">
+                <Choice value={tpExame} onChange={setTpExame} options={TIPOS_EXAME.map(([v, l]) => [v, `${v} - ${l}`] as const)} />
+              </Field>
+              <Field label="Data do ASO *">
+                <TextInput type="date" value={dtAso} onChange={(e) => setDtAso(e.target.value)} required />
+              </Field>
+              <Field label="Resultado *">
+                <Choice value={resAso} onChange={setResAso} options={[["1", "Apto"], ["2", "Inapto"]]} />
+              </Field>
             </div>
-          </div>
+          </Section>
 
-          {/* Observações */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary">Observações Adicionais</h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="observations">Observações</Label>
-              <Textarea
-                id="observations"
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
-                placeholder="Informações adicionais sobre o exame..."
-                className="bg-background border-input text-foreground min-h-[100px]"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FFE2CF] border border-[#FD671A]/20">
-            <AlertCircle className="w-5 h-5 text-[#E85C14]" />
-            <p className="text-sm text-[#E85C14]">
-              Este evento será gerado conforme layout oficial do eSocial S-2220 versão S-1.3
+          <Section title="Exames e procedimentos (Tabela 27)">
+            {exames.map((x, i) => (
+              <div key={i} className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end border-b border-dashed border-border pb-3">
+                <Field label="Data *" className="md:col-span-3">
+                  <TextInput type="date" value={x.dtExm} onChange={(e) => updateExame(i, { dtExm: e.target.value })} />
+                </Field>
+                <Field label="Código (4 dígitos) *" className="md:col-span-2">
+                  <TextInput
+                    value={x.procRealizado}
+                    onChange={(e) => updateExame(i, { procRealizado: e.target.value.replace(/\D/g, "").slice(0, 4) })}
+                    placeholder="0000"
+                    inputMode="numeric"
+                  />
+                </Field>
+                <Field label="Observação" className="md:col-span-6">
+                  <TextInput value={x.obsProc} onChange={(e) => updateExame(i, { obsProc: e.target.value })} maxLength={999} />
+                </Field>
+                <div className="md:col-span-1 flex justify-end">
+                  {exames.length > 1 && (
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setExames(exames.filter((_, idx) => idx !== i))}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+                {x.procRealizado === AUDIOMETRIA && (
+                  <>
+                    <Field label="Ordem do exame *" className="md:col-span-4">
+                      <Choice value={x.ordExame} onChange={(v) => updateExame(i, { ordExame: v })} options={[["1", "Referencial"], ["2", "Sequencial"]]} />
+                    </Field>
+                    <Field label="Resultado da audiometria *" className="md:col-span-4">
+                      <Choice
+                        value={x.indResult}
+                        onChange={(v) => updateExame(i, { indResult: v })}
+                        options={[["1", "Normal"], ["2", "Alterado"], ["3", "Estável"], ["4", "Agravamento"]]}
+                      />
+                    </Field>
+                  </>
+                )}
+              </div>
+            ))}
+            <Button type="button" variant="outline" onClick={() => setExames([...exames, novoExame(dtAso)])}>
+              <Plus className="w-4 h-4 mr-2" /> Adicionar exame
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Use os códigos da Tabela 27 do eSocial (procedimentos diagnósticos). Inclua o exame clínico e os complementares.
             </p>
-          </div>
+          </Section>
 
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="border-input text-muted-foreground hover:bg-slate-50 hover:text-foreground bg-transparent"
-            >
+          <Section title="Médico emitente do ASO">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Field label="Nome *" className="md:col-span-2">
+                <TextInput value={medico.nmMed} onChange={(e) => setMedico({ ...medico, nmMed: e.target.value })} maxLength={70} />
+              </Field>
+              <Field label="CRM">
+                <TextInput value={medico.nrCRM} onChange={(e) => setMedico({ ...medico, nrCRM: e.target.value })} maxLength={10} />
+              </Field>
+              <Field label="UF do CRM">
+                <Choice value={medico.ufCRM} onChange={(v) => setMedico({ ...medico, ufCRM: v })} options={UFS.map((u) => [u, u] as const)} />
+              </Field>
+            </div>
+          </Section>
+
+          <Section title="Médico responsável pelo PCMSO">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={temResp} onChange={(e) => setTemResp(e.target.checked)} />
+              Informar o médico responsável/coordenador do PCMSO
+            </label>
+            {temResp && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Field label="Nome *" className="md:col-span-2">
+                  <TextInput value={resp.nmResp} onChange={(e) => setResp({ ...resp, nmResp: e.target.value })} maxLength={70} />
+                </Field>
+                <Field label="CPF">
+                  <TextInput value={resp.cpfResp} onChange={(e) => setResp({ ...resp, cpfResp: e.target.value })} />
+                </Field>
+                <Field label="CRM *">
+                  <TextInput value={resp.nrCRM} onChange={(e) => setResp({ ...resp, nrCRM: e.target.value })} maxLength={10} />
+                </Field>
+                <Field label="UF do CRM *">
+                  <Choice value={resp.ufCRM} onChange={(v) => setResp({ ...resp, ufCRM: v })} options={UFS.map((u) => [u, u] as const)} />
+                </Field>
+              </div>
+            )}
+          </Section>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={saving} className="border-border bg-transparent">
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Gerar Evento
+            <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              {saving ? "Gerando..." : "Gerar Evento S-2220"}
             </Button>
           </div>
         </form>

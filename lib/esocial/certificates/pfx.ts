@@ -81,7 +81,7 @@ export function loadPfx(payload: CertificateSecretPayload, options: { allowExpir
       validFrom: cert.validity.notBefore.toISOString(),
       validTo: cert.validity.notAfter.toISOString(),
       // Padrão ICP-Brasil: CN = "NOME:CNPJ" (e-CNPJ) ou "NOME:CPF" (e-CPF)
-      documento: subject.match(/:(\d{14}|\d{11})\s*$/)?.[1] ?? null,
+      documento: subject.match(/:([A-Z0-9]{12}\d{2}|\d{11})\s*$/i)?.[1]?.toUpperCase() ?? null,
       fingerprint: forge.md.sha256.create().update(der).digest().toHex(),
     },
     certPem: forge.pki.certificateToPem(cert),

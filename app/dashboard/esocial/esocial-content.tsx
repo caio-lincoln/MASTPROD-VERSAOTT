@@ -31,6 +31,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useESocialEvents, useESocialCompanies, ESocialEvent } from "@/hooks/use-esocial"
 import EventS2240Modal from "@/components/event-s2240-modal"
+import EventS2220Modal from "@/components/event-s2220-modal"
+import EventS2210Modal from "@/components/event-s2210-modal"
 import { db } from "@/lib/data-client"
 import { Label } from "@/components/ui/label"
 import { transmitEvent, consultEvent, createS1000Event, regenerateEventXml } from "@/lib/esocial/transmission/gateway"
@@ -47,59 +49,6 @@ import {
 } from "./components/visual-components"
 
 // Mock modal components for demonstration purposes if actual components are not provided
-const EventS2220Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-  <>
-    {isOpen && (
-      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
-        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
-          <div className="p-6 border-b border-border">
-            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2220</h3>
-            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2220.</p>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-muted-foreground">Formulário de criação de evento S-2220 aqui...</p>
-          </div>
-          <div className="p-6 border-t border-border">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      </div>
-    )}
-  </>
-)
-const EventS2210Modal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-  <>
-    {isOpen && (
-      <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 p-4">
-        <div className="bg-white border border-border rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-sm">
-          <div className="p-6 border-b border-border">
-            <h3 className="text-xl font-bold text-foreground mb-2">Criar Evento S-2210</h3>
-            <p className="text-sm text-muted-foreground">Preencha os campos para criar um novo evento S-2210.</p>
-          </div>
-          <div className="flex-1 overflow-y-auto p-6">
-            <p className="text-muted-foreground">Formulário de criação de evento S-2210 aqui...</p>
-          </div>
-          <div className="p-6 border-t border-border">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="w-full border-border text-muted-foreground hover:bg-slate-50 bg-white"
-            >
-              Cancelar
-            </Button>
-          </div>
-        </div>
-      </div>
-    )}
-  </>
-)
-
 const EventS1000Modal = ({ isOpen, onClose, companies, onSuccess }: { isOpen: boolean; onClose: () => void; companies: any[]; onSuccess: () => void }) => {
   const [selectedCompany, setSelectedCompany] = useState("")
   const [loading, setLoading] = useState(false)
@@ -511,7 +460,7 @@ export default function ESocialContent({ environment }: { environment: "producti
 
   const handleGenerateXML = async (event: any) => {
     try {
-      if (event.eventType === 'S-1000' || event.eventType === 'S-2240') {
+      if (['S-1000', 'S-2240', 'S-2220', 'S-2210'].includes(event.eventType)) {
         await regenerateEventXml(event.id)
         await refreshEvents()
         alert(`XML do evento ${event.eventType} gerado e salvo com sucesso.`)
@@ -737,9 +686,10 @@ export default function ESocialContent({ environment }: { environment: "producti
   }
 
   // Calculate stats for KPIs
-  const totalSent = events.filter(e => e.status === 'Enviado' || e.status === 'Processado').length
-  const totalErrors = events.filter(e => e.status === 'Erro').length
-  const totalPending = events.filter(e => e.status === 'Pendente').length
+  // `events` traz o status como está no banco (minúsculo); só os cards usam a versão capitalizada
+  const totalSent = events.filter(e => e.status === 'enviado' || e.status === 'processado').length
+  const totalErrors = events.filter(e => e.status === 'erro' || e.status === 'rejeitado').length
+  const totalPending = events.filter(e => e.status === 'pendente').length
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
@@ -1350,11 +1300,19 @@ export default function ESocialContent({ environment }: { environment: "producti
       )}
 
       {showCreateS2220Modal && (
-        <EventS2220Modal isOpen={showCreateS2220Modal} onClose={() => setShowCreateS2220Modal(false)} />
+        <EventS2220Modal
+          isOpen={showCreateS2220Modal}
+          onClose={() => setShowCreateS2220Modal(false)}
+          onCreated={() => refreshEvents()}
+        />
       )}
 
       {showCreateS2210Modal && (
-        <EventS2210Modal isOpen={showCreateS2210Modal} onClose={() => setShowCreateS2210Modal(false)} />
+        <EventS2210Modal
+          isOpen={showCreateS2210Modal}
+          onClose={() => setShowCreateS2210Modal(false)}
+          onCreated={() => refreshEvents()}
+        />
       )}
 
       {showCreateS1000Modal && (

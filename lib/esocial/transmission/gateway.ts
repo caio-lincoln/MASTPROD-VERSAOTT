@@ -52,6 +52,16 @@ export function createS2240Event(payload: Record<string, unknown>) {
   })
 }
 
+export function createSstEvent(
+  tipo: "S-2220" | "S-2210",
+  payload: { empresaId: string; funcionarioId: string; matricula?: string | null; dados: unknown }
+) {
+  return postJson<{ success: boolean; eventId: string; idEvento: string; xml: string }>("/api/esocial/events", {
+    tipo,
+    ...payload,
+  })
+}
+
 export function regenerateEventXml(eventId: string) {
   return postJson<{ success: boolean; errors?: string[] }>(`/api/esocial/events/${eventId}/regenerate`, {})
 }

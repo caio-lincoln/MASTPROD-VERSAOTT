@@ -1,4 +1,4 @@
-import { isValidCpf, onlyDigits } from "../common"
+import { CNPJ_PATTERN, cleanInscricao, isValidCpf } from "../common"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "./types"
 
 // Agentes que exigem limite de tolerância na avaliação quantitativa
@@ -35,9 +35,9 @@ export function validateS2240(d: S2240Data): string[] {
     const n = `Ambiente ${i + 1}`
     if (!a.dscSetor?.trim()) e.push(`${n}: descreva o setor.`)
     if (a.dscSetor && a.dscSetor.length > 100) e.push(`${n}: descrição do setor com mais de 100 caracteres.`)
-    const nr = onlyDigits(a.nrInsc)
-    const esperado = a.tpInsc === "4" ? 12 : 14
-    if (nr.length !== esperado) e.push(`${n}: inscrição do local deve ter ${esperado} dígitos.`)
+    const nr = cleanInscricao(a.nrInsc)
+    const ok = a.tpInsc === "4" ? /^\d{12}$/.test(nr) : a.tpInsc === "1" ? CNPJ_PATTERN.test(nr) : /^\d{14}$/.test(nr)
+    if (!ok) e.push(`${n}: inscrição do local inválida (${a.tpInsc === "4" ? "CNO com 12 dígitos" : "14 posições"}).`)
   })
 
   // Atividade

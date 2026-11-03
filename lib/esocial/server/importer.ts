@@ -2,6 +2,8 @@ import "server-only"
 import { query, withTransaction } from "@/lib/server/db"
 import { HttpError } from "@/lib/server/access"
 import { consolidate, parseEsocialFiles, type InputFile, type TrabalhadorImportado } from "../import/parser"
+import { vinculoDe } from "../import/sst-mappers"
+import { importarHistoricoSst } from "./sst-history"
 
 export type Situacao = "novo" | "atualizado" | "sem_alteracao"
 
@@ -29,6 +31,10 @@ export interface ResultadoImportacao {
   exclusoesSemRecibo: number
   s2240JaEnviados: number
   estabelecimentos: number
+  /** Histórico de SST (S-2210, S-2220, S-2240) encontrado nos arquivos */
+  sst: { tipo: string; novos: number; jaImportados: number }[]
+  /** Eventos de SST de trabalhador sem cadastro (será criado com o CPF) */
+  sstSemTrabalhador: number
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
   linhas: LinhaPrevia[]
   gravado: boolean
@@ -127,6 +133,23 @@ export async function importarEsocial(params: {
     }
   })
 
+  // Histórico de SST: o que já foi importado antes (mesmo Id de evento) não entra de novo
+  const idsExistentes = new Set(
+    (
+      await query<{ id_evento: string }>(
+        "SELECT id_evento FROM esocial_eventos WHERE empresa_id = $1 AND id_evento IS NOT NULL",
+        [empresa.id]
+      )
+    ).map((r) => r.id_evento)
+  )
+  const sstNovos = dados.sst.filter((e) => !e.id || !idsExistentes.has(e.id))
+  const cpfsConhecidos = new Set([...porCpf.keys(), ...dados.trabalhadores.map((w) => w.cpf)])
+  const sstResumo = ["S-2240", "S-2220", "S-2210"].map((tipo) => {
+    const todos = dados.sst.filter((e) => e.kind === tipo).length
+    const novos = sstNovos.filter((e) => e.kind === tipo).length
+    return { tipo, novos, jaImportados: todos - novos }
+  })
+
   const resultado: ResultadoImportacao = {
     empresa: { id: empresa.id, razaoSocial: empresa.razao_social, cnpj: empresa.cnpj },
     arquivosLidos: parsed.arquivosLidos,
@@ -139,6 +162,8 @@ export async function importarEsocial(params: {
     exclusoesSemRecibo: dados.exclusoesSemRecibo,
     s2240JaEnviados: dados.s2240Enviados,
     estabelecimentos: dados.estabelecimentos.length,
+    sst: sstResumo,
+    sstSemTrabalhador: sstNovos.filter((e) => !cpfsConhecidos.has(vinculoDe(e.node).cpf)).length,
     totais: {
       trabalhadores: linhas.length,
       novos: linhas.filter((l) => l.situacao === "novo").length,
@@ -202,6 +227,8 @@ export async function importarEsocial(params: {
         ]
       )
     }
+
+    await importarHistoricoSst(client, empresa.id, sstNovos, params.userId)
 
     for (const est of dados.estabelecimentos) {
       if (est.excluido) {

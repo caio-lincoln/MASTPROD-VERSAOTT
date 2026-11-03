@@ -2,7 +2,7 @@ import "server-only"
 import type { PoolClient } from "pg"
 import { withTransaction } from "@/lib/server/db"
 import { HttpError } from "@/lib/server/access"
-import { empregadorIde, onlyDigits } from "../events/common"
+import { cleanInscricao, empregadorIde, onlyDigits } from "../events/common"
 import { buildS2240XML } from "../events/S-2240/builder"
 import { validateS2240 } from "../events/S-2240/validator"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "../events/S-2240/types"
@@ -173,7 +173,7 @@ export async function createS2240Event(userId: string, input: S2240Input) {
       const { rows: [created] } = await client.query(
         `INSERT INTO ambientes_trabalho (empresa_id, nome, local_amb, dsc_setor, tp_insc, nr_insc)
          VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
-        [input.empresaId, a.nome?.trim() || a.dscSetor.trim(), a.localAmb, a.dscSetor.trim(), a.tpInsc, onlyDigits(a.nrInsc)]
+        [input.empresaId, a.nome?.trim() || a.dscSetor.trim(), a.localAmb, a.dscSetor.trim(), a.tpInsc, cleanInscricao(a.nrInsc)]
       )
       ambienteId = created.id
     } else {

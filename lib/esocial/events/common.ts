@@ -28,12 +28,22 @@ export interface EmpregadorIde {
   documento: string
 }
 
+/**
+ * Remove a pontuação de CNPJ/CPF/CNO preservando letras: desde 01/07/2026 o CNPJ pode ser
+ * alfanumérico (12 posições [A-Z0-9] + 2 dígitos verificadores).
+ */
+export function cleanInscricao(value: unknown): string {
+  return String(value ?? "").replace(/[^0-9A-Za-z]/g, "").toUpperCase()
+}
+
+export const CNPJ_PATTERN = /^[A-Z0-9]{12}\d{2}$/
+
 export function empregadorIde(cnpjOuCpf: string, naturezaJuridica?: string | null): EmpregadorIde {
-  const documento = String(cnpjOuCpf || "").replace(/\D/g, "")
-  if (documento.length === 11) {
+  const documento = cleanInscricao(cnpjOuCpf)
+  if (/^\d{11}$/.test(documento)) {
     return { tpInsc: "2", nrInsc: documento, documento }
   }
-  if (documento.length !== 14) {
+  if (!CNPJ_PATTERN.test(documento)) {
     throw new Error("CNPJ/CPF do empregador inválido.")
   }
   const natJurid = String(naturezaJuridica || "").replace(/\D/g, "")

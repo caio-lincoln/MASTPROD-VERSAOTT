@@ -39,6 +39,8 @@ interface Resultado {
   exclusoesSemRecibo: number
   s2240JaEnviados: number
   estabelecimentos: number
+  sst: { tipo: string; novos: number; jaImportados: number }[]
+  sstSemTrabalhador: number
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
   linhas: Linha[]
   gravado: boolean
@@ -228,10 +230,30 @@ export default function EsocialImportModal({ isOpen, onClose, onImported }: Prop
                   .map(([k, v]) => `${k}: ${v}`)
                   .join(" · ") || "nenhum evento de trabalhador"}
                 {resultado.estabelecimentos > 0 && ` · ${resultado.estabelecimentos} estabelecimento(s)`}
-                {resultado.s2240JaEnviados > 0 && ` · ${resultado.s2240JaEnviados} S-2240 já enviados`}
                 {resultado.eventosExcluidos > 0 && ` · ${resultado.eventosExcluidos} excluído(s) por S-3000`}
                 {resultado.eventosRetificados > 0 && ` · ${resultado.eventosRetificados} retificado(s)`}
               </p>
+
+              {resultado.sst.some((s) => s.novos + s.jaImportados > 0) && (
+                <div className="rounded-lg border border-border bg-white p-3 text-sm">
+                  <p className="font-medium mb-1">Histórico de SST já enviado ao eSocial</p>
+                  <ul className="text-muted-foreground space-y-0.5">
+                    {resultado.sst
+                      .filter((s) => s.novos + s.jaImportados > 0)
+                      .map((s) => (
+                        <li key={s.tipo}>
+                          {s.tipo === "S-2240" ? "S-2240 (condições ambientais)" : s.tipo === "S-2220" ? "S-2220 (ASO)" : "S-2210 (CAT)"}:{" "}
+                          <strong>{s.novos}</strong> novo(s){s.jaImportados > 0 && `, ${s.jaImportados} já importado(s)`}
+                        </li>
+                      ))}
+                  </ul>
+                  {resultado.sstSemTrabalhador > 0 && (
+                    <p className="text-xs text-amber-700 mt-1">
+                      {resultado.sstSemTrabalhador} evento(s) de trabalhador sem cadastro: ele será criado com o CPF.
+                    </p>
+                  )}
+                </div>
+              )}
 
               {(resultado.eventosDeOutroEmpregador > 0 || resultado.exclusoesSemRecibo > 0 || resultado.totais.semMatricula > 0 || resultado.erros.length > 0) && (
                 <Alert className="bg-amber-50 border-amber-200">

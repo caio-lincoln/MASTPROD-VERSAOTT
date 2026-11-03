@@ -1,303 +1,394 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useMemo } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { useEffect, useState } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { AlertCircle, FileText, Building2 } from "lucide-react"
+import { AlertCircle } from "lucide-react"
+import { createSstEvent } from "@/lib/esocial/transmission/gateway"
+import { TIPOS_ACIDENTE, TIPOS_CAT, TIPOS_LOCAL } from "@/lib/esocial/events/S-2210"
+import { Choice, ErrorList, Field, SIM_NAO, Section, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
 
-interface EventS2210ModalProps {
+interface Props {
   isOpen: boolean
   onClose: () => void
+  onCreated?: () => void
 }
 
-export default function EventS2210Modal({ isOpen, onClose }: EventS2210ModalProps) {
-  const [selectedCompany, setSelectedCompany] = useState("")
-  const [selectedEmployee, setSelectedEmployee] = useState("")
-  const [accidentDate, setAccidentDate] = useState("")
-  const [accidentTime, setAccidentTime] = useState("")
-  const [accidentType, setAccidentType] = useState("")
-  const [bodyPart, setBodyPart] = useState("")
-  const [accidentCause, setAccidentCause] = useState("")
-  const [description, setDescription] = useState("")
-  const [initialDiagnosis, setInitialDiagnosis] = useState("")
-  const [doctorName, setDoctorName] = useState("")
-  const [doctorCrm, setDoctorCrm] = useState("")
-  const [doctorUf, setDoctorUf] = useState("")
-  const [deathOccurred, setDeathOccurred] = useState("")
+const hhmm = (v: string) => v.replace(/\D/g, "").slice(0, 4)
+const vazio = (v: string) => (v.trim() ? v.trim() : null)
+const digitos = (v: string, n: number) => v.replace(/\D/g, "").slice(0, n)
 
-  const allCompanies = useMemo(
-    () => [
-      { id: 1, name: "TechCorp Solutions", cnpj: "12.345.678/0001-90" },
-      { id: 2, name: "IndustrialMax Ltda", cnpj: "98.765.432/0001-10" },
-      { id: 3, name: "ServiçoPro Brasil", cnpj: "11.222.333/0001-44" },
-    ],
-    [],
-  )
+const inicial = {
+  dtAcid: "",
+  tpAcid: "1",
+  hrAcid: "",
+  hrsTrabAntesAcid: "",
+  tpCat: "1",
+  nrRecCatOrig: "",
+  indCatObito: "N",
+  dtObito: "",
+  indComunPolicia: "N",
+  codSitGeradora: "",
+  iniciatCAT: "1",
+  obsCAT: "",
+  ultDiaTrab: "",
+  houveAfast: "",
+}
 
-  const allEmployees = useMemo(
-    () => [
-      { id: 1, name: "Carlos Silva", cpf: "123.456.789-00", role: "Operador de Máquinas", companyId: 1 },
-      { id: 2, name: "Maria Santos", cpf: "987.654.321-00", role: "Técnica de Segurança", companyId: 1 },
-      { id: 3, name: "João Oliveira", cpf: "456.789.123-00", role: "Soldador", companyId: 2 },
-      { id: 4, name: "Ana Costa", cpf: "321.654.987-00", role: "Eletricista", companyId: 2 },
-    ],
-    [],
-  )
+const localInicial = {
+  tpLocal: "1",
+  dscLocal: "",
+  tpLograd: "",
+  dscLograd: "",
+  nrLograd: "",
+  complemento: "",
+  bairro: "",
+  cep: "",
+  codMunic: "",
+  uf: "",
+  pais: "",
+  codPostal: "",
+  localTpInsc: "1",
+  localNrInsc: "",
+}
 
-  const filteredEmployees = useMemo(() => {
-    if (!selectedCompany) return []
-    return allEmployees.filter((emp) => emp.companyId === Number.parseInt(selectedCompany))
-  }, [selectedCompany, allEmployees])
+const atestadoInicial = {
+  dtAtendimento: "",
+  hrAtendimento: "",
+  indInternacao: "N",
+  durTrat: "",
+  indAfast: "N",
+  dscLesao: "",
+  dscCompLesao: "",
+  diagProvavel: "",
+  codCID: "",
+  observacao: "",
+  nmEmit: "",
+  ideOC: "1",
+  nrOC: "",
+  ufOC: "",
+}
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Criando evento S-2210...")
+export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
+  const t = useTrabalhador(isOpen)
+  const [cat, setCat] = useState(inicial)
+  const [local, setLocal] = useState(localInicial)
+  const [parte, setParte] = useState({ codParteAting: "", lateralidade: "0" })
+  const [codAgntCausador, setCodAgntCausador] = useState("")
+  const [atestado, setAtestado] = useState(atestadoInicial)
+  const [saving, setSaving] = useState(false)
+  const [errors, setErrors] = useState<string[]>([])
+
+  // Local do acidente começa no estabelecimento da própria empresa
+  useEffect(() => {
+    if (t.empresa) setLocal((l) => ({ ...l, localNrInsc: t.empresa!.cnpj.replace(/[^0-9A-Za-z]/g, "").toUpperCase() }))
+  }, [t.empresa])
+
+  const exterior = local.tpLocal === "2"
+  const localComInscricao = local.tpLocal === "1" || local.tpLocal === "3"
+  const reaberturaOuObito = cat.tpCat === "2" || cat.tpCat === "3"
+  const obito = cat.indCatObito === "S" || cat.tpCat === "3"
+
+  const reset = () => {
+    t.reset()
+    setCat(inicial)
+    setLocal(localInicial)
+    setParte({ codParteAting: "", lateralidade: "0" })
+    setCodAgntCausador("")
+    setAtestado(atestadoInicial)
+    setErrors([])
+  }
+
+  const handleClose = () => {
+    if (saving) return
+    reset()
     onClose()
   }
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!t.empresaId || !t.funcionarioId) {
+      setErrors(["Selecione a empresa e o funcionário."])
+      return
+    }
+    const dados = {
+      dtAcid: cat.dtAcid,
+      tpAcid: cat.tpAcid,
+      hrAcid: vazio(cat.hrAcid),
+      hrsTrabAntesAcid: vazio(cat.hrsTrabAntesAcid),
+      tpCat: cat.tpCat,
+      indCatObito: cat.tpCat === "3" ? "S" : cat.indCatObito,
+      dtObito: obito ? vazio(cat.dtObito) : null,
+      indComunPolicia: cat.indComunPolicia,
+      codSitGeradora: cat.codSitGeradora,
+      iniciatCAT: cat.iniciatCAT,
+      obsCAT: vazio(cat.obsCAT),
+      ultDiaTrab: vazio(cat.ultDiaTrab),
+      houveAfast: cat.houveAfast || null,
+      local: {
+        tpLocal: local.tpLocal,
+        dscLocal: vazio(local.dscLocal),
+        tpLograd: vazio(local.tpLograd),
+        dscLograd: local.dscLograd.trim(),
+        nrLograd: local.nrLograd.trim(),
+        complemento: vazio(local.complemento),
+        bairro: vazio(local.bairro),
+        cep: exterior ? null : vazio(local.cep),
+        codMunic: exterior ? null : vazio(local.codMunic),
+        uf: exterior ? null : local.uf || null,
+        pais: exterior ? vazio(local.pais) : null,
+        codPostal: exterior ? vazio(local.codPostal) : null,
+        ideLocalAcid: localComInscricao ? { tpInsc: local.localTpInsc, nrInsc: local.localNrInsc } : null,
+      },
+      parteAtingida: parte,
+      codAgntCausador,
+      atestado: {
+        dtAtendimento: atestado.dtAtendimento,
+        hrAtendimento: atestado.hrAtendimento,
+        indInternacao: atestado.indInternacao,
+        durTrat: atestado.durTrat === "" ? NaN : Number(atestado.durTrat),
+        indAfast: atestado.indAfast,
+        dscLesao: atestado.dscLesao,
+        dscCompLesao: vazio(atestado.dscCompLesao),
+        diagProvavel: vazio(atestado.diagProvavel),
+        codCID: atestado.codCID.trim(),
+        observacao: vazio(atestado.observacao),
+        emitente: { nmEmit: atestado.nmEmit.trim(), ideOC: atestado.ideOC, nrOC: atestado.nrOC.trim(), ufOC: atestado.ufOC || null },
+      },
+      nrRecCatOrig: reaberturaOuObito ? vazio(cat.nrRecCatOrig) : null,
+    }
+    try {
+      setSaving(true)
+      setErrors([])
+      await createSstEvent("S-2210", { empresaId: t.empresaId, funcionarioId: t.funcionarioId, matricula: t.matricula || null, dados })
+      reset()
+      onCreated?.()
+      onClose()
+    } catch (err: any) {
+      setErrors(err.errors?.length ? err.errors : [err.message || "Erro ao gerar o evento."])
+      document.getElementById("s2210-erros")?.scrollIntoView({ behavior: "smooth" })
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white border-border text-foreground max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded-lg shadow-sm">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="bg-background border-border text-foreground w-[calc(100vw-2rem)] max-w-4xl sm:max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            Novo Evento S-2210 - Comunicação de Acidente de Trabalho
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <AlertCircle className="w-5 h-5 text-destructive" />
+            Evento S-2210: Comunicação de Acidente de Trabalho (CAT)
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Informe os dados sobre acidente ou doença ocupacional (CAT)
+            Leiaute S-1.3. Prazo legal: até o 1º dia útil seguinte ao acidente (imediato em caso de óbito). Os códigos seguem as
+            tabelas 13 a 17 do eSocial.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* Identificação */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              Identificação
-            </h3>
+        <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          <div id="s2210-erros">
+            <ErrorList errors={errors} />
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="company">Empresa *</Label>
-                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione a empresa" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {allCompanies.map((company) => (
-                      <SelectItem key={company.id} value={company.id.toString()}>
-                        {company.name} - {company.cnpj}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <TrabalhadorSection t={t} />
 
-              <div className="space-y-2">
-                <Label htmlFor="employee">Funcionário *</Label>
-                <Select value={selectedEmployee} onValueChange={setSelectedEmployee} disabled={!selectedCompany}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione o funcionário" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    {filteredEmployees.map((employee) => (
-                      <SelectItem key={employee.id} value={employee.id.toString()}>
-                        {employee.name} - {employee.role}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <Section title="Acidente">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Field label="Data *">
+                <TextInput type="date" value={cat.dtAcid} onChange={(e) => setCat({ ...cat, dtAcid: e.target.value })} required />
+              </Field>
+              <Field label="Tipo de acidente *">
+                <Choice value={cat.tpAcid} onChange={(v) => setCat({ ...cat, tpAcid: v })} options={TIPOS_ACIDENTE} />
+              </Field>
+              <Field label={cat.tpAcid === "2" ? "Hora (HHMM)" : "Hora (HHMM) *"}>
+                <TextInput value={cat.hrAcid} onChange={(e) => setCat({ ...cat, hrAcid: hhmm(e.target.value) })} placeholder="0830" inputMode="numeric" />
+              </Field>
+              <Field label={cat.tpAcid === "1" ? "Horas trabalhadas antes *" : "Horas trabalhadas antes"}>
+                <TextInput
+                  value={cat.hrsTrabAntesAcid}
+                  onChange={(e) => setCat({ ...cat, hrsTrabAntesAcid: hhmm(e.target.value) })}
+                  placeholder="0230"
+                  inputMode="numeric"
+                />
+              </Field>
+              <Field label="Tipo de CAT *">
+                <Choice value={cat.tpCat} onChange={(v) => setCat({ ...cat, tpCat: v })} options={TIPOS_CAT} />
+              </Field>
+              {reaberturaOuObito && (
+                <Field label="Recibo da CAT de origem *" className="md:col-span-2">
+                  <TextInput value={cat.nrRecCatOrig} onChange={(e) => setCat({ ...cat, nrRecCatOrig: e.target.value.trim() })} placeholder="1.2.0000000000000000000" />
+                </Field>
+              )}
+              <Field label="Houve óbito? *">
+                <Choice value={cat.tpCat === "3" ? "S" : cat.indCatObito} onChange={(v) => setCat({ ...cat, indCatObito: v })} options={SIM_NAO} />
+              </Field>
+              {obito && (
+                <Field label="Data do óbito *">
+                  <TextInput type="date" value={cat.dtObito} onChange={(e) => setCat({ ...cat, dtObito: e.target.value })} />
+                </Field>
+              )}
+              <Field label="Comunicado à polícia? *">
+                <Choice value={cat.indComunPolicia} onChange={(v) => setCat({ ...cat, indComunPolicia: v })} options={SIM_NAO} />
+              </Field>
+              <Field label="Situação geradora (Tab. 15/16) *">
+                <TextInput
+                  value={cat.codSitGeradora}
+                  onChange={(e) => setCat({ ...cat, codSitGeradora: digitos(e.target.value, 9) })}
+                  placeholder="9 dígitos"
+                  inputMode="numeric"
+                />
+              </Field>
+              <Field label="Iniciativa da CAT *">
+                <Choice
+                  value={cat.iniciatCAT}
+                  onChange={(v) => setCat({ ...cat, iniciatCAT: v })}
+                  options={[["1", "Empregador"], ["2", "Ordem judicial"], ["3", "Órgão fiscalizador"]]}
+                />
+              </Field>
+              <Field label="Último dia trabalhado">
+                <TextInput type="date" value={cat.ultDiaTrab} onChange={(e) => setCat({ ...cat, ultDiaTrab: e.target.value })} />
+              </Field>
+              <Field label="Houve afastamento?">
+                <Choice value={cat.houveAfast} onChange={(v) => setCat({ ...cat, houveAfast: v })} options={SIM_NAO} />
+              </Field>
             </div>
-          </div>
+            <Field label="Observações">
+              <Textarea value={cat.obsCAT} onChange={(e) => setCat({ ...cat, obsCAT: e.target.value })} maxLength={999} className="bg-white border-border" />
+            </Field>
+          </Section>
 
-          {/* Dados do Acidente */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary">Dados do Acidente</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="accidentDate">Data do Acidente *</Label>
-                <Input
-                  id="accidentDate"
-                  type="date"
-                  value={accidentDate}
-                  onChange={(e) => setAccidentDate(e.target.value)}
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="accidentTime">Hora do Acidente *</Label>
-                <Input
-                  id="accidentTime"
-                  type="time"
-                  value={accidentTime}
-                  onChange={(e) => setAccidentTime(e.target.value)}
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="accidentType">Tipo de Acidente *</Label>
-                <Select value={accidentType} onValueChange={setAccidentType}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione o tipo" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="tipico">Acidente Típico</SelectItem>
-                    <SelectItem value="trajeto">Acidente de Trajeto</SelectItem>
-                    <SelectItem value="doenca">Doença Ocupacional</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bodyPart">Parte do Corpo Atingida *</Label>
-                <Input
-                  id="bodyPart"
-                  value={bodyPart}
-                  onChange={(e) => setBodyPart(e.target.value)}
-                  placeholder="Ex: Mão direita, Perna esquerda..."
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="accidentCause">Causa do Acidente *</Label>
-                <Input
-                  id="accidentCause"
-                  value={accidentCause}
-                  onChange={(e) => setAccidentCause(e.target.value)}
-                  placeholder="Descreva a causa principal"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="description">Descrição do Acidente *</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Descreva detalhadamente como o acidente ocorreu..."
-                  className="bg-background border-input text-foreground min-h-[100px]"
-                  required
-                />
-              </div>
+          <Section title="Local do acidente">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Field label="Tipo de local *" className="md:col-span-2">
+                <Choice value={local.tpLocal} onChange={(v) => setLocal({ ...local, tpLocal: v })} options={TIPOS_LOCAL} />
+              </Field>
+              <Field label="Descrição do local" className="md:col-span-2">
+                <TextInput value={local.dscLocal} onChange={(e) => setLocal({ ...local, dscLocal: e.target.value })} maxLength={255} placeholder="Ex.: Galpão de produção, linha 2" />
+              </Field>
+              {localComInscricao && (
+                <>
+                  <Field label="Tipo de inscrição do local *">
+                    <Choice value={local.localTpInsc} onChange={(v) => setLocal({ ...local, localTpInsc: v })} options={[["1", "CNPJ"], ["3", "CAEPF"], ["4", "CNO"]]} />
+                  </Field>
+                  <Field label="Inscrição do local *">
+                    <TextInput value={local.localNrInsc} onChange={(e) => setLocal({ ...local, localNrInsc: e.target.value })} />
+                  </Field>
+                </>
+              )}
+              <Field label="Tipo de logradouro">
+                <TextInput value={local.tpLograd} onChange={(e) => setLocal({ ...local, tpLograd: e.target.value })} maxLength={4} placeholder="R, AV..." />
+              </Field>
+              <Field label="Logradouro *">
+                <TextInput value={local.dscLograd} onChange={(e) => setLocal({ ...local, dscLograd: e.target.value })} maxLength={100} />
+              </Field>
+              <Field label="Número *">
+                <TextInput value={local.nrLograd} onChange={(e) => setLocal({ ...local, nrLograd: e.target.value })} maxLength={10} placeholder="S/N" />
+              </Field>
+              <Field label="Complemento">
+                <TextInput value={local.complemento} onChange={(e) => setLocal({ ...local, complemento: e.target.value })} maxLength={30} />
+              </Field>
+              <Field label="Bairro">
+                <TextInput value={local.bairro} onChange={(e) => setLocal({ ...local, bairro: e.target.value })} maxLength={90} />
+              </Field>
+              {exterior ? (
+                <>
+                  <Field label="País (código) *">
+                    <TextInput value={local.pais} onChange={(e) => setLocal({ ...local, pais: digitos(e.target.value, 3) })} placeholder="3 dígitos" />
+                  </Field>
+                  <Field label="Código postal">
+                    <TextInput value={local.codPostal} onChange={(e) => setLocal({ ...local, codPostal: e.target.value })} maxLength={12} />
+                  </Field>
+                </>
+              ) : (
+                <>
+                  <Field label="CEP">
+                    <TextInput value={local.cep} onChange={(e) => setLocal({ ...local, cep: digitos(e.target.value, 8) })} inputMode="numeric" />
+                  </Field>
+                  <Field label="Município (IBGE) *">
+                    <TextInput value={local.codMunic} onChange={(e) => setLocal({ ...local, codMunic: digitos(e.target.value, 7) })} placeholder="7 dígitos" inputMode="numeric" />
+                  </Field>
+                  <Field label="UF *">
+                    <Choice value={local.uf} onChange={(v) => setLocal({ ...local, uf: v })} options={UFS.map((u) => [u, u] as const)} />
+                  </Field>
+                </>
+              )}
             </div>
-          </div>
+          </Section>
 
-          {/* Atendimento Médico */}
-          <div className="space-y-4 p-4 rounded-lg bg-white border border-border">
-            <h3 className="font-semibold text-primary">Atendimento Médico</h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="initialDiagnosis">Diagnóstico Inicial *</Label>
-                <Input
-                  id="initialDiagnosis"
-                  value={initialDiagnosis}
-                  onChange={(e) => setInitialDiagnosis(e.target.value)}
-                  placeholder="CID-10 e descrição"
-                  className="bg-background border-input text-foreground"
-                  required
+          <Section title="Lesão">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Field label="Parte atingida (Tab. 13) *">
+                <TextInput value={parte.codParteAting} onChange={(e) => setParte({ ...parte, codParteAting: digitos(e.target.value, 9) })} placeholder="9 dígitos" inputMode="numeric" />
+              </Field>
+              <Field label="Lateralidade *">
+                <Choice
+                  value={parte.lateralidade}
+                  onChange={(v) => setParte({ ...parte, lateralidade: v })}
+                  options={[["0", "Não aplicável"], ["1", "Esquerda"], ["2", "Direita"], ["3", "Ambas"]]}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="doctorName">Nome do Médico *</Label>
-                <Input
-                  id="doctorName"
-                  value={doctorName}
-                  onChange={(e) => setDoctorName(e.target.value)}
-                  placeholder="Nome completo"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="doctorCrm">CRM *</Label>
-                <Input
-                  id="doctorCrm"
-                  value={doctorCrm}
-                  onChange={(e) => setDoctorCrm(e.target.value)}
-                  placeholder="000000"
-                  className="bg-background border-input text-foreground"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="doctorUf">UF *</Label>
-                <Select value={doctorUf} onValueChange={setDoctorUf}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="UF" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="SP">SP</SelectItem>
-                    <SelectItem value="RJ">RJ</SelectItem>
-                    <SelectItem value="MG">MG</SelectItem>
-                    <SelectItem value="RS">RS</SelectItem>
-                    <SelectItem value="BA">BA</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="deathOccurred">Houve Óbito? *</Label>
-                <Select value={deathOccurred} onValueChange={setDeathOccurred}>
-                  <SelectTrigger className="bg-background border-input text-foreground">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover border-border text-popover-foreground">
-                    <SelectItem value="nao">Não</SelectItem>
-                    <SelectItem value="sim">Sim</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              </Field>
+              <Field label="Agente causador (Tab. 14/15) *">
+                <TextInput value={codAgntCausador} onChange={(e) => setCodAgntCausador(digitos(e.target.value, 9))} placeholder="9 dígitos" inputMode="numeric" />
+              </Field>
             </div>
-          </div>
+          </Section>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-red-50 border border-red-200">
-            <AlertCircle className="w-5 h-5 text-red-700" />
-            <p className="text-sm text-red-700">
-              A CAT deve ser comunicada ao INSS até o primeiro dia útil seguinte ao acidente
-            </p>
-          </div>
+          <Section title="Atestado médico">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Field label="Data do atendimento *">
+                <TextInput type="date" value={atestado.dtAtendimento} onChange={(e) => setAtestado({ ...atestado, dtAtendimento: e.target.value })} />
+              </Field>
+              <Field label="Hora (HHMM) *">
+                <TextInput value={atestado.hrAtendimento} onChange={(e) => setAtestado({ ...atestado, hrAtendimento: hhmm(e.target.value) })} placeholder="0915" inputMode="numeric" />
+              </Field>
+              <Field label="Internação? *">
+                <Choice value={atestado.indInternacao} onChange={(v) => setAtestado({ ...atestado, indInternacao: v })} options={SIM_NAO} />
+              </Field>
+              <Field label="Duração do tratamento (dias) *">
+                <TextInput value={atestado.durTrat} onChange={(e) => setAtestado({ ...atestado, durTrat: digitos(e.target.value, 4) })} inputMode="numeric" />
+              </Field>
+              <Field label="Afastamento? *">
+                <Choice value={atestado.indAfast} onChange={(v) => setAtestado({ ...atestado, indAfast: v })} options={SIM_NAO} />
+              </Field>
+              <Field label="Natureza da lesão (Tab. 17) *">
+                <TextInput value={atestado.dscLesao} onChange={(e) => setAtestado({ ...atestado, dscLesao: digitos(e.target.value, 9) })} placeholder="9 dígitos" inputMode="numeric" />
+              </Field>
+              <Field label="CID *">
+                <TextInput value={atestado.codCID} onChange={(e) => setAtestado({ ...atestado, codCID: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) })} placeholder="S610" />
+              </Field>
+              <Field label="Diagnóstico provável">
+                <TextInput value={atestado.diagProvavel} onChange={(e) => setAtestado({ ...atestado, diagProvavel: e.target.value })} maxLength={100} />
+              </Field>
+              <Field label="Complemento da lesão" className="md:col-span-2">
+                <TextInput value={atestado.dscCompLesao} onChange={(e) => setAtestado({ ...atestado, dscCompLesao: e.target.value })} maxLength={200} />
+              </Field>
+              <Field label="Observação" className="md:col-span-2">
+                <TextInput value={atestado.observacao} onChange={(e) => setAtestado({ ...atestado, observacao: e.target.value })} maxLength={255} />
+              </Field>
+              <Field label="Emitente (médico/dentista) *" className="md:col-span-2">
+                <TextInput value={atestado.nmEmit} onChange={(e) => setAtestado({ ...atestado, nmEmit: e.target.value })} maxLength={70} />
+              </Field>
+              <Field label="Conselho *">
+                <Choice value={atestado.ideOC} onChange={(v) => setAtestado({ ...atestado, ideOC: v })} options={[["1", "CRM"], ["2", "CRO"], ["3", "RMS"]]} />
+              </Field>
+              <Field label="Nº no conselho *">
+                <TextInput value={atestado.nrOC} onChange={(e) => setAtestado({ ...atestado, nrOC: e.target.value })} maxLength={14} />
+              </Field>
+              <Field label="UF do conselho">
+                <Choice value={atestado.ufOC} onChange={(v) => setAtestado({ ...atestado, ufOC: v })} options={UFS.map((u) => [u, u] as const)} />
+              </Field>
+            </div>
+          </Section>
 
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FFE2CF] border border-[#FD671A]/20">
-            <AlertCircle className="w-5 h-5 text-[#E85C14]" />
-            <p className="text-sm text-[#E85C14]">
-              Este evento será gerado conforme layout oficial do eSocial S-2210 versão S-1.3
-            </p>
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="border-input text-muted-foreground hover:bg-accent hover:text-accent-foreground bg-transparent"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={saving} className="border-border bg-transparent">
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              Gerar Evento
+            <Button type="submit" disabled={saving} className="bg-primary text-primary-foreground hover:bg-primary/90">
+              {saving ? "Gerando..." : "Gerar Evento S-2210"}
             </Button>
           </div>
         </form>

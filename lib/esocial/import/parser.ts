@@ -27,6 +27,8 @@ export type EventKind =
   | "S-2300"
   | "S-2399"
   | "S-3000"
+  | "S-2210"
+  | "S-2220"
 
 const EVENT_TAGS: Record<string, EventKind> = {
   evtInfoEmpregador: "S-1000",
@@ -42,6 +44,8 @@ const EVENT_TAGS: Record<string, EventKind> = {
   evtTSVInicio: "S-2300",
   evtTSVTermino: "S-2399",
   evtExclusao: "S-3000",
+  evtCAT: "S-2210",
+  evtMonit: "S-2220",
 }
 
 export interface ParsedEvent {
@@ -49,6 +53,8 @@ export interface ParsedEvent {
   id: string | null
   /** Recibo do evento, quando o arquivo traz o retorno do processamento junto */
   recibo: string | null
+  /** XML original do arquivo, quando ele contém só este evento */
+  raw: string | null
   file: string
   empregador: { tpInsc: string; nrInsc: string }
   node: any
@@ -155,8 +161,9 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
       continue
     }
     let doc: any
+    const xmlText = decodeXml(file.data)
     try {
-      doc = parser.parse(decodeXml(file.data))
+      doc = parser.parse(xmlText)
     } catch {
       erros.push(`${file.name}: XML inválido`)
       continue
@@ -175,6 +182,7 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
         kind: EVENT_TAGS[tag],
         id,
         recibo: null,
+        raw: null,
         file: file.name,
         empregador: {
           tpInsc: text(value?.ideEmpregador?.tpInsc),
@@ -185,6 +193,7 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
     })
     // Só dá para ligar o recibo ao evento quando o arquivo traz um evento e seu retorno
     if (doArquivo.length === 1 && recibos.length === 1) doArquivo[0].recibo = recibos[0]
+    if (doArquivo.length === 1) doArquivo[0].raw = xmlText
     events.push(...doArquivo)
     if (!found) ignorados.push(file.name)
   }
@@ -244,16 +253,18 @@ export interface ConsolidatedImport {
   excluidos: number // eventos anulados por S-3000
   retificados: number // eventos substituídos por retificação
   exclusoesSemRecibo: number // S-3000 cujo evento original não pôde ser identificado
+  /** Eventos de SST vigentes (S-2210, S-2220, S-2240), para importar como histórico */
+  sst: ParsedEvent[]
 }
 
-function text(v: any): string {
+export function text(v: any): string {
   if (v === undefined || v === null) return ""
   if (typeof v === "object") return String(v["#text"] ?? "")
   return String(v).trim()
 }
 
 const opt = (v: any) => text(v) || null
-const arr = <T,>(v: T | T[] | undefined): T[] => (v === undefined || v === null ? [] : Array.isArray(v) ? v : [v])
+export const arr = <T,>(v: T | T[] | undefined): T[] => (v === undefined || v === null ? [] : Array.isArray(v) ? v : [v])
 const digits = (v: any) => text(v).replace(/\D/g, "")
 
 /** Data do fato, para aplicar os eventos na ordem em que aconteceram. */
@@ -282,8 +293,9 @@ function eventDate(e: ParsedEvent): string {
 }
 
 export function belongsTo(empregadorDoc: string, nrInsc: string): boolean {
-  const doc = empregadorDoc.replace(/\D/g, "")
-  const nr = nrInsc.replace(/\D/g, "")
+  // CNPJ pode ser alfanumérico: compara sem pontuação, preservando letras
+  const doc = empregadorDoc.replace(/[^0-9A-Za-z]/g, "").toUpperCase()
+  const nr = nrInsc.replace(/[^0-9A-Za-z]/g, "").toUpperCase()
   if (!nr) return false
   return doc === nr || (nr.length === 8 && doc.startsWith(nr))
 }
@@ -392,10 +404,10 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         const bloco = info.inclusao ?? info.alteracao ?? info.exclusao
         const ide = bloco?.ideEstab
         if (!ide) break
-        const key = `${text(ide.tpInsc)}:${digits(ide.nrInsc)}`
+        const key = `${text(ide.tpInsc)}:${text(ide.nrInsc).replace(/[^0-9A-Za-z]/g, "").toUpperCase()}`
         estabelecimentos.set(key, {
           tpInsc: text(ide.tpInsc),
-          nrInsc: digits(ide.nrInsc),
+          nrInsc: text(ide.nrInsc).replace(/[^0-9A-Za-z]/g, "").toUpperCase(),
           cnaePrep: opt(bloco?.dadosEstab?.cnaePrep),
           iniValid: opt(ide.iniValid),
           fimValid: opt(ide.fimValid),
@@ -513,5 +525,6 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
     excluidos,
     retificados,
     exclusoesSemRecibo,
+    sst: vigentes.filter((e) => e.kind === "S-2210" || e.kind === "S-2220" || e.kind === "S-2240"),
   }
 }
