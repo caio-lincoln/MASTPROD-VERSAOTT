@@ -17,30 +17,38 @@ export type EventKind =
   | "S-1000"
   | "S-1005"
   | "S-1200"
+  | "S-1202"
   | "S-2200"
   | "S-2205"
   | "S-2206"
+  | "S-2230"
   | "S-2240"
   | "S-2299"
   | "S-2300"
   | "S-2399"
+  | "S-3000"
 
 const EVENT_TAGS: Record<string, EventKind> = {
   evtInfoEmpregador: "S-1000",
   evtTabEstab: "S-1005",
   evtRemun: "S-1200",
+  evtRmnRPPS: "S-1202",
   evtAdmissao: "S-2200",
   evtAltCadastral: "S-2205",
   evtAltContratual: "S-2206",
+  evtAfastTemp: "S-2230",
   evtExpRisco: "S-2240",
   evtDeslig: "S-2299",
   evtTSVInicio: "S-2300",
   evtTSVTermino: "S-2399",
+  evtExclusao: "S-3000",
 }
 
 export interface ParsedEvent {
   kind: EventKind
   id: string | null
+  /** Recibo do evento, quando o arquivo traz o retorno do processamento junto */
+  recibo: string | null
   file: string
   empregador: { tpInsc: string; nrInsc: string }
   node: any
@@ -93,6 +101,27 @@ function decodeXml(data: Uint8Array): string {
   return text
 }
 
+/** nrRecibo dos retornos de processamento (retornoEvento/recibo), fora dos eventos. */
+function collectRecibos(node: any, out: string[] = []): string[] {
+  if (!node || typeof node !== "object") return out
+  if (Array.isArray(node)) {
+    node.forEach((n) => collectRecibos(n, out))
+    return out
+  }
+  for (const [key, value] of Object.entries(node)) {
+    if (key.startsWith("@") || EVENT_TAGS[key]) continue
+    if (key === "recibo") {
+      for (const r of Array.isArray(value) ? value : [value]) {
+        const nr = typeof r === "object" ? r?.nrRecibo : null
+        if (nr) out.push(String(typeof nr === "object" ? nr["#text"] : nr).trim())
+      }
+      continue
+    }
+    collectRecibos(value, out)
+  }
+  return out
+}
+
 /** Percorre a árvore e chama fn para cada evento reconhecido. */
 function walk(node: any, fn: (tag: string, value: any) => void) {
   if (!node || typeof node !== "object") return
@@ -134,15 +163,18 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
     }
     arquivosLidos++
     let found = 0
+    const recibos = collectRecibos(doc)
+    const doArquivo: ParsedEvent[] = []
     walk(doc, (tag, value) => {
       const id = value?.["@Id"] ?? null
       // O mesmo evento pode vir repetido (evento + retorno, ou arquivos duplicados)
       if (id && vistos.has(id)) return
       if (id) vistos.add(id)
       found++
-      events.push({
+      doArquivo.push({
         kind: EVENT_TAGS[tag],
         id,
+        recibo: null,
         file: file.name,
         empregador: {
           tpInsc: text(value?.ideEmpregador?.tpInsc),
@@ -151,6 +183,9 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
         node: value,
       })
     })
+    // Só dá para ligar o recibo ao evento quando o arquivo traz um evento e seu retorno
+    if (doArquivo.length === 1 && recibos.length === 1) doArquivo[0].recibo = recibos[0]
+    events.push(...doArquivo)
     if (!found) ignorados.push(file.name)
   }
 
@@ -175,7 +210,9 @@ export interface TrabalhadorImportado {
   dataAdmissao: string | null
   dataDesligamento: string | null
   semVinculo: boolean // TSVE (S-2300)
-  ultimoPerApur: string | null // última competência com remuneração (S-1200)
+  ultimoPerApur: string | null // última competência com remuneração (S-1200/S-1202)
+  afastamentoInicio: string | null // afastamento em aberto (S-2230 sem término)
+  afastamentoMotivo: string | null // Tabela 18
   eventos: EventKind[]
 }
 
@@ -204,6 +241,9 @@ export interface ConsolidatedImport {
   s2240Enviados: number
   contagem: Partial<Record<EventKind, number>>
   outroEmpregador: number // eventos descartados por serem de outro CNPJ
+  excluidos: number // eventos anulados por S-3000
+  retificados: number // eventos substituídos por retificação
+  exclusoesSemRecibo: number // S-3000 cujo evento original não pôde ser identificado
 }
 
 function text(v: any): string {
@@ -232,7 +272,10 @@ function eventDate(e: ParsedEvent): string {
     case "S-2399":
       return text(n.infoTSVTermino?.dtTerm) || "9999"
     case "S-1200":
+    case "S-1202":
       return `${text(n.ideEvento?.perApur)}-31`
+    case "S-2230":
+      return text(n.infoAfastamento?.iniAfastamento?.dtIniAfast) || text(n.infoAfastamento?.fimAfastamento?.dtTermAfast) || "0000"
     default:
       return "0000"
   }
@@ -257,6 +300,28 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
     return true
   })
 
+  // S-3000 anula o evento do recibo informado; retificação (indRetif=2) substitui o original
+  const anulados = new Set<string>()
+  let exclusoesSemRecibo = 0
+  const recibosConhecidos = new Set(proprios.map((e) => e.recibo).filter(Boolean) as string[])
+  for (const e of proprios) {
+    if (e.kind === "S-3000") {
+      const nr = text(e.node.infoExclusao?.nrRecEvt)
+      if (nr && recibosConhecidos.has(nr)) anulados.add(nr)
+      else exclusoesSemRecibo++
+    }
+  }
+  let retificados = 0
+  for (const e of proprios) {
+    const nr = text(e.node.ideEvento?.nrRecibo)
+    if (text(e.node.ideEvento?.indRetif) === "2" && nr && recibosConhecidos.has(nr) && !anulados.has(nr)) {
+      anulados.add(nr)
+      retificados++
+    }
+  }
+  const excluidos = proprios.filter((e) => e.kind !== "S-3000" && e.recibo && anulados.has(e.recibo)).length - retificados
+  const vigentes = proprios.filter((e) => e.kind !== "S-3000" && !(e.recibo && anulados.has(e.recibo)))
+
   const workers = new Map<string, TrabalhadorImportado>()
   const get = (cpf: string) => {
     let w = workers.get(cpf)
@@ -276,6 +341,8 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         dataDesligamento: null,
         semVinculo: false,
         ultimoPerApur: null,
+        afastamentoInicio: null,
+        afastamentoMotivo: null,
         eventos: [],
       }
       workers.set(cpf, w)
@@ -301,7 +368,7 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
   const estabelecimentos = new Map<string, EstabelecimentoImportado>()
   let s2240Enviados = 0
 
-  const ordered = [...proprios].sort((a, b) => eventDate(a).localeCompare(eventDate(b)))
+  const ordered = [...vigentes].sort((a, b) => eventDate(a).localeCompare(eventDate(b)))
   for (const e of ordered) {
     const n = e.node
     switch (e.kind) {
@@ -391,7 +458,22 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         w.dataDesligamento = opt(n.infoTSVTermino?.dtTerm)
         break
       }
-      case "S-1200": {
+      case "S-2230": {
+        const w = get(digits(n.ideVinculo?.cpfTrab))
+        w.eventos.push(e.kind)
+        const ini = n.infoAfastamento?.iniAfastamento
+        const fim = n.infoAfastamento?.fimAfastamento
+        if (fim?.dtTermAfast) {
+          w.afastamentoInicio = null
+          w.afastamentoMotivo = null
+        } else if (ini?.dtIniAfast) {
+          w.afastamentoInicio = opt(ini.dtIniAfast)
+          w.afastamentoMotivo = opt(ini.codMotAfast)
+        }
+        break
+      }
+      case "S-1200":
+      case "S-1202": {
         const w = get(digits(n.ideTrabalhador?.cpfTrab))
         w.eventos.push(e.kind)
         // nmTrab/dtNascto só vêm quando o trabalhador não tem S-2200 (infoComplem)
@@ -401,7 +483,7 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         if (perApur && (!w.ultimoPerApur || perApur > w.ultimoPerApur)) w.ultimoPerApur = perApur
         if (!w.matricula) {
           for (const dm of arr<any>(n.dmDev)) {
-            for (const est of arr<any>(dm.infoPerApur?.ideEstabLot)) {
+            for (const est of arr<any>(dm.infoPerApur?.ideEstabLot ?? dm.infoPerApur?.ideEstab)) {
               for (const rem of arr<any>(est.remunPerApur)) {
                 if (!w.matricula && opt(rem.matricula)) w.matricula = opt(rem.matricula)
               }
@@ -428,5 +510,8 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
     s2240Enviados,
     contagem,
     outroEmpregador,
+    excluidos,
+    retificados,
+    exclusoesSemRecibo,
   }
 }

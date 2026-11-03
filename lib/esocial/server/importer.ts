@@ -12,6 +12,7 @@ export interface LinhaPrevia {
   cargo: string | null
   dataAdmissao: string | null
   dataDesligamento: string | null
+  afastamentoInicio: string | null
   situacao: Situacao
   avisos: string[]
 }
@@ -23,6 +24,9 @@ export interface ResultadoImportacao {
   erros: string[]
   eventos: Record<string, number>
   eventosDeOutroEmpregador: number
+  eventosExcluidos: number
+  eventosRetificados: number
+  exclusoesSemRecibo: number
   s2240JaEnviados: number
   estabelecimentos: number
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
@@ -38,10 +42,16 @@ interface FuncionarioAtual {
   cargo: string | null
   data_admissao: string | null
   data_desligamento: string | null
+  afastamento_inicio: string | null
   status: string
 }
 
 const onlyDigits = (v: string | null | undefined) => String(v ?? "").replace(/\D/g, "")
+
+// Só eventos de início/fim de vínculo dizem se o trabalhador está desligado; só o S-2230 diz se está afastado.
+// Sem eles no arquivo, o que já está cadastrado é mantido.
+const temEventoDeVinculo = (w: TrabalhadorImportado) => w.eventos.some((e) => ["S-2200", "S-2300", "S-2299", "S-2399"].includes(e))
+const temEventoDeAfastamento = (w: TrabalhadorImportado) => w.eventos.includes("S-2230")
 
 function statusFor(w: TrabalhadorImportado): "ativo" | "inativo" {
   return w.dataDesligamento ? "inativo" : "ativo"
@@ -49,8 +59,10 @@ function statusFor(w: TrabalhadorImportado): "ativo" | "inativo" {
 
 function compare(w: TrabalhadorImportado, atual: FuncionarioAtual | undefined): { situacao: Situacao; avisos: string[] } {
   const avisos: string[] = []
-  if (!w.matricula && !w.semVinculo) avisos.push("Sem matrícula nos arquivos: inclua o S-2200 ou o S-1200 deste trabalhador.")
-  if (!w.nome) avisos.push("Nome não encontrado (só há S-1200); preencha depois no cadastro.")
+  // Avisos consideram o que já está cadastrado: um ZIP parcial não "apaga" nome nem matrícula
+  if (!w.matricula && !atual?.matricula_esocial && !w.semVinculo) avisos.push("Sem matrícula nos arquivos: inclua o S-2200 ou o S-1200 deste trabalhador.")
+  if (!w.nome && !atual) avisos.push("Nome não encontrado (só há S-1200/S-1202); preencha depois no cadastro.")
+  if (w.afastamentoInicio) avisos.push(`Afastado desde ${w.afastamentoInicio.split("-").reverse().join("/")} (motivo ${w.afastamentoMotivo ?? "?"}).`)
   if (!atual) return { situacao: "novo", avisos }
   if (atual.matricula_esocial && w.matricula && atual.matricula_esocial !== w.matricula) {
     avisos.push(`Matrícula muda de ${atual.matricula_esocial} para ${w.matricula} (valor do eSocial prevalece).`)
@@ -60,8 +72,9 @@ function compare(w: TrabalhadorImportado, atual: FuncionarioAtual | undefined): 
     (w.matricula && w.matricula !== atual.matricula_esocial) ||
     (w.cargo && w.cargo !== atual.cargo) ||
     (w.dataAdmissao && w.dataAdmissao !== atual.data_admissao) ||
-    (w.dataDesligamento ?? null) !== (atual.data_desligamento ?? null) ||
-    statusFor(w) !== (atual.status === "ativo" ? "ativo" : "inativo")
+    (temEventoDeVinculo(w) && (w.dataDesligamento ?? null) !== (atual.data_desligamento ?? null)) ||
+    (temEventoDeAfastamento(w) && (w.afastamentoInicio ?? null) !== (atual.afastamento_inicio ?? null)) ||
+    (temEventoDeVinculo(w) && atual.status !== "cancelado" && statusFor(w) !== (atual.status === "ativo" ? "ativo" : "inativo"))
   return { situacao: mudou ? "atualizado" : "sem_alteracao", avisos }
 }
 
@@ -93,20 +106,22 @@ export async function importarEsocial(params: {
   }
 
   const atuais = await query<FuncionarioAtual>(
-    "SELECT id, cpf, nome, matricula_esocial, cargo, data_admissao, data_desligamento, status FROM funcionarios WHERE empresa_id = $1",
+    "SELECT id, cpf, nome, matricula_esocial, cargo, data_admissao, data_desligamento, afastamento_inicio, status FROM funcionarios WHERE empresa_id = $1",
     [empresa.id]
   )
   const porCpf = new Map(atuais.map((f) => [onlyDigits(f.cpf), f]))
 
   const linhas: LinhaPrevia[] = dados.trabalhadores.map((w) => {
     const { situacao, avisos } = compare(w, porCpf.get(w.cpf))
+    const atual = porCpf.get(w.cpf)
     return {
       cpf: w.cpf,
-      nome: w.nome,
-      matricula: w.matricula,
-      cargo: w.cargo,
-      dataAdmissao: w.dataAdmissao,
-      dataDesligamento: w.dataDesligamento,
+      nome: w.nome ?? atual?.nome ?? null,
+      matricula: w.matricula ?? atual?.matricula_esocial ?? null,
+      cargo: w.cargo ?? atual?.cargo ?? null,
+      dataAdmissao: w.dataAdmissao ?? atual?.data_admissao ?? null,
+      dataDesligamento: temEventoDeVinculo(w) || !atual ? w.dataDesligamento : atual.data_desligamento,
+      afastamentoInicio: temEventoDeAfastamento(w) || !atual ? w.afastamentoInicio : atual.afastamento_inicio,
       situacao,
       avisos,
     }
@@ -119,6 +134,9 @@ export async function importarEsocial(params: {
     erros: parsed.erros,
     eventos: dados.contagem as Record<string, number>,
     eventosDeOutroEmpregador: dados.outroEmpregador,
+    eventosExcluidos: dados.excluidos,
+    eventosRetificados: dados.retificados,
+    exclusoesSemRecibo: dados.exclusoesSemRecibo,
     s2240JaEnviados: dados.s2240Enviados,
     estabelecimentos: dados.estabelecimentos.length,
     totais: {
@@ -126,9 +144,9 @@ export async function importarEsocial(params: {
       novos: linhas.filter((l) => l.situacao === "novo").length,
       atualizados: linhas.filter((l) => l.situacao === "atualizado").length,
       semAlteracao: linhas.filter((l) => l.situacao === "sem_alteracao").length,
-      ativos: dados.trabalhadores.filter((w) => !w.dataDesligamento).length,
-      desligados: dados.trabalhadores.filter((w) => w.dataDesligamento).length,
-      semMatricula: dados.trabalhadores.filter((w) => !w.matricula && !w.semVinculo).length,
+      ativos: linhas.filter((l) => !l.dataDesligamento).length,
+      desligados: linhas.filter((l) => l.dataDesligamento).length,
+      semMatricula: dados.trabalhadores.filter((w) => !w.matricula && !w.semVinculo && !porCpf.get(w.cpf)?.matricula_esocial).length,
     },
     linhas,
     gravado: false,
@@ -142,21 +160,24 @@ export async function importarEsocial(params: {
       await client.query(
         `INSERT INTO funcionarios
            (empresa_id, nome, cpf, data_nascimento, email, telefone, cargo, data_admissao, status,
-            matricula_esocial, cod_categoria, cbo, sexo, data_desligamento, origem, esocial_sincronizado_em)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, 'esocial', NOW())
+            matricula_esocial, cod_categoria, cbo, sexo, data_desligamento, afastamento_inicio, afastamento_motivo,
+            origem, esocial_sincronizado_em)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 'esocial', NOW())
          ON CONFLICT (empresa_id, cpf) DO UPDATE SET
-           nome = COALESCE(EXCLUDED.nome, funcionarios.nome),
+           nome = COALESCE($17, funcionarios.nome),
            data_nascimento = COALESCE(EXCLUDED.data_nascimento, funcionarios.data_nascimento),
            email = COALESCE(EXCLUDED.email, funcionarios.email),
            telefone = COALESCE(EXCLUDED.telefone, funcionarios.telefone),
            cargo = COALESCE(EXCLUDED.cargo, funcionarios.cargo),
            data_admissao = COALESCE(EXCLUDED.data_admissao, funcionarios.data_admissao),
-           status = CASE WHEN funcionarios.status = 'cancelado' THEN funcionarios.status ELSE EXCLUDED.status END,
+           status = CASE WHEN funcionarios.status = 'cancelado' OR NOT $18 THEN funcionarios.status ELSE EXCLUDED.status END,
            matricula_esocial = COALESCE(EXCLUDED.matricula_esocial, funcionarios.matricula_esocial),
            cod_categoria = COALESCE(EXCLUDED.cod_categoria, funcionarios.cod_categoria),
            cbo = COALESCE(EXCLUDED.cbo, funcionarios.cbo),
            sexo = COALESCE(EXCLUDED.sexo, funcionarios.sexo),
-           data_desligamento = EXCLUDED.data_desligamento,
+           data_desligamento = CASE WHEN $18 THEN EXCLUDED.data_desligamento ELSE funcionarios.data_desligamento END,
+           afastamento_inicio = CASE WHEN $19 THEN EXCLUDED.afastamento_inicio ELSE funcionarios.afastamento_inicio END,
+           afastamento_motivo = CASE WHEN $19 THEN EXCLUDED.afastamento_motivo ELSE funcionarios.afastamento_motivo END,
            esocial_sincronizado_em = NOW()`,
         [
           empresa.id,
@@ -173,6 +194,11 @@ export async function importarEsocial(params: {
           w.cbo,
           w.sexo,
           w.dataDesligamento,
+          w.afastamentoInicio,
+          w.afastamentoMotivo,
+          w.nome,
+          temEventoDeVinculo(w),
+          temEventoDeAfastamento(w),
         ]
       )
     }

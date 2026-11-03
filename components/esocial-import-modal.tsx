@@ -34,6 +34,9 @@ interface Resultado {
   erros: string[]
   eventos: Record<string, number>
   eventosDeOutroEmpregador: number
+  eventosExcluidos: number
+  eventosRetificados: number
+  exclusoesSemRecibo: number
   s2240JaEnviados: number
   estabelecimentos: number
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
@@ -125,8 +128,8 @@ export default function EsocialImportModal({ isOpen, onClose, onImported }: Prop
             Importar trabalhadores do eSocial
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Use o ZIP baixado no portal do eSocial (Empregador Web → Download) ou os XMLs dos eventos S-2200, S-2206,
-            S-2299, S-2300 e S-1200. Nada é gravado antes de você conferir a prévia.
+            Use o ZIP baixado no portal do eSocial (Empregador Web → Download) ou os XMLs dos eventos S-2200, S-2205,
+            S-2206, S-2230, S-2299, S-2300, S-1200, S-1202 e S-3000. Nada é gravado antes de você conferir a prévia.
           </DialogDescription>
         </DialogHeader>
 
@@ -226,14 +229,22 @@ export default function EsocialImportModal({ isOpen, onClose, onImported }: Prop
                   .join(" · ") || "nenhum evento de trabalhador"}
                 {resultado.estabelecimentos > 0 && ` · ${resultado.estabelecimentos} estabelecimento(s)`}
                 {resultado.s2240JaEnviados > 0 && ` · ${resultado.s2240JaEnviados} S-2240 já enviados`}
+                {resultado.eventosExcluidos > 0 && ` · ${resultado.eventosExcluidos} excluído(s) por S-3000`}
+                {resultado.eventosRetificados > 0 && ` · ${resultado.eventosRetificados} retificado(s)`}
               </p>
 
-              {(resultado.eventosDeOutroEmpregador > 0 || resultado.totais.semMatricula > 0 || resultado.erros.length > 0) && (
+              {(resultado.eventosDeOutroEmpregador > 0 || resultado.exclusoesSemRecibo > 0 || resultado.totais.semMatricula > 0 || resultado.erros.length > 0) && (
                 <Alert className="bg-amber-50 border-amber-200">
                   <AlertCircle className="h-4 w-4 text-amber-700" />
                   <AlertDescription className="text-amber-800 text-sm space-y-1">
                     {resultado.eventosDeOutroEmpregador > 0 && (
                       <p>{resultado.eventosDeOutroEmpregador} evento(s) de outro CNPJ foram ignorados.</p>
+                    )}
+                    {resultado.exclusoesSemRecibo > 0 && (
+                      <p>
+                        {resultado.exclusoesSemRecibo} exclusão(ões) S-3000 não puderam ser aplicadas porque o evento original veio sem
+                        recibo; confira esses trabalhadores.
+                      </p>
                     )}
                     {resultado.totais.semMatricula > 0 && (
                       <p>{resultado.totais.semMatricula} trabalhador(es) sem matrícula: o S-2240 deles exige a matrícula.</p>
