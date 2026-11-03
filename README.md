@@ -1,30 +1,48 @@
-# Health and Safety UI
+# MASTPROD - Gestão de SST e eSocial
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Next.js 16 + PostgreSQL. Login próprio (sessão em cookie), certificados A1 cifrados no banco e
+transmissão de eventos eSocial (leiaute S-1.3) assinados no servidor.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/caio-lincolns-projects-de97644d/v0-health-and-safety-ui)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/pv9EeBeoBP1)
+## Rodar localmente
 
-## Overview
+Pré-requisito: PostgreSQL instalado (os binários são procurados em `C:\Program Files\PostgreSQL\18\bin`
+ou na variável `PG_BIN`).
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+```bash
+cp .env.example .env.local   # preencha AUTH_SECRET, ESOCIAL_CERT_ENCRYPTION_KEY e o admin inicial
+npm install
+npm run db:init              # cria o cluster em .localdb/ (porta 5433) e o banco "mastprod"
+npm run db:migrate           # aplica db/migrations/*.sql
+npm run db:create-user       # cria o admin com SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD
+npm run dev
+```
 
-## Deployment
+Depois de reiniciar o computador: `npm run db:start`.
+Outros usuários: `npm run db:create-user -- email@dominio senha "Nome" user`
+(`admin` vê todas as empresas; `user` só as vinculadas a ele).
 
-Your project is live at:
+## Deploy no Railway
 
-**[https://vercel.com/caio-lincolns-projects-de97644d/v0-health-and-safety-ui](https://vercel.com/caio-lincolns-projects-de97644d/v0-health-and-safety-ui)**
+1. Crie um projeto com um serviço **PostgreSQL** e um serviço apontando para este repositório.
+2. No serviço do app, cadastre as variáveis do `.env.example`, com `DATABASE_URL=${{Postgres.DATABASE_URL}}`.
+   Use a **mesma** `ESOCIAL_CERT_ENCRYPTION_KEY` do ambiente onde os certificados foram cadastrados.
+3. O `railway.json` roda `npm run db:migrate` antes de cada deploy.
+4. Crie o primeiro usuário uma vez: `railway run npm run db:create-user -- email senha "Nome" admin`.
 
-## Build your app
+## Estrutura
 
-Continue building your app on:
+| Pasta | Conteúdo |
+|---|---|
+| `db/migrations/` | Schema do banco (SQL versionado) |
+| `lib/server/` | Conexão, sessão, controle de acesso por empresa e API de dados |
+| `lib/esocial/events/` | Builders/validadores de eventos (S-1000, S-2240) e regras comuns (Id, leiaute) |
+| `lib/esocial/server/` | Geração do S-2240 a partir do banco, assinatura, envio e consulta |
+| `app/api/` | Rotas: auth, dados, certificados, documentos e eSocial |
+| `biblioteca/` | XSDs e WSDLs oficiais do eSocial |
 
-**[https://v0.app/chat/pv9EeBeoBP1](https://v0.app/chat/pv9EeBeoBP1)**
+## eSocial: o que o S-2240 exige
 
-## How It Works
-
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+O S-2240 é rejeitado se o eSocial ainda não tiver o **S-1000** do empregador e o vínculo do trabalhador
+(**S-2200**/S-2300), normalmente enviados pela folha/contabilidade. A **matrícula** informada no
+cadastro do funcionário precisa ser idêntica à do S-2200. O ambiente (produção ou produção restrita) é
+definido só pela variável `ESOCIAL_AMBIENTE` no servidor.

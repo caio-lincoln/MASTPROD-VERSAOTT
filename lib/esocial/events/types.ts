@@ -1,10 +1,9 @@
-export type ESocialEventStatus = "pendente" | "processando" | "enviado" | "erro"
+export type ESocialEventStatus = "pendente" | "processando" | "enviado" | "processado" | "erro" | "rejeitado"
 
 export interface Certificate {
   id: string
   name: string
   pfx_storage_path: string | null
-  pfx_base64_encrypted: string | null
   fingerprint: string | null
   valid_from: string | null
   valid_to: string | null

@@ -27,6 +27,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
     department: "",
     companyId: "",
     admission: "",
+    matricula: "",
     birthDate: "",
     address: "",
     city: "",
@@ -45,6 +46,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
         department: initialData.department || "",
         companyId: initialData.companyId?.toString() || "",
         admission: initialData.admission || "",
+        matricula: initialData.matricula || "",
         birthDate: initialData.birthDate || "",
         address: initialData.address || "",
         city: initialData.city || "",
@@ -61,6 +63,7 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
         department: "",
         companyId: "",
         admission: "",
+        matricula: "",
         birthDate: "",
         address: "",
         city: "",
@@ -265,6 +268,20 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
                 onChange={(e) => setFormData({ ...formData, admission: e.target.value })}
                 className="bg-white border-input text-foreground"
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="matricula" className="text-muted-foreground">
+                Matrícula no eSocial
+              </Label>
+              <Input
+                id="matricula"
+                value={formData.matricula}
+                onChange={(e) => setFormData({ ...formData, matricula: e.target.value })}
+                placeholder="A mesma do S-2200 (folha/contabilidade)"
+                maxLength={30}
+                className="bg-white border-input text-foreground"
               />
             </div>
           </div>

@@ -8,7 +8,7 @@ import { TrainingModal } from "@/components/training-modal"
 import { Pagination } from "@/components/pagination"
 import { TrainingDetailsModal } from "@/components/training-details-modal"
 import { TrainingCancelModal } from "@/components/training-cancel-modal"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { DashboardHeader, ContentContainer, StatusBadge } from "@/app/dashboard/esocial/components/visual-components"
 import { cn } from "@/lib/utils"
 
@@ -43,7 +43,7 @@ export default function TrainingsPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      const { data } = await db.from("treinamentos").select("*").order("created_at", { ascending: false })
       const mapped = (data as TrainingRow[]).map((t) => ({
         id: t.id,
         name: t.titulo,
@@ -93,8 +93,8 @@ export default function TrainingsPage() {
       if (!row) return
       const dbStatus =
         newStatus === "Concluído" ? "concluido" : newStatus === "Em andamento" ? "em_andamento" : newStatus === "Agendado" ? "agendado" : "cancelado"
-      await supabase.from("treinamentos").update({ status: dbStatus }).eq("id", row.id)
-      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      await db.from("treinamentos").update({ status: dbStatus }).eq("id", row.id)
+      const { data } = await db.from("treinamentos").select("*").order("created_at", { ascending: false })
       const mapped = (data as TrainingRow[]).map((t) => ({
         id: t.id,
         name: t.titulo,
@@ -125,9 +125,9 @@ export default function TrainingsPage() {
     const run = async () => {
       const row = trainings.find((t) => t.id === id)
       if (!row) return
-      await supabase.from("treinamentos").update({ status: "cancelado" }).eq("id", row.id)
+      await db.from("treinamentos").update({ status: "cancelado" }).eq("id", row.id)
       setCancelModal(null)
-      const { data } = await supabase.from("treinamentos").select("*").order("created_at", { ascending: false })
+      const { data } = await db.from("treinamentos").select("*").order("created_at", { ascending: false })
       const mapped = (data as TrainingRow[]).map((t) => ({
         id: t.id,
         name: t.titulo,

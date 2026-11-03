@@ -9,7 +9,7 @@ import { PPEModal } from "@/components/ppe-modal"
 import { PPEDetailsModal } from "@/components/ppe-details-modal"
 import { PPECancelModal } from "@/components/ppe-cancel-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 import { cn } from "@/lib/utils"
 
@@ -47,9 +47,9 @@ export default function PPEPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      const { data: empresas } = await db.from("empresas").select("id, razao_social")
       setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
-      const { data: epis } = await supabase.from("epis").select("*")
+      const { data: epis } = await db.from("epis").select("*")
       const mapped = (epis as EpiRow[]).map((e) => ({
         id: e.id,
         name: e.nome,
@@ -97,7 +97,7 @@ export default function PPEPage() {
   const handleSavePPE = (ppeData: any) => {
     const run = async () => {
       if (editingPPE) {
-        await supabase
+        await db
           .from("epis")
           .update({
             nome: ppeData.name,
@@ -112,7 +112,7 @@ export default function PPEPage() {
           })
           .eq("id", editingPPE.id)
       } else {
-        await supabase.from("epis").insert({
+        await db.from("epis").insert({
           nome: ppeData.name,
           certificado_aprovacao: ppeData.ca,
           tipo_protecao: ppeData.type,
@@ -127,7 +127,7 @@ export default function PPEPage() {
       }
       setIsModalOpen(false)
       setEditingPPE(null)
-      const { data: epis } = await supabase.from("epis").select("*")
+      const { data: epis } = await db.from("epis").select("*")
       const mapped = (epis as EpiRow[]).map((e) => ({
         id: e.id,
         name: e.nome,
@@ -150,9 +150,9 @@ export default function PPEPage() {
 
   const handleCancelPPE = (id: number, reason: string) => {
     const run = async () => {
-      await supabase.from("epis").update({ status: "cancelado" }).eq("id", id)
+      await db.from("epis").update({ status: "cancelado" }).eq("id", id)
       setCancelPPE(null)
-      const { data: epis } = await supabase.from("epis").select("*")
+      const { data: epis } = await db.from("epis").select("*")
       const mapped = (epis as EpiRow[]).map((e) => ({
         id: e.id,
         name: e.nome,

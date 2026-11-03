@@ -7,7 +7,7 @@ import { Plus, Search, Building2, Users, MapPin, Eye, Edit, Trash2, Shield, Filt
 import { Pagination } from "@/components/pagination"
 import { CompanyModal } from "@/components/company-modal"
 import { CompanyDetailsModal } from "@/components/company-details-modal"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { toast } from "sonner"
 import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 
@@ -89,10 +89,8 @@ async function upsertCompanyCertificate(params: {
 }) {
   const { companyId, companyName, certificateFile, removeExisting, certificatePassword } = params
 
-  const shouldClearDefault = removeExisting || !!certificateFile
-
-  if (shouldClearDefault) {
-    const { error: clearError } = await supabase
+  if (removeExisting && !certificateFile) {
+    const { error: clearError } = await db
       .from("company_certificates")
       .update({ is_default: false })
       .eq("company_id", companyId)
@@ -101,109 +99,45 @@ async function upsertCompanyCertificate(params: {
     if (clearError) {
       console.error("Erro ao atualizar vínculo de certificado da empresa:", clearError)
       toast.error("Erro ao atualizar vínculo de certificado da empresa.")
-      return
     }
+    return
   }
 
   if (!certificateFile) {
     return
   }
 
-  const path = `${companyId}/${Date.now()}-${certificateFile.name}`
-
-  let validFrom: string | null = null
-  let validTo: string | null = null
-  let encryptedSecret: string | null = null
-
-  try {
-    const arrayBuffer = await certificateFile.arrayBuffer()
-    const bytes = new Uint8Array(arrayBuffer)
-    let binary = ""
-    for (let i = 0; i < bytes.length; i += 1) {
-      binary += String.fromCharCode(bytes[i])
-    }
-    const pfxBase64 = btoa(binary)
-
-    const password = certificatePassword || ""
-
-    if (password) {
-      const resp = await fetch("/api/esocial/cert-metadata", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          pfxBase64,
-          password,
-        }),
-      })
-
-      if (resp.ok) {
-        const data = (await resp.json()) as {
-          validFrom: string
-          validTo: string
-          encryptedSecret?: string
-        }
-        validFrom = data.validFrom
-        validTo = data.validTo
-        encryptedSecret = data.encryptedSecret ?? null
-      } else {
-        let errorBody: unknown = null
-        try {
-          errorBody = await resp.json()
-        } catch {
-          errorBody = null
-        }
-        console.error("Erro na NodeAPI de metadados do certificado:", errorBody)
-      }
-    }
-  } catch (err) {
-    console.error("Erro ao tentar extrair validade do certificado:", err)
-  }
-
-  const { error: uploadError } = await supabase.storage.from("certificados").upload(path, certificateFile, {
-    cacheControl: "3600",
-    upsert: false,
-    contentType: certificateFile.type || "application/x-pkcs12",
-  })
-
-  if (uploadError) {
-    console.error("Erro ao enviar certificado para o Storage:", uploadError)
-    toast.error("Erro ao enviar certificado para o Storage.")
+  if (!certificatePassword) {
+    toast.error("Informe a senha do certificado A1 para habilitar a transmissão ao eSocial.")
     return
   }
 
-  const { data: cert, error: certError } = await supabase
-    .from("certificates")
-    .insert({
+  const bytes = new Uint8Array(await certificateFile.arrayBuffer())
+  let binary = ""
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i])
+  }
+
+  const resp = await fetch("/api/certificates", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      companyId,
       name: `${companyName} - Certificado`,
-      pfx_storage_path: path,
-      pfx_base64_encrypted: encryptedSecret,
-      fingerprint: null,
-      valid_from: validFrom,
-      valid_to: validTo,
-    })
-    .select("id")
-    .single()
+      pfxBase64: btoa(binary),
+      password: certificatePassword,
+    }),
+  })
+  const result = await resp.json().catch(() => null)
 
-  if (certError || !cert) {
-    console.error("Erro ao registrar certificado no banco:", certError)
-    toast.error("Erro ao registrar certificado no banco.")
+  if (!resp.ok) {
+    console.error("Erro ao cadastrar certificado:", result)
+    toast.error(result?.error?.message || "Erro ao cadastrar certificado.")
     return
   }
 
-  const { error: linkError } = await supabase
-    .from("company_certificates")
-    .insert({
-      company_id: companyId,
-      certificate_id: cert.id,
-      is_default: true,
-    })
-
-  if (linkError) {
-    console.error("Erro ao vincular certificado à empresa:", linkError)
-    toast.error("Erro ao vincular certificado à empresa.")
-  }
+  const validTo = result?.info?.validTo ? new Date(result.info.validTo).toLocaleDateString("pt-BR") : "-"
+  toast.success(`Certificado cadastrado (válido até ${validTo}).`)
 }
 
 export default function CompaniesPage() {
@@ -220,13 +154,13 @@ export default function CompaniesPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data: empresas, error: errEmp } = await supabase.from("empresas").select("*")
+      const { data: empresas, error: errEmp } = await db.from("empresas").select("*")
       if (errEmp) {
         setError("Erro ao carregar empresas")
         setLoading(false)
         return
       }
-      const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const { data: metrics } = await db.from("dashboard_metricas_por_empresa").select("*")
       const metricsMap = new Map<string, MetricsRow>()
       metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
       const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
@@ -257,35 +191,8 @@ export default function CompaniesPage() {
       setLoading(true)
       console.log("Criando empresa com dados:", data)
 
-      // Verificar sessão antes de prosseguir
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError || !sessionData.session) {
-        console.error("Erro de sessão:", sessionError)
-        toast.error("Sessão inválida ou expirada. Faça login novamente.")
-        setLoading(false)
-        return
-      }
-
-      // Tenta refresh se o token estiver prestes a expirar (opcional, mas seguro)
-      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
-      
-      const session = refreshData.session || sessionData.session
-      const user = session?.user
-
-      if (refreshError) {
-         console.warn("Erro ao atualizar sessão:", refreshError)
-      }
-
-      if (!user) {
-        toast.error("Usuário não autenticado.")
-        setLoading(false)
-        return
-      }
-
-      // Inserção direta no banco de dados (bypass Edge Function por solicitação do usuário)
       // 1. Inserir empresa
-      const { data: newCompany, error: createError } = await supabase
+      const { data: newCompany, error: createError } = await db
         .from("empresas")
         .insert({
           razao_social: data.name,
@@ -304,7 +211,6 @@ export default function CompaniesPage() {
           origem: 'manual',
           importada: false,
           status: 'ativo',
-          user_id: user.id,
           ind_coop: data.indCoop,
           ind_constr: data.indConstr,
           ind_des_folha: data.indDesFolha,
@@ -340,31 +246,15 @@ export default function CompaniesPage() {
         })
       }
 
-      // 2. Vincular usuário à empresa
-      const { error: linkError } = await supabase
-        .from("usuarios_empresas")
-        .insert({
-          empresa_id: newCompany.id,
-          user_id: user.id,
-          role: 'owner'
-        })
-
-      if (linkError) {
-        console.error("Erro ao vincular usuário à empresa:", linkError)
-        toast.error(`Empresa criada, mas erro ao vincular usuário: ${linkError.message}`)
-        // Opcional: tentar deletar a empresa criada para evitar órfãos?
-        // Por enquanto, apenas avisar.
-      } else {
-        toast.success("Empresa criada com sucesso!")
-      }
+      toast.success("Empresa criada com sucesso!")
 
       setCreateModalOpen(false)
       
       // Recarregar dados
-      const { data: empresas, error: errEmp } = await supabase.from("empresas").select("*")
+      const { data: empresas, error: errEmp } = await db.from("empresas").select("*")
       if (errEmp) throw errEmp
 
-      const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+      const { data: metrics } = await db.from("dashboard_metricas_por_empresa").select("*")
       const metricsMap = new Map<string, MetricsRow>()
       metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
       
@@ -384,7 +274,7 @@ export default function CompaniesPage() {
     const removeCertificate = data.removeCertificate as boolean | undefined
     const certificatePassword = data.certificatePassword as string | null
 
-    await supabase
+    await db
       .from("empresas")
       .update({
         razao_social: data.name,
@@ -413,8 +303,8 @@ export default function CompaniesPage() {
     })
 
     setEditingCompany(null)
-    const { data: empresas } = await supabase.from("empresas").select("*")
-    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+    const { data: empresas } = await db.from("empresas").select("*")
+    const { data: metrics } = await db.from("dashboard_metricas_por_empresa").select("*")
     const metricsMap = new Map<string, MetricsRow>()
     metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
     const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)
@@ -424,36 +314,18 @@ export default function CompaniesPage() {
   const handleDeleteCompany = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir esta empresa?")) return
 
-    // Tentativa de exclusão direta via Client (aproveitando RLS policies)
-    const { error: deleteError } = await supabase.from("empresas").delete().eq("id", id)
+    // Exclusão via API (acesso por empresa verificado no servidor)
+    const { error: deleteError } = await db.from("empresas").delete().eq("id", id)
 
     if (deleteError) {
       console.error("Erro ao excluir empresa:", deleteError)
       alert(`Erro ao excluir empresa: ${deleteError.message}`)
-      
-      // Fallback para Edge Function se falhar por permissão (caso RLS não esteja propagado ou usuário seja service_role simulado)
-      // Mas como configuramos RLS, o delete direto deve funcionar.
-      // Se quiser manter a Edge Function como fallback:
-      /*
-      const token = (await supabase.auth.getSession()).data.session?.access_token || ""
-      const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/admin_onboarding`
-      const resp = await fetch(`${base}/delete-company`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ empresa_id: id }),
-      })
-      if (!resp.ok) {
-        const errText = await resp.text()
-        alert(`Falha na exclusão via servidor: ${errText}`)
-        return
-      }
-      */
       return
     }
 
     // Sucesso - Recarregar dados
-    const { data: empresas } = await supabase.from("empresas").select("*")
-    const { data: metrics } = await supabase.from("dashboard_metricas_por_empresa").select("*")
+    const { data: empresas } = await db.from("empresas").select("*")
+    const { data: metrics } = await db.from("dashboard_metricas_por_empresa").select("*")
     const metricsMap = new Map<string, MetricsRow>()
     metrics?.forEach((m: any) => metricsMap.set(m.empresa_id, m))
     const mapped = mapCompanies(empresas as CompanyRow[], metricsMap)

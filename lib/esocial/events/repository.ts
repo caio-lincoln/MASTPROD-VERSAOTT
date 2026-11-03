@@ -1,8 +1,8 @@
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import type { Certificate, CompanyCertificate, ESocialEventRecord } from "./types"
 
 export async function listCompanyCertificates(companyId: string): Promise<Certificate[]> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("company_certificates")
     .select(
       `
@@ -10,7 +10,6 @@ export async function listCompanyCertificates(companyId: string): Promise<Certif
         id,
         name,
         pfx_storage_path,
-        pfx_base64_encrypted,
         fingerprint,
         valid_from,
         valid_to,
@@ -29,7 +28,7 @@ export async function listCompanyCertificates(companyId: string): Promise<Certif
 }
 
 export async function getDefaultCompanyCertificate(companyId: string): Promise<Certificate | null> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("company_certificates")
     .select(
       `
@@ -38,7 +37,6 @@ export async function getDefaultCompanyCertificate(companyId: string): Promise<C
         id,
         name,
         pfx_storage_path,
-        pfx_base64_encrypted,
         fingerprint,
         valid_from,
         valid_to,
@@ -62,7 +60,7 @@ export async function getDefaultCompanyCertificate(companyId: string): Promise<C
 }
 
 export async function attachCertificateToEvent(eventId: string, certificateId: string): Promise<ESocialEventRecord> {
-  const { data, error } = await supabase
+  const { data, error } = await db
     .from("esocial_eventos")
     .update({
       certificate_id: certificateId,

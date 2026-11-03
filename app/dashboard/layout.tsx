@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabaseClient"
+import { getCurrentUser, signOut } from "@/lib/auth-client"
 import { Sidebar } from "@/components/sidebar"
 import { LogOut, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,17 +22,14 @@ export default function DashboardLayout({
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        
-        if (error || !session) {
+        const current = await getCurrentUser()
+
+        if (!current) {
           router.push("/login")
           return
         }
 
-        setUser({
-          name: session.user.user_metadata?.name || "Usuário",
-          email: session.user.email || "",
-        })
+        setUser({ name: current.nome || "Usuário", email: current.email })
       } catch (error) {
         console.error("Error checking session:", error)
         router.push("/login")
@@ -42,23 +39,10 @@ export default function DashboardLayout({
     }
 
     checkUser()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        router.push("/login")
-      } else {
-        setUser({
-          name: session.user.user_metadata?.name || "Usuário",
-          email: session.user.email || "",
-        })
-      }
-    })
-
-    return () => subscription.unsubscribe()
   }, [router])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     router.push("/login")
   }
 

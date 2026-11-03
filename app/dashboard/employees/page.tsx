@@ -9,7 +9,7 @@ import { EmployeeDetailsModal } from "@/components/employee-details-modal"
 import { EmployeeCancelModal } from "@/components/employee-cancel-modal"
 import { Pagination } from "@/components/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { supabase } from "@/lib/supabaseClient"
+import { db } from "@/lib/data-client"
 import { DashboardHeader, ContentContainer, StatusBadge } from "../esocial/components/visual-components"
 
 type EmployeeRow = {
@@ -24,6 +24,7 @@ type EmployeeRow = {
   cpf: string
   data_admissao: string | null
   data_nascimento: string | null
+  matricula_esocial: string | null
   endereco: string | null
 }
 
@@ -48,9 +49,9 @@ export default function EmployeesPage() {
     const load = async () => {
       setLoading(true)
       setError(null)
-      const { data: empresas } = await supabase.from("empresas").select("id, razao_social")
+      const { data: empresas } = await db.from("empresas").select("id, razao_social")
       setCompanies((empresas as CompanyRow[]).map((e) => ({ id: e.id, name: e.razao_social })))
-      const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+      const { data: funcionarios } = await db.from("funcionarios").select("*")
       const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
         id: f.id,
         name: f.nome,
@@ -62,6 +63,7 @@ export default function EmployeesPage() {
         companyId: f.empresa_id,
         cpf: f.cpf,
         admission: f.data_admissao || "",
+        matricula: f.matricula_esocial || "",
         birthDate: f.data_nascimento || "",
         address: f.endereco || "",
       }))
@@ -102,7 +104,7 @@ export default function EmployeesPage() {
   }
 
   const handleCreateEmployee = async (data: any) => {
-    await supabase.from("funcionarios").insert({
+    await db.from("funcionarios").insert({
       nome: data.name,
       email: data.email,
       telefone: data.phone,
@@ -111,12 +113,13 @@ export default function EmployeesPage() {
       status: "ativo",
       empresa_id: data.companyId,
       cpf: data.cpf,
+      matricula_esocial: data.matricula || null,
       data_admissao: data.admission,
       data_nascimento: data.birthDate,
       endereco: data.address,
     })
     setModalOpen(false)
-    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const { data: funcionarios } = await db.from("funcionarios").select("*")
     const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
       id: f.id,
       name: f.nome,
@@ -128,6 +131,7 @@ export default function EmployeesPage() {
       companyId: f.empresa_id,
       cpf: f.cpf,
       admission: f.data_admissao || "",
+      matricula: f.matricula_esocial || "",
       birthDate: f.data_nascimento || "",
       address: f.endereco || "",
     }))
@@ -136,7 +140,7 @@ export default function EmployeesPage() {
 
   const handleEditEmployee = async (data: any) => {
     if (!editingEmployee) return
-    await supabase
+    await db
       .from("funcionarios")
       .update({
         nome: data.name,
@@ -146,13 +150,14 @@ export default function EmployeesPage() {
         departamento: data.department,
         empresa_id: data.companyId,
         cpf: data.cpf,
+        matricula_esocial: data.matricula || null,
         data_admissao: data.admission,
         data_nascimento: data.birthDate,
         endereco: data.address,
       })
       .eq("id", editingEmployee.id)
     setEditingEmployee(null)
-    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const { data: funcionarios } = await db.from("funcionarios").select("*")
     const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
       id: f.id,
       name: f.nome,
@@ -164,6 +169,7 @@ export default function EmployeesPage() {
       companyId: f.empresa_id,
       cpf: f.cpf,
       admission: f.data_admissao || "",
+      matricula: f.matricula_esocial || "",
       birthDate: f.data_nascimento || "",
       address: f.endereco || "",
     }))
@@ -172,9 +178,9 @@ export default function EmployeesPage() {
 
   const handleCancelEmployee = async (reason: string) => {
     if (!cancelingEmployee) return
-    await supabase.from("funcionarios").update({ status: "cancelado" }).eq("id", cancelingEmployee.id)
+    await db.from("funcionarios").update({ status: "cancelado" }).eq("id", cancelingEmployee.id)
     setCancelingEmployee(null)
-    const { data: funcionarios } = await supabase.from("funcionarios").select("*")
+    const { data: funcionarios } = await db.from("funcionarios").select("*")
     const mapped = (funcionarios as EmployeeRow[]).map((f) => ({
       id: f.id,
       name: f.nome,
@@ -186,6 +192,7 @@ export default function EmployeesPage() {
       companyId: f.empresa_id,
       cpf: f.cpf,
       admission: f.data_admissao || "",
+      matricula: f.matricula_esocial || "",
       birthDate: f.data_nascimento || "",
       address: f.endereco || "",
     }))

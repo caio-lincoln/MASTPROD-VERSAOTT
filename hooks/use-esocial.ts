@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { db } from "@/lib/data-client"
 
 export interface ESocialEvent {
   id: string
   tipo_evento: string
-  status: 'pendente' | 'enviado' | 'erro' | 'processando'
+  status: 'pendente' | 'processando' | 'enviado' | 'processado' | 'erro' | 'rejeitado'
   created_at: string
   updated_at?: string
   xml_envio?: string
@@ -45,7 +45,7 @@ export function useESocialEvents(type?: string) {
   const fetchEvents = async () => {
     try {
       setLoading(true)
-      let query = supabase
+      let query = db
         .from('esocial_eventos')
         .select(`
           *,
@@ -84,10 +84,9 @@ export function useESocialCompanies() {
     try {
       setLoading(true)
       // Buscar empresas vinculadas ao eSocial ou importadas
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('empresas')
         .select('*')
-        .or('origem.eq.esocial,origem.eq.manual') // Ajustar conforme lógica de negócio
         .order('razao_social')
 
       if (error) throw error
