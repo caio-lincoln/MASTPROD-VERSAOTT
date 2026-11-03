@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as { companyId?: string; pfxBase64?: string; password?: string; name?: string }
     await assertCompanyAccess(user, body.companyId)
     if (!body.pfxBase64 || !body.password) {
-      throw new HttpError(400, "Envie o arquivo .pfx e a senha do certificado.")
+      throw new HttpError(400, "Envie o arquivo do certificado (.pfx ou .p12) e a senha.")
     }
 
     let material

@@ -23,5 +23,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/:path*"],
+  // A importação recebe arquivos grandes; fica fora do proxy (que limita o corpo da requisição)
+  // e valida a sessão na própria rota.
+  matcher: ["/dashboard/:path*", "/api/((?!esocial/import).*)"],
 }

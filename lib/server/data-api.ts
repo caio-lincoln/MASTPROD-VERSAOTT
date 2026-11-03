@@ -54,6 +54,8 @@ const TABLES: Record<string, TableConfig> = {
   },
   exposicao_responsaveis: { scope: { kind: "subquery", sql: (p) => `exposicao_id IN (${EXPOSICOES_DA_EMPRESA(p)})` } },
   dashboard_metricas_por_empresa: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
+  estabelecimentos: { scope: { kind: "column", column: "empresa_id" } },
+  esocial_importacoes: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
 }
 
 // Colunas preenchidas pelo servidor, ignoradas se vierem do navegador
@@ -74,9 +76,12 @@ export interface DataRequest {
 const IDENT = /^[a-z_][a-z0-9_]*$/
 
 let columnCache: Map<string, Set<string>> | null = null
+let columnCacheAt = 0
 
 async function tableColumns(table: string): Promise<Set<string>> {
-  if (!columnCache) {
+  // Recarrega periodicamente para enxergar colunas de migrations aplicadas com o servidor no ar
+  if (!columnCache || Date.now() - columnCacheAt > 60_000) {
+    columnCacheAt = Date.now()
     const rows = await query<{ table_name: string; column_name: string }>(
       "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = 'public'"
     )

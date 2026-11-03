@@ -3,10 +3,11 @@
 import { useState, useMemo, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, Search, Mail, Phone, Briefcase, Eye, Edit, Trash2, Building2, Filter } from "lucide-react"
+import { Plus, Search, Mail, Phone, Briefcase, Eye, Edit, Trash2, Building2, Filter, Download } from "lucide-react"
 import { EmployeeModal } from "@/components/employee-modal"
 import { EmployeeDetailsModal } from "@/components/employee-details-modal"
 import { EmployeeCancelModal } from "@/components/employee-cancel-modal"
+import EsocialImportModal from "@/components/esocial-import-modal"
 import { Pagination } from "@/components/pagination"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { db } from "@/lib/data-client"
@@ -44,6 +45,8 @@ export default function EmployeesPage() {
   const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [importOpen, setImportOpen] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     const load = async () => {
@@ -71,7 +74,7 @@ export default function EmployeesPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [reloadKey])
 
   const filteredEmployees = useMemo(() => {
     return employees.filter((e) => {
@@ -209,6 +212,10 @@ export default function EmployeesPage() {
         title="Funcionários" 
         subtitle="Gestão de colaboradores e vínculos"
       >
+        <Button variant="outline" onClick={() => setImportOpen(true)} className="bg-white border-border">
+          <Download className="w-4 h-4 mr-2" />
+          Importar do eSocial
+        </Button>
         <Button onClick={() => setModalOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground transition-colors duration-200">
           <Plus className="w-4 h-4 mr-2" />
           Novo Funcionário
@@ -336,6 +343,12 @@ export default function EmployeesPage() {
           />
         </div>
       </ContentContainer>
+
+      <EsocialImportModal
+        isOpen={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={() => setReloadKey((k) => k + 1)}
+      />
 
       <EmployeeModal
         isOpen={modalOpen}
