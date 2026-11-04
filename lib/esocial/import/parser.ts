@@ -65,6 +65,18 @@ export interface ParseResult {
   arquivosLidos: number
   ignorados: string[] // arquivos sem evento reconhecido
   erros: string[] // arquivos que não puderam ser lidos
+  foraDoEscopo: number // eventos de folha/totalizadores pulados sem abrir (S-1210, S-5001...)
+}
+
+/** Tipos de evento usados pela importação; os demais são pulados pelo nome do arquivo. */
+export const TIPOS_IMPORTADOS = new Set([
+  "S-1000", "S-1005", "S-1200", "S-1202", "S-2200", "S-2205", "S-2206", "S-2210",
+  "S-2220", "S-2230", "S-2240", "S-2299", "S-2300", "S-2399", "S-3000",
+])
+
+/** O download do portal nomeia cada arquivo com o tipo: "ID...S-2200.xml". */
+function tipoPeloNome(name: string): string | null {
+  return name.match(/(S-\d{4})\.xml$/i)?.[1]?.toUpperCase() ?? null
 }
 
 const parser = new XMLParser({
@@ -78,7 +90,7 @@ const parser = new XMLParser({
 
 const isZip = (d: Uint8Array) => d.length > 3 && d[0] === 0x50 && d[1] === 0x4b && d[2] === 0x03 && d[3] === 0x04
 
-function expand(file: InputFile, out: InputFile[], erros: string[], depth = 0) {
+function expand(file: InputFile, out: InputFile[], erros: string[], skipped: { n: number }, depth = 0) {
   if (isZip(file.data)) {
     if (depth > 3) {
       erros.push(`${file.name}: ZIPs aninhados demais`)
@@ -86,14 +98,24 @@ function expand(file: InputFile, out: InputFile[], erros: string[], depth = 0) {
     }
     let entries: Record<string, Uint8Array>
     try {
-      entries = unzipSync(file.data)
+      // Descompacta só o que interessa: os ZIPs de "todos os eventos" são dominados pela folha
+      entries = unzipSync(file.data, {
+        filter: (f) => {
+          const tipo = tipoPeloNome(f.name)
+          if (tipo && !TIPOS_IMPORTADOS.has(tipo)) {
+            skipped.n++
+            return false
+          }
+          return true
+        },
+      })
     } catch {
       erros.push(`${file.name}: ZIP inválido ou corrompido`)
       return
     }
     for (const [name, data] of Object.entries(entries)) {
       if (name.endsWith("/")) continue
-      expand({ name: `${file.name}/${name}`, data }, out, erros, depth + 1)
+      expand({ name: `${file.name}/${name}`, data }, out, erros, skipped, depth + 1)
     }
     return
   }
@@ -120,6 +142,9 @@ function collectRecibos(node: any, out: string[] = []): string[] {
       for (const r of Array.isArray(value) ? value : [value]) {
         const nr = typeof r === "object" ? r?.nrRecibo : null
         if (nr) out.push(String(typeof nr === "object" ? nr["#text"] : nr).trim())
+        // No download do portal o número fica mais fundo:
+        // retornoProcessamentoDownload/recibo/eSocial/retornoEvento/recibo/nrRecibo
+        else collectRecibos(r, out)
       }
       continue
     }
@@ -148,7 +173,8 @@ function walk(node: any, fn: (tag: string, value: any) => void) {
 export function parseEsocialFiles(files: InputFile[]): ParseResult {
   const flat: InputFile[] = []
   const erros: string[] = []
-  files.forEach((f) => expand(f, flat, erros))
+  const skipped = { n: 0 }
+  files.forEach((f) => expand(f, flat, erros, skipped))
 
   const events: ParsedEvent[] = []
   const ignorados: string[] = []
@@ -198,7 +224,7 @@ export function parseEsocialFiles(files: InputFile[]): ParseResult {
     if (!found) ignorados.push(file.name)
   }
 
-  return { events, arquivosLidos, ignorados, erros }
+  return { events, arquivosLidos, ignorados, erros, foraDoEscopo: skipped.n }
 }
 
 // ---------------------------------------------------------------------------
@@ -320,7 +346,8 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
     if (e.kind === "S-3000") {
       const nr = text(e.node.infoExclusao?.nrRecEvt)
       if (nr && recibosConhecidos.has(nr)) anulados.add(nr)
-      else exclusoesSemRecibo++
+      // Exclusão de evento fora do escopo (folha, totalizadores) não afeta a importação
+      else if (TIPOS_IMPORTADOS.has(text(e.node.infoExclusao?.tpEvento).toUpperCase())) exclusoesSemRecibo++
     }
   }
   let retificados = 0

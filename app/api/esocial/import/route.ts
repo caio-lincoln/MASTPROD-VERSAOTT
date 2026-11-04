@@ -3,7 +3,7 @@ import { importarEsocial } from "@/lib/esocial/server/importer"
 
 export const runtime = "nodejs"
 
-const MAX_TOTAL_BYTES = 80 * 1024 * 1024
+const MAX_TOTAL_BYTES = 150 * 1024 * 1024
 
 /**
  * Importa trabalhadores a partir dos XMLs/ZIP baixados do eSocial.
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const uploads = form.getAll("arquivos").filter((v): v is File => typeof v === "object" && "arrayBuffer" in v)
     if (!uploads.length) throw new HttpError(400, "Selecione o ZIP ou os XMLs baixados do eSocial.")
     const total = uploads.reduce((sum, f) => sum + f.size, 0)
-    if (total > MAX_TOTAL_BYTES) throw new HttpError(413, "Arquivos maiores que 80 MB. Divida a importação em partes.")
+    if (total > MAX_TOTAL_BYTES) throw new HttpError(413, "Arquivos maiores que 150 MB. Importe um ano por vez.")
 
     const files = await Promise.all(uploads.map(async (f) => ({ name: f.name, data: new Uint8Array(await f.arrayBuffer()) })))
     const result = await importarEsocial({

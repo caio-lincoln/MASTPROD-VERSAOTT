@@ -117,6 +117,19 @@ export async function importarEsocial(params: {
   )
   const porCpf = new Map(atuais.map((f) => [onlyDigits(f.cpf), f]))
 
+  // Desligamento de vínculo antigo enviado com atraso (S-2299 retroativo): se o lote não traz
+  // admissão e o cadastro já tem uma admissão posterior à data do desligamento, ele é de outro
+  // vínculo e não pode desativar o trabalhador nem trocar a matrícula atual.
+  for (const w of dados.trabalhadores) {
+    const atual = porCpf.get(w.cpf)
+    const temAdmissao = w.eventos.some((e) => e === "S-2200" || e === "S-2300")
+    if (atual?.data_admissao && w.dataDesligamento && !temAdmissao && w.dataDesligamento < atual.data_admissao) {
+      w.dataDesligamento = atual.data_desligamento
+      w.matricula = atual.matricula_esocial
+      w.eventos = w.eventos.filter((e) => e !== "S-2299" && e !== "S-2399")
+    }
+  }
+
   const linhas: LinhaPrevia[] = dados.trabalhadores.map((w) => {
     const { situacao, avisos } = compare(w, porCpf.get(w.cpf))
     const atual = porCpf.get(w.cpf)
