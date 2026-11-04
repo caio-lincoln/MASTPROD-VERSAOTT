@@ -31,6 +31,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useESocialEvents, useESocialCompanies, ESocialEvent } from "@/hooks/use-esocial"
 import EventS2240Modal from "@/components/event-s2240-modal"
+import S2240BatchModal from "@/components/s2240-batch-modal"
 import EventS2220Modal from "@/components/event-s2220-modal"
 import EventS2210Modal from "@/components/event-s2210-modal"
 import { db } from "@/lib/data-client"
@@ -136,6 +137,7 @@ export default function ESocialContent({ environment }: { environment: "producti
   const [companyPage, setCompanyPage] = useState(1)
 
   const [showCreateS2240Modal, setShowCreateS2240Modal] = useState(false)
+  const [showS2240BatchModal, setShowS2240BatchModal] = useState(false)
   const [showCreateS2220Modal, setShowCreateS2220Modal] = useState(false)
   const [showCreateS2210Modal, setShowCreateS2210Modal] = useState(false)
   const [mandatoryTab, setMandatoryTab] = useState("s1000")
@@ -897,14 +899,19 @@ export default function ESocialContent({ environment }: { environment: "producti
           <ContentContainer
             title="S-2240 - Condições Ambientais"
             action={
-                <Button
-                  size="sm"
-                  onClick={() => setShowCreateS2240Modal(true)}
-                  className="bg-primary hover:bg-primary/90 text-white shadow-sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Novo Evento
-                </Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setShowS2240BatchModal(true)} className="bg-white">
+                    Gerar em lote
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowCreateS2240Modal(true)}
+                    className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Novo Evento
+                  </Button>
+                </div>
             }
           >
               <div className="relative mt-2 mb-6">
@@ -1295,6 +1302,14 @@ export default function ESocialContent({ environment }: { environment: "producti
         <EventS2240Modal
           isOpen={showCreateS2240Modal}
           onClose={() => setShowCreateS2240Modal(false)}
+          onCreated={() => refreshEvents()}
+        />
+      )}
+
+      {showS2240BatchModal && (
+        <S2240BatchModal
+          isOpen={showS2240BatchModal}
+          onClose={() => setShowS2240BatchModal(false)}
           onCreated={() => refreshEvents()}
         />
       )}
