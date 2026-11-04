@@ -4,6 +4,26 @@ import { HttpError } from "@/lib/server/access"
 import { consolidate, parseEsocialFiles, type InputFile, type TrabalhadorImportado } from "../import/parser"
 import { vinculoDe } from "../import/sst-mappers"
 import { importarHistoricoSst } from "./sst-history"
+import forge from "node-forge"
+
+/**
+ * Lê o certificado que assinou o S-1000. Quando é o e-CNPJ da própria empresa
+ * (CN "NOME:CNPJ"), traz a razão social e o município do titular.
+ */
+function dadosDoCertificado(base64: string | null, cnpjEmpresa: string) {
+  if (!base64) return null
+  try {
+    const der = forge.util.decode64(base64)
+    const cert = forge.pki.certificateFromAsn1(forge.asn1.fromDer(der))
+    const attr = (name: string) => String(cert.subject.getField(name)?.value ?? "").trim() || null
+    const cn = attr("CN") ?? ""
+    const [, nome, doc] = cn.match(/^(.+):([A-Z0-9]{14}|\d{11})$/i) ?? []
+    if (!nome || doc.toUpperCase() !== cnpjEmpresa.replace(/[^0-9A-Za-z]/g, "").toUpperCase()) return null
+    return { nome: nome.trim(), cidade: attr("L"), uf: attr("ST")?.toUpperCase().slice(0, 2) ?? null }
+  } catch {
+    return null
+  }
+}
 
 export type Situacao = "novo" | "atualizado" | "sem_alteracao"
 
@@ -35,6 +55,8 @@ export interface ResultadoImportacao {
   sst: { tipo: string; novos: number; jaImportados: number }[]
   /** Eventos de SST de trabalhador sem cadastro (será criado com o CPF) */
   sstSemTrabalhador: number
+  /** Dados do empregador lidos do S-1000 (recibo e certificado do titular) */
+  empregadorExtraido: { nome: string | null; natJurid: string | null; cidade: string | null; uf: string | null } | null
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
   linhas: LinhaPrevia[]
   gravado: boolean
@@ -177,6 +199,12 @@ export async function importarEsocial(params: {
     estabelecimentos: dados.estabelecimentos.length,
     sst: sstResumo,
     sstSemTrabalhador: sstNovos.filter((e) => !cpfsConhecidos.has(vinculoDe(e.node).cpf)).length,
+    empregadorExtraido: dados.empregador
+      ? (() => {
+          const cert = dadosDoCertificado(dados.empregador!.certificadoAssinante, empresa.cnpj)
+          return { nome: cert?.nome ?? null, natJurid: dados.empregador!.natJurid, cidade: cert?.cidade ?? null, uf: cert?.uf ?? null }
+        })()
+      : null,
     totais: {
       trabalhadores: linhas.length,
       novos: linhas.filter((l) => l.situacao === "novo").length,
@@ -265,6 +293,9 @@ export async function importarEsocial(params: {
     // S-1000: completa só o que estiver vazio no cadastro da empresa
     if (dados.empregador) {
       const e = dados.empregador
+      const ext = resultado.empregadorExtraido
+      // Nome só substitui um nome provisório (que é apenas o CNPJ), nunca um nome digitado
+      const nomeProvisorio = onlyDigits(empresa.razao_social) === onlyDigits(empresa.cnpj)
       await client.query(
         `UPDATE empresas SET
            classificacao_tributaria = COALESCE(classificacao_tributaria, $2),
@@ -272,6 +303,10 @@ export async function importarEsocial(params: {
            ind_coop = COALESCE(ind_coop, $4), ind_constr = COALESCE(ind_constr, $5),
            ind_des_folha = COALESCE(ind_des_folha, $6),
            ind_opt_reg_eletron = COALESCE(ind_opt_reg_eletron, $7),
+           natureza_juridica = COALESCE(natureza_juridica, $8),
+           razao_social = CASE WHEN $9::text IS NOT NULL AND $10 THEN $9 ELSE razao_social END,
+           cidade = COALESCE(cidade, $11),
+           estado = COALESCE(estado, $12),
            esocial_status = 'REGISTRADO'
          WHERE id = $1`,
         [
@@ -282,6 +317,11 @@ export async function importarEsocial(params: {
           e.indConstr === null ? null : e.indConstr === "1",
           e.indDesFolha === null ? null : e.indDesFolha !== "0",
           e.indOptRegEletron,
+          e.natJurid,
+          ext?.nome ?? null,
+          nomeProvisorio,
+          ext?.cidade ?? null,
+          ext?.uf ?? null,
         ]
       )
     }

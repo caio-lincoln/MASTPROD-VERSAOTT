@@ -258,6 +258,10 @@ export interface EmpregadorImportado {
   indDesFolha: string | null
   indOptRegEletron: string | null
   iniValid: string | null
+  /** Natureza jurídica informada no recibo do S-1000 (infoContribuinte/natJurid) */
+  natJurid: string | null
+  /** Certificado (base64) que assinou o S-1000; se for o e-CNPJ da empresa, traz nome e município */
+  certificadoAssinante: string | null
 }
 
 export interface EstabelecimentoImportado {
@@ -415,6 +419,7 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         const bloco = n.infoEmpregador?.inclusao ?? n.infoEmpregador?.alteracao
         const cad = bloco?.infoCadastro
         if (cad) {
+          const anterior = empregador as EmpregadorImportado | null
           empregador = {
             classTrib: opt(cad.classTrib),
             indCoop: opt(cad.indCoop),
@@ -422,6 +427,12 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
             indDesFolha: opt(cad.indDesFolha),
             indOptRegEletron: opt(cad.indOptRegEletron),
             iniValid: opt(bloco.idePeriodo?.iniValid),
+            // O recibo e a assinatura não fazem parte do nó do evento: lidos do XML original
+            natJurid: e.raw?.match(/<natJurid>(\d{4})<\/natJurid>/)?.[1] ?? anterior?.natJurid ?? null,
+            certificadoAssinante:
+              e.raw?.match(/<X509Certificate>([^<]+)<\/X509Certificate>/)?.[1]?.replace(/\s+/g, "") ??
+              anterior?.certificadoAssinante ??
+              null,
           }
         }
         break

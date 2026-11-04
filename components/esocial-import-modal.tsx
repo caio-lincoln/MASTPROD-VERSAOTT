@@ -41,6 +41,7 @@ interface Resultado {
   estabelecimentos: number
   sst: { tipo: string; novos: number; jaImportados: number }[]
   sstSemTrabalhador: number
+  empregadorExtraido: { nome: string | null; natJurid: string | null; cidade: string | null; uf: string | null } | null
   totais: { trabalhadores: number; novos: number; atualizados: number; semAlteracao: number; ativos: number; desligados: number; semMatricula: number }
   linhas: Linha[]
   gravado: boolean
@@ -233,6 +234,15 @@ export default function EsocialImportModal({ isOpen, onClose, onImported }: Prop
                 {resultado.eventosExcluidos > 0 && ` · ${resultado.eventosExcluidos} excluído(s) por S-3000`}
                 {resultado.eventosRetificados > 0 && ` · ${resultado.eventosRetificados} retificado(s)`}
               </p>
+
+              {resultado.empregadorExtraido && (resultado.empregadorExtraido.nome || resultado.empregadorExtraido.natJurid) && (
+                <p className="text-sm">
+                  Empregador no eSocial: <strong>{resultado.empregadorExtraido.nome ?? resultado.empresa.razaoSocial}</strong>
+                  {resultado.empregadorExtraido.natJurid && ` · natureza jurídica ${resultado.empregadorExtraido.natJurid}`}
+                  {resultado.empregadorExtraido.cidade && ` · ${resultado.empregadorExtraido.cidade}/${resultado.empregadorExtraido.uf ?? ""}`}
+                  <span className="text-muted-foreground"> (completa os campos vazios do cadastro)</span>
+                </p>
+              )}
 
               {resultado.sst.some((s) => s.novos + s.jaImportados > 0) && (
                 <div className="rounded-lg border border-border bg-white p-3 text-sm">
