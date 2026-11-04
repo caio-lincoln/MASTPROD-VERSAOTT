@@ -1,5 +1,6 @@
 import { ambienteAtual, cleanInscricao, escapeXml, eventNamespace, formatDecimal, generateEventId, onlyDigits } from "../common"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "./types"
+import { EXIGE_LIM_TOL } from "./validator"
 
 const tag = (name: string, value: unknown) => `<${name}>${escapeXml(value)}</${name}>`
 const optTag = (name: string, value: unknown) =>
@@ -58,7 +59,10 @@ export function buildS2240XML(d: S2240Data, verProc = process.env.ESOCIAL_VER_PR
       x += tag("tpAval", a.tpAval)
       if (a.tpAval === "1") {
         x += tag("intConc", formatDecimal(a.intConc as number))
-        if (a.limTol !== null && a.limTol !== undefined) x += tag("limTol", formatDecimal(a.limTol))
+        // Leiaute: limTol é exclusivo de sílica livre e calor; para os demais agentes é rejeitado
+        if (EXIGE_LIM_TOL.includes(a.codAgNoc) && a.limTol !== null && a.limTol !== undefined) {
+          x += tag("limTol", formatDecimal(a.limTol))
+        }
         x += tag("unMed", a.unMed)
         x += tag("tecMedicao", a.tecMedicao?.trim())
       }

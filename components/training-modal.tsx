@@ -31,7 +31,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
     companyId: "",
   })
 
-  const [selectedEmployees, setSelectedEmployees] = useState<number[]>([])
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([])
   const [employeeSearch, setEmployeeSearch] = useState("")
   const [companies, setCompanies] = useState<Array<{ id: string; name: string; cnpj: string }>>([])
   const [employees, setEmployees] = useState<Array<{ id: string; name: string; position: string; department: string; companyId: string }>>([])
@@ -94,7 +94,7 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
     }
   }
 
-  const toggleEmployee = (employeeId: number) => {
+  const toggleEmployee = (employeeId: string) => {
     setSelectedEmployees((prev) =>
       prev.includes(employeeId) ? prev.filter((id) => id !== employeeId) : [...prev, employeeId],
     )
@@ -255,8 +255,8 @@ export function TrainingModal({ open, onClose }: TrainingModalProps) {
                             >
                               <Checkbox
                                 id={`employee-${employee.id}`}
-                                checked={selectedEmployees.includes(Number(employee.id))}
-                                onCheckedChange={() => toggleEmployee(Number(employee.id))}
+                                checked={selectedEmployees.includes(employee.id)}
+                                onCheckedChange={() => toggleEmployee(employee.id)}
                                 className="border-input data-[state=checked]:bg-primary"
                               />
                               <Label

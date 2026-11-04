@@ -15,7 +15,8 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Activity
+  Activity,
+  ClipboardList,
 } from "lucide-react"
 import { useState } from "react"
 import { BrandLogo } from "@/components/brand-logo"
@@ -26,6 +27,7 @@ const menuItems = [
   { href: "/dashboard/companies", label: "Empresas", icon: Building2 },
   { href: "/dashboard/employees", label: "Funcionários", icon: Users },
   { href: "/dashboard/risks", label: "Gestão de Riscos", icon: AlertTriangle },
+  { href: "/dashboard/sst-cadastros", label: "Ambientes e Responsáveis", icon: ClipboardList },
   { href: "/dashboard/ppe", label: "Controle de EPIs", icon: HardHat },
   { href: "/dashboard/trainings", label: "Treinamentos", icon: GraduationCap },
   { href: "/dashboard/library", label: "Biblioteca", icon: BookOpen },

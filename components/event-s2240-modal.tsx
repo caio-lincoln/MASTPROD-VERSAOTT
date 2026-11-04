@@ -12,6 +12,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, Plus, Trash2, Wind } from "lucide-react"
 import { db } from "@/lib/data-client"
 import { createS2240Event } from "@/lib/esocial/transmission/gateway"
+import { EXIGE_DSC_AGENTE, EXIGE_LIM_TOL } from "@/lib/esocial/events/S-2240/validator"
+import { TabelaInput } from "./esocial-form-parts"
 
 interface EventS2240ModalProps {
   isOpen: boolean
@@ -22,14 +24,6 @@ interface EventS2240ModalProps {
 const NOVO = "__novo__"
 const AUSENCIA = "09.01.001"
 
-// Sugestões da Tabela 24; qualquer outro código pode ser digitado
-const AGENTES_SUGERIDOS = [
-  { cod: "09.01.001", dsc: "Ausência de agente nocivo ou de atividades previstas no Anexo IV do Decreto 3.048/1999" },
-  { cod: "02.01.001", dsc: "Ruído" },
-  { cod: "01.01.001", dsc: "Arsênio e seus compostos" },
-  { cod: "01.02.001", dsc: "Asbestos (ou amianto)" },
-  { cod: "01.03.001", dsc: "Benzeno e seus compostos tóxicos" },
-]
 
 const UNIDADES = [
   ["1", "dose diária de ruído"], ["2", "dB (linear)"], ["3", "dB(C)"], ["4", "dB(A)"], ["5", "m/s²"],
@@ -184,9 +178,19 @@ export default function EventS2240Modal({ isOpen, onClose, onCreated }: EventS22
       .then(({ data }) => setEpisEmpresa((data || []).filter((e: any) => e.certificado_aprovacao)))
   }, [empresaId, empresas])
 
+  // Vínculos ativos: com mais de um, a matrícula é escolhida numa lista (o S-2240 é por vínculo)
+  const [vinculos, setVinculos] = useState<{ matricula: string; cargo: string | null; data_admissao: string | null }[]>([])
   useEffect(() => {
     const f = funcionarios.find((x) => x.id === funcionarioId)
     setMatricula(f?.matricula_esocial || "")
+    setVinculos([])
+    if (!funcionarioId) return
+    db.from("funcionario_vinculos")
+      .select("matricula, cargo, data_admissao")
+      .eq("funcionario_id", funcionarioId)
+      .eq("status", "ativo")
+      .order("data_admissao", { ascending: false })
+      .then(({ data }) => setVinculos((data || []).filter((v: any) => v.matricula)))
   }, [funcionarioId, funcionarios])
 
   const somenteAusencia = agentes.length === 1 && agentes[0].codAgNoc === AUSENCIA
@@ -325,15 +329,31 @@ export default function EventS2240Modal({ isOpen, onClose, onCreated }: EventS22
                   placeholder={empresaId ? "Selecione o funcionário" : "Escolha a empresa primeiro"}
                 />
               </Field>
-              <Field label="Matrícula no eSocial *" className="md:col-span-2">
-                <Input
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  placeholder="A mesma matrícula enviada no S-2200 pela folha/contabilidade"
-                  maxLength={30}
-                  className="bg-white border-border"
-                />
-              </Field>
+              {vinculos.length > 1 ? (
+                <Field label={`Vínculo * (${vinculos.length} ativos: o S-2240 é por matrícula)`} className="md:col-span-2">
+                  <Choice
+                    value={matricula}
+                    onChange={setMatricula}
+                    options={vinculos.map(
+                      (v) =>
+                        [
+                          v.matricula,
+                          `Matrícula ${v.matricula}${v.cargo ? ` · ${v.cargo}` : ""}${v.data_admissao ? ` · desde ${v.data_admissao.split("-").reverse().join("/")}` : ""}`,
+                        ] as const
+                    )}
+                  />
+                </Field>
+              ) : (
+                <Field label="Matrícula no eSocial *" className="md:col-span-2">
+                  <Input
+                    value={matricula}
+                    onChange={(e) => setMatricula(e.target.value)}
+                    placeholder="A mesma matrícula enviada no S-2200 pela folha/contabilidade"
+                    maxLength={30}
+                    className="bg-white border-border"
+                  />
+                </Field>
+              )}
             </div>
           </Section>
 
@@ -420,27 +440,22 @@ export default function EventS2240Modal({ isOpen, onClose, onCreated }: EventS22
                     )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Field label="Sugestões">
-                      <Choice
-                        value={AGENTES_SUGERIDOS.some((s) => s.cod === a.codAgNoc) ? a.codAgNoc : ""}
-                        onChange={(v) => {
-                          const s = AGENTES_SUGERIDOS.find((x) => x.cod === v)
-                          updateAgente(i, { codAgNoc: v, dscAgNoc: v === AUSENCIA ? "" : s?.dsc ?? "" })
-                        }}
-                        options={AGENTES_SUGERIDOS.map((s) => [s.cod, `${s.cod} - ${s.dsc}`] as const)}
-                        placeholder="Escolha ou digite o código"
-                      />
-                    </Field>
-                    <Field label="Código *">
-                      <Input
+                    <Field label="Agente nocivo (Tabela 24) *" className="md:col-span-2">
+                      <TabelaInput
+                        tabela="24"
                         value={a.codAgNoc}
-                        onChange={(e) => updateAgente(i, { codAgNoc: e.target.value })}
-                        placeholder="00.00.000"
-                        className="bg-white border-border"
+                        onChange={(codigo, item) =>
+                          updateAgente(i, {
+                            codAgNoc: codigo,
+                            // descrição sugerida a partir da tabela (pode ser ajustada)
+                            dscAgNoc: codigo === AUSENCIA ? "" : item && !a.dscAgNoc ? item.descricao.slice(0, 100) : a.dscAgNoc,
+                          })
+                        }
+                        placeholder="Ex.: ruído, sílica, 09.01.001 (sem agente)..."
                       />
                     </Field>
                     {!ausencia && (
-                      <Field label="Descrição do agente *">
+                      <Field label={EXIGE_DSC_AGENTE.includes(a.codAgNoc) ? "Descrição do agente *" : "Descrição do agente"}>
                         <Input
                           value={a.dscAgNoc}
                           onChange={(e) => updateAgente(i, { dscAgNoc: e.target.value })}
@@ -466,9 +481,12 @@ export default function EventS2240Modal({ isOpen, onClose, onCreated }: EventS22
                             <Field label="Intensidade/concentração *">
                               <Input value={a.intConc} onChange={(e) => updateAgente(i, { intConc: e.target.value })} inputMode="decimal" className="bg-white border-border" />
                             </Field>
-                            <Field label="Limite de tolerância">
-                              <Input value={a.limTol} onChange={(e) => updateAgente(i, { limTol: e.target.value })} inputMode="decimal" className="bg-white border-border" />
-                            </Field>
+                            {/* Leiaute: limite de tolerância só para sílica livre e calor */}
+                            {EXIGE_LIM_TOL.includes(a.codAgNoc) && (
+                              <Field label="Limite de tolerância *">
+                                <Input value={a.limTol} onChange={(e) => updateAgente(i, { limTol: e.target.value })} inputMode="decimal" className="bg-white border-border" />
+                              </Field>
+                            )}
                             <Field label="Unidade de medida *">
                               <Choice value={a.unMed} onChange={(v) => updateAgente(i, { unMed: v })} options={UNIDADES} />
                             </Field>

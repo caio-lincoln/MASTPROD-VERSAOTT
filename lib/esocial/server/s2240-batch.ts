@@ -9,7 +9,9 @@ import { ValidationError, createS2240Event, type S2240Input } from "./s2240"
  */
 
 export interface Pendente {
+  /** Id do vínculo (uma pessoa pode ter mais de um vínculo ativo) */
   id: string
+  funcionarioId: string
   nome: string
   cpf: string
   matricula: string
@@ -26,12 +28,14 @@ export interface Modelo {
   total: number
 }
 
-/** Ativos sem S-2240 para a matrícula atual (o S-2240 é por vínculo). */
+/** Vínculos ativos sem S-2240 para a sua matrícula (o S-2240 é por vínculo). */
 export async function listarPendentes(empresaId: string) {
   const pendentes = await query<any>(
-    `SELECT f.id, f.nome, f.cpf, f.matricula_esocial, f.cargo, f.data_admissao,
+    `SELECT v.id AS vinculo_id, f.id, f.nome, f.cpf, v.matricula AS matricula_esocial,
+            COALESCE(v.cargo, f.cargo) AS cargo, COALESCE(v.data_admissao, f.data_admissao) AS data_admissao,
             ant.exposicao_id, ant.dsc_setor, ant.agentes, ant.dt_ini
-       FROM funcionarios f
+       FROM funcionario_vinculos v
+       JOIN funcionarios f ON f.id = v.funcionario_id AND f.status <> 'cancelado'
        LEFT JOIN LATERAL (
          SELECT x.id AS exposicao_id, a.dsc_setor, x.dt_ini_condicao AS dt_ini,
                 (SELECT string_agg(g.cod_ag_noc, ', ' ORDER BY g.ordem) FROM exposicao_agentes g WHERE g.exposicao_id = x.id) AS agentes
@@ -41,16 +45,16 @@ export async function listarPendentes(empresaId: string) {
           ORDER BY x.dt_ini_condicao DESC, x.created_at DESC
           LIMIT 1
        ) ant ON TRUE
-      WHERE f.empresa_id = $1
-        AND f.status = 'ativo'
-        AND f.matricula_esocial IS NOT NULL
+      WHERE v.empresa_id = $1
+        AND v.status = 'ativo'
+        AND v.matricula IS NOT NULL
         AND NOT EXISTS (
           SELECT 1 FROM esocial_eventos ev
            WHERE ev.funcionario_id = f.id
              AND ev.tipo_evento = 'S-2240'
-             AND position('<matricula>' || f.matricula_esocial || '</matricula>' IN coalesce(ev.xml_envio, '')) > 0
+             AND position('<matricula>' || v.matricula || '</matricula>' IN coalesce(ev.xml_envio, '')) > 0
         )
-      ORDER BY f.nome`,
+      ORDER BY f.nome, v.data_admissao`,
     [empresaId]
   )
 
@@ -86,7 +90,8 @@ export async function listarPendentes(empresaId: string) {
   return {
     dataMinimaSugerida: primeiro?.min ?? null,
     pendentes: pendentes.map<Pendente>((p) => ({
-      id: p.id,
+      id: p.vinculo_id,
+      funcionarioId: p.id,
       nome: p.nome,
       cpf: p.cpf,
       matricula: p.matricula_esocial,
@@ -152,7 +157,8 @@ async function exposicaoComoModelo(exposicaoId: string, empresaId: string) {
 
 export interface LoteParams {
   empresaId: string
-  funcionarioIds: string[]
+  /** Vínculos (ids de funcionario_vinculos) a gerar */
+  vinculoIds: string[]
   /** Usa o S-2240 anterior do próprio trabalhador (readmissão) quando existir */
   copiarAnterior: boolean
   /** Exposição usada como modelo para quem não tem S-2240 anterior */
@@ -167,12 +173,12 @@ export interface LoteParams {
 
 export interface ResultadoLote {
   gerados: number
-  falhas: { funcionarioId: string; nome: string; erros: string[] }[]
+  falhas: { vinculoId: string; nome: string; erros: string[] }[]
 }
 
 export async function gerarLoteS2240(userId: string, p: LoteParams): Promise<ResultadoLote> {
-  if (!p.funcionarioIds.length) throw new HttpError(400, "Selecione ao menos um trabalhador.")
-  if (p.funcionarioIds.length > 500) throw new HttpError(400, "No máximo 500 trabalhadores por lote.")
+  if (!p.vinculoIds?.length) throw new HttpError(400, "Selecione ao menos um trabalhador.")
+  if (p.vinculoIds.length > 500) throw new HttpError(400, "No máximo 500 trabalhadores por lote.")
   if (p.dataInicio.tipo === "fixa" && !/^\d{4}-\d{2}-\d{2}$/.test(p.dataInicio.data)) {
     throw new HttpError(400, "Data de início inválida.")
   }
@@ -186,10 +192,10 @@ export async function gerarLoteS2240(userId: string, p: LoteParams): Promise<Res
   }
 
   const resultado: ResultadoLote = { gerados: 0, falhas: [] }
-  for (const funcionarioId of p.funcionarioIds) {
-    const t = porId.get(funcionarioId)
+  for (const vinculoId of p.vinculoIds) {
+    const t = porId.get(vinculoId)
     if (!t) {
-      resultado.falhas.push({ funcionarioId, nome: "", erros: ["Trabalhador não está pendente (já tem S-2240 para a matrícula atual ou está inativo)."] })
+      resultado.falhas.push({ vinculoId, nome: "", erros: ["Trabalhador não está pendente (já tem S-2240 para a matrícula atual ou está inativo)."] })
       continue
     }
     try {
@@ -206,7 +212,8 @@ export async function gerarLoteS2240(userId: string, p: LoteParams): Promise<Res
 
       await createS2240Event(userId, {
         empresaId: p.empresaId,
-        funcionarioId,
+        funcionarioId: t.funcionarioId,
+        matricula: t.matricula,
         ambienteId: base.ambienteId,
         dtIniCondicao: dtIni,
         dscAtivDes: base.dscAtivDes,
@@ -217,7 +224,7 @@ export async function gerarLoteS2240(userId: string, p: LoteParams): Promise<Res
       resultado.gerados++
     } catch (err) {
       const erros = err instanceof ValidationError ? err.errors : [err instanceof Error ? err.message : "Erro ao gerar"]
-      resultado.falhas.push({ funcionarioId, nome: t.nome, erros })
+      resultado.falhas.push({ vinculoId, nome: t.nome, erros })
     }
   }
   return resultado

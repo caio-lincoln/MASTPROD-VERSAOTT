@@ -4,6 +4,7 @@ import { HttpError } from "@/lib/server/access"
 import { consolidate, parseEsocialFiles, type InputFile, type TrabalhadorImportado } from "../import/parser"
 import { vinculoDe } from "../import/sst-mappers"
 import { importarHistoricoSst } from "./sst-history"
+import { sincronizarVinculos } from "./vinculos"
 import forge from "node-forge"
 
 /**
@@ -269,6 +270,7 @@ export async function importarEsocial(params: {
       )
     }
 
+    await sincronizarVinculos(client, empresa.id, dados.trabalhadores)
     await importarHistoricoSst(client, empresa.id, sstNovos, params.userId)
 
     for (const est of dados.estabelecimentos) {

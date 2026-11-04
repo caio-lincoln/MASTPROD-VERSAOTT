@@ -14,7 +14,7 @@ interface PPEModalProps {
   onOpenChange: (open: boolean) => void
   onSave: (data: any) => void
   editingPPE: any
-  companies: { id: number; name: string; cnpj: string }[]
+  companies: { id: string; name: string; cnpj?: string }[]
 }
 
 const ppeTypes = [
@@ -111,7 +111,7 @@ export function PPEModal({ open, onOpenChange, onSave, editingPPE, companies }: 
       ...formData,
       quantity,
       minQuantity,
-      companyId: Number.parseInt(formData.companyId),
+      companyId: formData.companyId, // UUID da empresa
       status,
     })
   }

@@ -24,7 +24,7 @@ export default function DashboardPage() {
       setLoading(true)
       setError(null)
       const { data: view } = await db.from("dashboard_metricas_por_empresa").select("*")
-      const agg = (view || []).reduce(
+      const agg = ((view || []) as any[]).reduce(
         (acc, v: any) => {
           acc.funcionarios += v.total_funcionarios || 0
           acc.treinamentos_ativos += v.total_treinamentos_ativos || 0

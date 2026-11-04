@@ -351,34 +351,31 @@ export default function EmployeesPage() {
       />
 
       <EmployeeModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false)
-          setEditingEmployee(null)
+        open={modalOpen || !!editingEmployee}
+        onOpenChange={(open) => {
+          if (!open) {
+            setModalOpen(false)
+            setEditingEmployee(null)
+          }
         }}
-        onSuccess={() => {
-          setModalOpen(false)
-          setEditingEmployee(null)
-          window.location.reload()
-        }}
-        employee={editingEmployee}
+        onSubmit={editingEmployee ? handleEditEmployee : handleCreateEmployee}
+        initialData={editingEmployee}
+        mode={editingEmployee ? "edit" : "create"}
         companies={companies}
       />
 
       <EmployeeDetailsModal
-        isOpen={!!viewingEmployee}
-        onClose={() => setViewingEmployee(null)}
+        open={!!viewingEmployee}
+        onOpenChange={(open) => !open && setViewingEmployee(null)}
         employee={viewingEmployee}
+        companyName={viewingEmployee ? getCompanyName(viewingEmployee.companyId) : ""}
       />
 
       <EmployeeCancelModal
-        isOpen={!!cancelingEmployee}
-        onClose={() => setCancelingEmployee(null)}
-        onSuccess={() => {
-          setCancelingEmployee(null)
-          window.location.reload()
-        }}
-        employee={cancelingEmployee}
+        open={!!cancelingEmployee}
+        onOpenChange={(open) => !open && setCancelingEmployee(null)}
+        onConfirm={handleCancelEmployee}
+        employeeName={cancelingEmployee?.name ?? ""}
       />
     </div>
   )

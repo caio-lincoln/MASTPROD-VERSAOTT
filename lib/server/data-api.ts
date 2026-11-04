@@ -56,6 +56,7 @@ const TABLES: Record<string, TableConfig> = {
   dashboard_metricas_por_empresa: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
   estabelecimentos: { scope: { kind: "column", column: "empresa_id" } },
   asos: { scope: { kind: "column", column: "empresa_id" }, noInsert: true },
+  funcionario_vinculos: { scope: { kind: "column", column: "empresa_id" }, noInsert: true },
   cats: { scope: { kind: "column", column: "empresa_id" }, noInsert: true },
   esocial_importacoes: { scope: { kind: "column", column: "empresa_id" }, readOnly: true },
 }

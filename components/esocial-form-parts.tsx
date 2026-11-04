@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useId, useMemo, useState } from "react"
+import { TABELAS, itemDaTabela, type ItemTabela, type NumeroTabela } from "@/lib/esocial/tabelas"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -58,6 +59,58 @@ export const Section = ({ title, children }: { title: string; children: React.Re
 
 export function TextInput(props: React.ComponentProps<typeof Input>) {
   return <Input {...props} className={`bg-white border-border ${props.className ?? ""}`} />
+}
+
+/**
+ * Código de uma tabela oficial do eSocial com busca por código ou descrição.
+ * Aceita mais de uma tabela (ex.: agente causador: Tabela 14 ou 15).
+ */
+export function TabelaInput({
+  tabela,
+  value,
+  onChange,
+  placeholder = "Digite o código ou parte da descrição",
+}: {
+  tabela: NumeroTabela | NumeroTabela[]
+  value: string
+  onChange: (codigo: string, item: ItemTabela | null) => void
+  placeholder?: string
+}) {
+  const id = useId()
+  const tabelas = Array.isArray(tabela) ? tabela : [tabela]
+  const buscar = (codigo: string) => tabelas.map((t) => itemDaTabela(t, codigo)).find(Boolean) ?? null
+  const rotulo = (i: ItemTabela) => `${i.codigo} - ${i.descricao}`
+  const atual = buscar(value)
+  const [texto, setTexto] = useState(atual ? rotulo(atual) : value)
+
+  useEffect(() => {
+    const item = buscar(value)
+    if (item) setTexto(rotulo(item))
+    else if (!value) setTexto("")
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, tabelas.join(",")])
+
+  return (
+    <div className="space-y-1 min-w-0">
+      <TextInput
+        list={id}
+        value={texto}
+        placeholder={placeholder}
+        onChange={(e) => {
+          const t = e.target.value
+          setTexto(t)
+          const codigo = t.split(" - ")[0].trim()
+          onChange(codigo, buscar(codigo))
+        }}
+      />
+      <datalist id={id}>
+        {tabelas.flatMap((t) =>
+          TABELAS[t].itens.map((i) => <option key={`${t}-${i.codigo}`} value={rotulo(i)} />)
+        )}
+      </datalist>
+      {value && !atual && <p className="text-xs text-amber-700">Código não encontrado na {tabelas.map((t) => `Tabela ${t}`).join(" / ")}.</p>}
+    </div>
+  )
 }
 
 export function ErrorList({ errors, title = "Corrija antes de gerar o evento" }: { errors: string[]; title?: string }) {
@@ -118,8 +171,18 @@ export function useTrabalhador(isOpen: boolean) {
       .then(({ data }) => setFuncionarios((data || []).filter((f: FuncionarioOpt) => f.status !== "cancelado")))
   }, [empresaId])
 
+  // Vínculos ativos do trabalhador: com mais de um, a matrícula é escolhida numa lista
+  const [vinculos, setVinculos] = useState<{ matricula: string; cargo: string | null; data_admissao: string | null }[]>([])
   useEffect(() => {
     setMatricula(funcionarios.find((f) => f.id === funcionarioId)?.matricula_esocial || "")
+    setVinculos([])
+    if (!funcionarioId) return
+    db.from("funcionario_vinculos")
+      .select("matricula, cargo, data_admissao")
+      .eq("funcionario_id", funcionarioId)
+      .eq("status", "ativo")
+      .order("data_admissao", { ascending: false })
+      .then(({ data }) => setVinculos((data || []).filter((v: { matricula: string | null }) => v.matricula)))
   }, [funcionarioId, funcionarios])
 
   const empresa = empresas.find((e) => e.id === empresaId) ?? null
@@ -143,6 +206,7 @@ export function useTrabalhador(isOpen: boolean) {
     setFuncionarioId,
     matricula,
     setMatricula,
+    vinculos,
     empresaOptions,
     funcionarioOptions,
     reset,
@@ -164,14 +228,30 @@ export function TrabalhadorSection({ t }: { t: ReturnType<typeof useTrabalhador>
             placeholder={t.empresaId ? "Selecione o funcionário" : "Escolha a empresa primeiro"}
           />
         </Field>
-        <Field label="Matrícula no eSocial *" className="md:col-span-2">
-          <TextInput
-            value={t.matricula}
-            onChange={(e) => t.setMatricula(e.target.value)}
-            placeholder="A mesma matrícula enviada no S-2200 pela folha/contabilidade"
-            maxLength={30}
-          />
-        </Field>
+        {t.vinculos.length > 1 ? (
+          <Field label={`Vínculo * (${t.vinculos.length} ativos: o evento é por matrícula)`} className="md:col-span-2">
+            <Choice
+              value={t.matricula}
+              onChange={t.setMatricula}
+              options={t.vinculos.map(
+                (v) =>
+                  [
+                    v.matricula,
+                    `Matrícula ${v.matricula}${v.cargo ? ` · ${v.cargo}` : ""}${v.data_admissao ? ` · desde ${v.data_admissao.split("-").reverse().join("/")}` : ""}`,
+                  ] as const
+              )}
+            />
+          </Field>
+        ) : (
+          <Field label="Matrícula no eSocial *" className="md:col-span-2">
+            <TextInput
+              value={t.matricula}
+              onChange={(e) => t.setMatricula(e.target.value)}
+              placeholder="A mesma matrícula enviada no S-2200 pela folha/contabilidade"
+              maxLength={30}
+            />
+          </Field>
+        )}
       </div>
     </Section>
   )

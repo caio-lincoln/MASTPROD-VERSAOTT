@@ -1,8 +1,15 @@
 import { CNPJ_PATTERN, cleanInscricao, isValidCpf } from "../common"
+import { existeNaTabela } from "../../tabelas"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "./types"
 
-// Agentes que exigem limite de tolerância na avaliação quantitativa
-const EXIGE_LIM_TOL = ["01.18.001", "02.01.014"]
+// Regras conferidas no leiaute oficial S-1.3 (NT 07/2026 rev.)
+// limTol: obrigatório e EXCLUSIVO para sílica livre e calor, em avaliação quantitativa
+export const EXIGE_LIM_TOL = ["01.18.001", "02.01.014"]
+// dscAgNoc: obrigatório só para estes códigos (para os demais é opcional)
+export const EXIGE_DSC_AGENTE = [
+  "01.01.001", "01.02.001", "01.03.001", "01.04.001", "01.05.001", "01.06.001", "01.07.001", "01.08.001", "01.09.001",
+  "01.10.001", "01.12.001", "01.13.001", "01.14.001", "01.15.001", "01.16.001", "01.17.001", "01.18.001", "05.01.001",
+]
 // Agente incluído por decisão judicial/administrativa: exige número do processo
 const EXIGE_PROCESSO = "05.01.001"
 
@@ -23,6 +30,11 @@ export function validateS2240(d: S2240Data): string[] {
 
   // Período
   if (!DATE.test(d.dtIniCondicao || "")) e.push("Data de início da condição inválida.")
+  else {
+    // Leiaute: não pode ser posterior a 30 dias da data atual
+    const limite = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    if (d.dtIniCondicao > limite) e.push("Data de início da condição não pode passar de 30 dias à frente da data atual.")
+  }
   if (d.dtFimCondicao) {
     if (!DATE.test(d.dtFimCondicao)) e.push("Data de fim da condição inválida.")
     else if (d.dtFimCondicao < d.dtIniCondicao) e.push("Data de fim anterior à data de início.")
@@ -57,11 +69,15 @@ export function validateS2240(d: S2240Data): string[] {
       e.push(`${n}: código da Tabela 24 inválido (formato 00.00.000).`)
       return
     }
+    if (!existeNaTabela("24", a.codAgNoc)) {
+      e.push(`${n}: código não existe na Tabela 24 do eSocial.`)
+      return
+    }
     if (codigos.has(a.codAgNoc)) e.push(`${n}: agente repetido no mesmo evento.`)
     codigos.add(a.codAgNoc)
     if (a.codAgNoc === COD_AUSENCIA_AGENTE) return
 
-    if (!a.dscAgNoc?.trim()) e.push(`${n}: descreva o agente nocivo.`)
+    if (EXIGE_DSC_AGENTE.includes(a.codAgNoc) && !a.dscAgNoc?.trim()) e.push(`${n}: descreva o agente nocivo.`)
     if (a.dscAgNoc && a.dscAgNoc.length > 100) e.push(`${n}: descrição com mais de 100 caracteres.`)
     if (a.tpAval !== "1" && a.tpAval !== "2") e.push(`${n}: informe o tipo de avaliação (quantitativa ou qualitativa).`)
     if (a.tpAval === "1") {

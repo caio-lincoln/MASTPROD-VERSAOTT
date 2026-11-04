@@ -8,7 +8,7 @@ import { Activity, Plus, Trash2 } from "lucide-react"
 import { db } from "@/lib/data-client"
 import { createSstEvent } from "@/lib/esocial/transmission/gateway"
 import { TIPOS_EXAME } from "@/lib/esocial/events/S-2220"
-import { Choice, ErrorList, Field, Section, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
+import { Choice, ErrorList, Field, Section, TabelaInput, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
 
 interface Props {
   isOpen: boolean
@@ -156,15 +156,15 @@ export default function EventS2220Modal({ isOpen, onClose, onCreated }: Props) {
                 <Field label="Data *" className="md:col-span-3">
                   <TextInput type="date" value={x.dtExm} onChange={(e) => updateExame(i, { dtExm: e.target.value })} />
                 </Field>
-                <Field label="Código (4 dígitos) *" className="md:col-span-2">
-                  <TextInput
+                <Field label="Procedimento (Tabela 27) *" className="md:col-span-5">
+                  <TabelaInput
+                    tabela="27"
                     value={x.procRealizado}
-                    onChange={(e) => updateExame(i, { procRealizado: e.target.value.replace(/\D/g, "").slice(0, 4) })}
-                    placeholder="0000"
-                    inputMode="numeric"
+                    onChange={(codigo) => updateExame(i, { procRealizado: codigo })}
+                    placeholder="Ex.: audiometria, hemograma, 0281..."
                   />
                 </Field>
-                <Field label="Observação" className="md:col-span-6">
+                <Field label="Observação" className="md:col-span-3">
                   <TextInput value={x.obsProc} onChange={(e) => updateExame(i, { obsProc: e.target.value })} maxLength={999} />
                 </Field>
                 <div className="md:col-span-1 flex justify-end">

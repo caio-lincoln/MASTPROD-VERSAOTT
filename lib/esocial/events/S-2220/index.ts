@@ -1,5 +1,6 @@
 import { ambienteAtual, eventNamespace, generateEventId, isValidCpf, onlyDigits } from "../common"
 import { DATE, UFS, buildBaseXml, optTag, tag, validateBase, type EventoSstBase } from "../sst-common"
+import { existeNaTabela } from "../../tabelas"
 
 /**
  * S-2220 - Monitoramento da Saúde do Trabalhador (evtMonit), leiaute S-1.3.
@@ -34,7 +35,7 @@ export const TIPOS_EXAME = [
   ["9", "Demissional"],
 ] as const
 
-// Audiometria tonal: o leiaute pede a ordem do exame e o resultado (referencial x sequencial)
+// Audiometria tonal ocupacional (Tabela 27): o leiaute exige a ordem do exame (referencial x sequencial)
 const AUDIOMETRIA = "0281"
 
 export function validateS2220(d: S2220Data): string[] {
@@ -51,18 +52,18 @@ export function validateS2220(d: S2220Data): string[] {
     const n = `Exame ${i + 1}`
     if (!DATE.test(x.dtExm || "")) e.push(`${n}: data inválida.`)
     else if (a.dtAso && x.dtExm > a.dtAso) e.push(`${n}: data posterior à data do ASO.`)
-    if (!/^\d{4}$/.test(x.procRealizado || "")) e.push(`${n}: código do procedimento (Tabela 27) deve ter 4 dígitos.`)
+    if (!existeNaTabela("27", x.procRealizado)) e.push(`${n}: procedimento não existe na Tabela 27 do eSocial.`)
     if (x.obsProc && x.obsProc.length > 999) e.push(`${n}: observação com mais de 999 caracteres.`)
-    if (x.procRealizado === AUDIOMETRIA) {
-      if (!x.ordExame) e.push(`${n}: audiometria exige a ordem do exame (referencial ou sequencial).`)
-      if (!x.indResult) e.push(`${n}: audiometria exige o resultado (normal, alterado, estável ou agravamento).`)
+    if (x.procRealizado === AUDIOMETRIA && !x.ordExame) {
+      e.push(`${n}: audiometria exige a ordem do exame (referencial ou sequencial).`)
     }
   })
 
   const m = a.medico
   if (!m?.nmMed?.trim() || m.nmMed.trim().length < 2) e.push("Informe o nome do médico emitente do ASO.")
   if (m?.nrCRM && m.nrCRM.length > 10) e.push("CRM do médico emitente com mais de 10 caracteres.")
-  if (!!m?.nrCRM !== !!m?.ufCRM) e.push("Informe o CRM e a UF do CRM do médico emitente juntos.")
+  // Leiaute: CRM e UF do emitente só são dispensados quando o trabalhador mora no exterior
+  if (!m?.nrCRM?.trim() || !m?.ufCRM) e.push("Informe o CRM e a UF do CRM do médico emitente do ASO.")
   if (m?.ufCRM && !UFS.includes(m.ufCRM)) e.push("UF do CRM do médico emitente inválida.")
 
   const r = a.respMonit

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { AlertCircle } from "lucide-react"
 import { createSstEvent } from "@/lib/esocial/transmission/gateway"
 import { TIPOS_ACIDENTE, TIPOS_CAT, TIPOS_LOCAL } from "@/lib/esocial/events/S-2210"
-import { Choice, ErrorList, Field, SIM_NAO, Section, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
+import { Choice, ErrorList, Field, SIM_NAO, Section, TabelaInput, TextInput, TrabalhadorSection, UFS, useTrabalhador } from "./esocial-form-parts"
 
 interface Props {
   isOpen: boolean
@@ -116,8 +116,8 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
     const dados = {
       dtAcid: cat.dtAcid,
       tpAcid: cat.tpAcid,
-      hrAcid: vazio(cat.hrAcid),
-      hrsTrabAntesAcid: vazio(cat.hrsTrabAntesAcid),
+      hrAcid: cat.tpAcid === "2" ? null : vazio(cat.hrAcid),
+      hrsTrabAntesAcid: cat.tpAcid === "2" ? null : vazio(cat.hrsTrabAntesAcid),
       tpCat: cat.tpCat,
       indCatObito: cat.tpCat === "3" ? "S" : cat.indCatObito,
       dtObito: obito ? vazio(cat.dtObito) : null,
@@ -203,28 +203,39 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
               <Field label="Tipo de acidente *">
                 <Choice value={cat.tpAcid} onChange={(v) => setCat({ ...cat, tpAcid: v })} options={TIPOS_ACIDENTE} />
               </Field>
-              <Field label={cat.tpAcid === "2" ? "Hora (HHMM)" : "Hora (HHMM) *"}>
-                <TextInput value={cat.hrAcid} onChange={(e) => setCat({ ...cat, hrAcid: hhmm(e.target.value) })} placeholder="0830" inputMode="numeric" />
-              </Field>
-              <Field label={cat.tpAcid === "1" ? "Horas trabalhadas antes *" : "Horas trabalhadas antes"}>
-                <TextInput
-                  value={cat.hrsTrabAntesAcid}
-                  onChange={(e) => setCat({ ...cat, hrsTrabAntesAcid: hhmm(e.target.value) })}
-                  placeholder="0230"
-                  inputMode="numeric"
-                />
-              </Field>
+              {/* Leiaute: hora e horas trabalhadas não são informadas em doença do trabalho */}
+              {cat.tpAcid !== "2" && (
+                <>
+                  <Field label="Hora (HHMM) *">
+                    <TextInput value={cat.hrAcid} onChange={(e) => setCat({ ...cat, hrAcid: hhmm(e.target.value) })} placeholder="0830" inputMode="numeric" />
+                  </Field>
+                  <Field label="Horas trabalhadas antes *">
+                    <TextInput
+                      value={cat.hrsTrabAntesAcid}
+                      onChange={(e) => setCat({ ...cat, hrsTrabAntesAcid: hhmm(e.target.value) })}
+                      placeholder="0230"
+                      inputMode="numeric"
+                    />
+                  </Field>
+                </>
+              )}
               <Field label="Tipo de CAT *">
-                <Choice value={cat.tpCat} onChange={(v) => setCat({ ...cat, tpCat: v })} options={TIPOS_CAT} />
+                <Choice
+                  value={cat.tpCat}
+                  onChange={(v) => setCat({ ...cat, tpCat: v, indCatObito: v === "3" ? "S" : v === "2" ? "N" : cat.indCatObito })}
+                  options={TIPOS_CAT}
+                />
               </Field>
               {reaberturaOuObito && (
                 <Field label="Recibo da CAT de origem *" className="md:col-span-2">
                   <TextInput value={cat.nrRecCatOrig} onChange={(e) => setCat({ ...cat, nrRecCatOrig: e.target.value.trim() })} placeholder="1.2.0000000000000000000" />
                 </Field>
               )}
-              <Field label="Houve óbito? *">
-                <Choice value={cat.tpCat === "3" ? "S" : cat.indCatObito} onChange={(v) => setCat({ ...cat, indCatObito: v })} options={SIM_NAO} />
-              </Field>
+              {cat.tpCat === "1" && (
+                <Field label="Houve óbito? *">
+                  <Choice value={cat.indCatObito} onChange={(v) => setCat({ ...cat, indCatObito: v })} options={SIM_NAO} />
+                </Field>
+              )}
               {obito && (
                 <Field label="Data do óbito *">
                   <TextInput type="date" value={cat.dtObito} onChange={(e) => setCat({ ...cat, dtObito: e.target.value })} />
@@ -233,13 +244,8 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
               <Field label="Comunicado à polícia? *">
                 <Choice value={cat.indComunPolicia} onChange={(v) => setCat({ ...cat, indComunPolicia: v })} options={SIM_NAO} />
               </Field>
-              <Field label="Situação geradora (Tab. 15/16) *">
-                <TextInput
-                  value={cat.codSitGeradora}
-                  onChange={(e) => setCat({ ...cat, codSitGeradora: digitos(e.target.value, 9) })}
-                  placeholder="9 dígitos"
-                  inputMode="numeric"
-                />
+              <Field label="Situação geradora (Tabela 15) *" className="md:col-span-2">
+                <TabelaInput tabela="15" value={cat.codSitGeradora} onChange={(codigo) => setCat({ ...cat, codSitGeradora: codigo })} />
               </Field>
               <Field label="Iniciativa da CAT *">
                 <Choice
@@ -248,10 +254,10 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
                   options={[["1", "Empregador"], ["2", "Ordem judicial"], ["3", "Órgão fiscalizador"]]}
                 />
               </Field>
-              <Field label="Último dia trabalhado">
+              <Field label="Último dia trabalhado *">
                 <TextInput type="date" value={cat.ultDiaTrab} onChange={(e) => setCat({ ...cat, ultDiaTrab: e.target.value })} />
               </Field>
-              <Field label="Houve afastamento?">
+              <Field label="Houve afastamento? *">
                 <Choice value={cat.houveAfast} onChange={(v) => setCat({ ...cat, houveAfast: v })} options={SIM_NAO} />
               </Field>
             </div>
@@ -320,8 +326,8 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
 
           <Section title="Lesão">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Field label="Parte atingida (Tab. 13) *">
-                <TextInput value={parte.codParteAting} onChange={(e) => setParte({ ...parte, codParteAting: digitos(e.target.value, 9) })} placeholder="9 dígitos" inputMode="numeric" />
+              <Field label="Parte atingida (Tabela 13) *" className="md:col-span-2">
+                <TabelaInput tabela="13" value={parte.codParteAting} onChange={(codigo) => setParte({ ...parte, codParteAting: codigo })} />
               </Field>
               <Field label="Lateralidade *">
                 <Choice
@@ -330,8 +336,12 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
                   options={[["0", "Não aplicável"], ["1", "Esquerda"], ["2", "Direita"], ["3", "Ambas"]]}
                 />
               </Field>
-              <Field label="Agente causador (Tab. 14/15) *">
-                <TextInput value={codAgntCausador} onChange={(e) => setCodAgntCausador(digitos(e.target.value, 9))} placeholder="9 dígitos" inputMode="numeric" />
+              <Field label={`Agente causador (${cat.tpAcid === "2" ? "Tabela 14 ou 15" : "Tabela 14"}) *`} className="md:col-span-3">
+                <TabelaInput
+                  tabela={cat.tpAcid === "2" || (cat.dtAcid && cat.dtAcid < "2024-01-22") ? ["14", "15"] : "14"}
+                  value={codAgntCausador}
+                  onChange={(codigo) => setCodAgntCausador(codigo)}
+                />
               </Field>
             </div>
           </Section>
@@ -353,8 +363,8 @@ export default function EventS2210Modal({ isOpen, onClose, onCreated }: Props) {
               <Field label="Afastamento? *">
                 <Choice value={atestado.indAfast} onChange={(v) => setAtestado({ ...atestado, indAfast: v })} options={SIM_NAO} />
               </Field>
-              <Field label="Natureza da lesão (Tab. 17) *">
-                <TextInput value={atestado.dscLesao} onChange={(e) => setAtestado({ ...atestado, dscLesao: digitos(e.target.value, 9) })} placeholder="9 dígitos" inputMode="numeric" />
+              <Field label="Natureza da lesão (Tabela 17) *" className="md:col-span-2">
+                <TabelaInput tabela="17" value={atestado.dscLesao} onChange={(codigo) => setAtestado({ ...atestado, dscLesao: codigo })} />
               </Field>
               <Field label="CID *">
                 <TextInput value={atestado.codCID} onChange={(e) => setAtestado({ ...atestado, codCID: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 4) })} placeholder="S610" />

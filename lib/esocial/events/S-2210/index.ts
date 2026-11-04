@@ -1,5 +1,6 @@
 import { CNPJ_PATTERN, ambienteAtual, cleanInscricao, eventNamespace, generateEventId, onlyDigits } from "../common"
 import { DATE, HORA, RECIBO, UFS, buildBaseXml, optTag, tag, validateBase, type EventoSstBase } from "../sst-common"
+import { existeNaTabela } from "../../tabelas"
 
 /**
  * S-2210 - Comunicação de Acidente de Trabalho (evtCAT), leiaute S-1.3.
@@ -80,45 +81,66 @@ export const TIPOS_LOCAL = [
 ] as const
 
 const COD9 = /^\d{9}$/
-const NO_BRASIL = ["1", "3", "4", "5", "6", "9"]
+// Leiaute: codMunic e uf obrigatórios para estes tipos de local; vedados no exterior (2)
+const EXIGE_MUNICIPIO = ["1", "3", "4", "5"]
 
+/** Regras do leiaute S-1.3 do S-2210 (conferidas no leiaute oficial, NT 07/2026 rev.). */
 export function validateS2210(d: S2210Data): string[] {
   const e: string[] = []
   validateBase(d, e)
   const c = d.cat
+  const hoje = new Date().toISOString().slice(0, 10)
 
   if (!DATE.test(c.dtAcid || "")) e.push("Data do acidente inválida.")
+  else if (c.dtAcid > hoje) e.push("Data do acidente no futuro.")
   if (!["1", "2", "3"].includes(c.tpAcid)) e.push("Informe o tipo de acidente.")
-  if (c.tpAcid !== "2") {
-    if (!HORA.test(c.hrAcid || "")) e.push("Informe a hora do acidente (HHMM).")
-  } else if (c.hrAcid && !HORA.test(c.hrAcid)) e.push("Hora do acidente inválida (HHMM).")
-  if (c.tpAcid === "1" && !/^\d{2}[0-5]\d$/.test(c.hrsTrabAntesAcid || "")) {
-    e.push("Informe as horas trabalhadas antes do acidente (HHMM).")
+
+  // hrAcid: obrigatória se típico, ou trajeto a partir de 26/01/2022; vedada em doença
+  // hrsTrabAntesAcid: obrigatória se típico, ou trajeto a partir de 20/07/2022; vedada em doença
+  if (c.tpAcid === "2") {
+    if (c.hrAcid || c.hrsTrabAntesAcid) e.push("Em doença do trabalho não informe hora do acidente nem horas trabalhadas.")
+  } else {
+    const exigeHora = c.tpAcid === "1" || (c.tpAcid === "3" && c.dtAcid >= "2022-01-26")
+    const exigeHoras = c.tpAcid === "1" || (c.tpAcid === "3" && c.dtAcid >= "2022-07-20")
+    if (exigeHora && !HORA.test(c.hrAcid || "")) e.push("Informe a hora do acidente (HHMM, 0000 a 2359).")
+    else if (c.hrAcid && !HORA.test(c.hrAcid)) e.push("Hora do acidente inválida (HHMM, 0000 a 2359).")
+    if (exigeHoras && !/^\d{2}[0-5]\d$/.test(c.hrsTrabAntesAcid || "")) e.push("Informe as horas trabalhadas antes do acidente (HHMM).")
   }
+
   if (!["1", "2", "3"].includes(c.tpCat)) e.push("Informe o tipo da CAT.")
   if ((c.tpCat === "2" || c.tpCat === "3") && !RECIBO.test(c.nrRecCatOrig || "")) {
     e.push("Reabertura ou comunicação de óbito exige o recibo da CAT de origem.")
   }
-  if (c.indCatObito === "S" || c.tpCat === "3") {
+  // indCatObito: CAT de óbito = S; CAT de reabertura = N
+  if (c.tpCat === "3" && c.indCatObito !== "S") e.push("CAT de comunicação de óbito exige 'Houve óbito' = Sim.")
+  if (c.tpCat === "2" && c.indCatObito !== "N") e.push("CAT de reabertura exige 'Houve óbito' = Não.")
+  if (c.indCatObito === "S") {
     if (!DATE.test(c.dtObito || "")) e.push("Informe a data do óbito.")
-    else if (c.dtAcid && c.dtObito! < c.dtAcid) e.push("Data do óbito anterior à data do acidente.")
+    else if ((c.dtAcid && c.dtObito! < c.dtAcid) || c.dtObito! > hoje) e.push("Data do óbito deve estar entre a data do acidente e hoje.")
   }
-  if (!COD9.test(c.codSitGeradora || "")) e.push("Situação geradora (Tabela 15/16) deve ter 9 dígitos.")
+
+  if (!existeNaTabela("15", c.codSitGeradora)) e.push("Situação geradora: código não existe na Tabela 15.")
   if (!["1", "2", "3"].includes(c.iniciatCAT)) e.push("Informe a iniciativa da CAT.")
   if (c.obsCAT && c.obsCAT.length > 999) e.push("Observação da CAT com mais de 999 caracteres.")
-  if (c.ultDiaTrab && !DATE.test(c.ultDiaTrab)) e.push("Último dia trabalhado inválido.")
+  // ultDiaTrab e houveAfast: obrigatórios para acidentes a partir de 16/01/2023
+  if (c.dtAcid >= "2023-01-16") {
+    if (!DATE.test(c.ultDiaTrab || "")) e.push("Informe o último dia trabalhado.")
+    if (c.houveAfast !== "S" && c.houveAfast !== "N") e.push("Informe se houve afastamento.")
+  }
+  if (c.ultDiaTrab && (!DATE.test(c.ultDiaTrab) || c.ultDiaTrab > hoje)) e.push("Último dia trabalhado inválido.")
 
   const l = c.local
   if (!l?.dscLograd?.trim()) e.push("Informe o logradouro do local do acidente.")
   if (!l?.nrLograd?.trim()) e.push('Informe o número do local do acidente (use "S/N" se não houver).')
   if (l?.tpLocal === "2") {
-    if (!/^\d{3}$/.test(l.pais || "")) e.push("Acidente no exterior: informe o país (código de 3 dígitos).")
-  } else if (l && NO_BRASIL.includes(l.tpLocal)) {
+    if (!/^\d{3}$/.test(l.pais || "")) e.push("Acidente no exterior: informe o país (código de 3 dígitos da Tabela 06).")
+  } else if (l && EXIGE_MUNICIPIO.includes(l.tpLocal)) {
     if (!l.uf || !UFS.includes(l.uf)) e.push("Informe a UF do local do acidente.")
     if (!/^\d{7}$/.test(l.codMunic || "")) e.push("Informe o município do local do acidente (código IBGE com 7 dígitos).")
-    if (l.cep && !/^\d{8}$/.test(onlyDigits(l.cep))) e.push("CEP do local do acidente inválido.")
   }
-  if (l && (l.tpLocal === "1" || l.tpLocal === "3")) {
+  if (l?.cep && !/^\d{8}$/.test(onlyDigits(l.cep))) e.push("CEP do local do acidente inválido.")
+  // ideLocalAcid: obrigatório para empregador CNPJ em estabelecimento próprio ou de terceiros
+  if (l && (l.tpLocal === "1" || l.tpLocal === "3") && d.empregador.tpInsc === "1") {
     const ide = l.ideLocalAcid
     const nr = cleanInscricao(ide?.nrInsc)
     if (!ide || !(ide.tpInsc === "4" ? /^\d{12}$/.test(nr) : CNPJ_PATTERN.test(nr))) {
@@ -126,16 +148,21 @@ export function validateS2210(d: S2210Data): string[] {
     }
   }
 
-  if (!COD9.test(c.parteAtingida?.codParteAting || "")) e.push("Parte do corpo atingida (Tabela 13) deve ter 9 dígitos.")
+  if (!existeNaTabela("13", c.parteAtingida?.codParteAting)) e.push("Parte do corpo atingida: código não existe na Tabela 13.")
   if (!["0", "1", "2", "3"].includes(c.parteAtingida?.lateralidade)) e.push("Informe a lateralidade da parte atingida.")
-  if (!COD9.test(c.codAgntCausador || "")) e.push("Agente causador (Tabela 14/15) deve ter 9 dígitos.")
+  // Agente causador: Tabela 14 para acidente típico/trajeto a partir de 22/01/2024; antes disso ou em doença, 14 ou 15
+  const soTabela14 = c.dtAcid >= "2024-01-22" && (c.tpAcid === "1" || c.tpAcid === "3")
+  const agenteOk = soTabela14
+    ? existeNaTabela("14", c.codAgntCausador)
+    : existeNaTabela("14", c.codAgntCausador) || existeNaTabela("15", c.codAgntCausador)
+  if (!agenteOk) e.push(`Agente causador: código não existe na ${soTabela14 ? "Tabela 14" : "Tabela 14 ou 15"}.`)
 
   const a = c.atestado
   if (!DATE.test(a?.dtAtendimento || "")) e.push("Data do atendimento médico inválida.")
   else if (c.dtAcid && a.dtAtendimento < c.dtAcid) e.push("Atendimento médico anterior à data do acidente.")
-  if (!HORA.test(a?.hrAtendimento || "")) e.push("Hora do atendimento médico inválida (HHMM).")
+  if (!HORA.test(a?.hrAtendimento || "")) e.push("Hora do atendimento médico inválida (HHMM, 0000 a 2359).")
   if (!Number.isInteger(a?.durTrat) || a.durTrat < 0 || a.durTrat > 9999) e.push("Duração do tratamento (em dias) inválida.")
-  if (!COD9.test(a?.dscLesao || "")) e.push("Natureza da lesão (Tabela 17) deve ter 9 dígitos.")
+  if (!existeNaTabela("17", a?.dscLesao)) e.push("Natureza da lesão: código não existe na Tabela 17.")
   if (!/^[A-Z]\d{2,3}$/.test((a?.codCID || "").replace(".", "").toUpperCase())) e.push("CID inválido (ex.: S61 ou S610).")
   if (!a?.emitente?.nmEmit?.trim() || a.emitente.nmEmit.trim().length < 2) e.push("Informe o nome do médico/dentista emitente do atestado.")
   if (!["1", "2", "3"].includes(a?.emitente?.ideOC)) e.push("Informe o conselho do emitente (CRM, CRO ou RMS).")
@@ -155,11 +182,14 @@ export function buildS2210XML(d: S2210Data, verProc = process.env.ESOCIAL_VER_PR
   x += "<cat>"
   x += tag("dtAcid", c.dtAcid)
   x += tag("tpAcid", c.tpAcid)
-  x += optTag("hrAcid", c.hrAcid)
-  x += optTag("hrsTrabAntesAcid", c.hrsTrabAntesAcid)
+  // Leiaute: hora e horas trabalhadas não podem ser informadas em doença (tpAcid = 2)
+  if (c.tpAcid !== "2") {
+    x += optTag("hrAcid", c.hrAcid)
+    x += optTag("hrsTrabAntesAcid", c.hrsTrabAntesAcid)
+  }
   x += tag("tpCat", c.tpCat)
   x += tag("indCatObito", c.indCatObito)
-  if (c.indCatObito === "S" || c.tpCat === "3") x += optTag("dtObito", c.dtObito)
+  if (c.indCatObito === "S") x += optTag("dtObito", c.dtObito)
   x += tag("indComunPolicia", c.indComunPolicia)
   x += tag("codSitGeradora", c.codSitGeradora)
   x += tag("iniciatCAT", c.iniciatCAT)

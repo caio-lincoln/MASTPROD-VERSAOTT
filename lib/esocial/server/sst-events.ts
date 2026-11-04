@@ -6,6 +6,7 @@ import { empregadorIde } from "../events/common"
 import { buildS2220XML, validateS2220, type AsoDados } from "../events/S-2220"
 import { buildS2210XML, validateS2210, type CatDados } from "../events/S-2210"
 import { ValidationError } from "./s2240"
+import { resolverVinculo } from "./vinculos"
 
 /**
  * S-2220 (ASO) e S-2210 (CAT): o conteúdo do evento fica em JSONB (asos.dados / cats.dados)
@@ -29,13 +30,11 @@ async function loadVinculo(client: PoolClient, empresaId: string, funcionarioId:
     [funcionarioId]
   )
   if (!f || f.empresa_id !== empresaId) throw new HttpError(400, "Funcionário não pertence à empresa selecionada.")
-  if (matricula?.trim() && matricula.trim() !== f.matricula_esocial) {
-    await client.query("UPDATE funcionarios SET matricula_esocial = $1 WHERE id = $2", [matricula.trim(), funcionarioId])
-    f.matricula_esocial = matricula.trim()
-  }
+  // Evento por vínculo: usa a matrícula escolhida sem trocar a principal do trabalhador
+  const v = await resolverVinculo(client, empresaId, funcionarioId, matricula)
   return {
     empregador: empregadorIde(f.cnpj, f.natureza_juridica),
-    trabalhador: { cpf: f.cpf, matricula: f.matricula_esocial, codCateg: f.cod_categoria },
+    trabalhador: { cpf: f.cpf, matricula: v.matricula, codCateg: v.codCategoria },
   }
 }
 
@@ -61,9 +60,9 @@ export async function createS2220Event(userId: string, input: SstInput<AsoDados>
     if (errors.length) throw new ValidationError(errors)
 
     const { rows: [aso] } = await client.query(
-      `INSERT INTO asos (empresa_id, funcionario_id, tp_exame_ocup, dt_aso, res_aso, medico_nome, dados, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [input.empresaId, input.funcionarioId, input.dados.tpExameOcup, input.dados.dtAso, input.dados.resAso ?? null, input.dados.medico.nmMed, JSON.stringify(input.dados), userId]
+      `INSERT INTO asos (empresa_id, funcionario_id, tp_exame_ocup, dt_aso, res_aso, medico_nome, dados, created_by, matricula)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      [input.empresaId, input.funcionarioId, input.dados.tpExameOcup, input.dados.dtAso, input.dados.resAso ?? null, input.dados.medico.nmMed, JSON.stringify(input.dados), userId, base.trabalhador.matricula]
     )
     const { id: idEvento, xml } = buildS2220XML(data)
     const evento = await insertEvento(client, {
@@ -89,9 +88,9 @@ export async function createS2210Event(userId: string, input: SstInput<CatDados>
     if (errors.length) throw new ValidationError(errors)
 
     const { rows: [cat] } = await client.query(
-      `INSERT INTO cats (empresa_id, funcionario_id, dt_acid, tp_acid, tp_cat, ind_obito, dados, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-      [input.empresaId, input.funcionarioId, input.dados.dtAcid, input.dados.tpAcid, input.dados.tpCat, input.dados.indCatObito === "S", JSON.stringify(input.dados), userId]
+      `INSERT INTO cats (empresa_id, funcionario_id, dt_acid, tp_acid, tp_cat, ind_obito, dados, created_by, matricula)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      [input.empresaId, input.funcionarioId, input.dados.dtAcid, input.dados.tpAcid, input.dados.tpCat, input.dados.indCatObito === "S", JSON.stringify(input.dados), userId, base.trabalhador.matricula]
     )
     const { id: idEvento, xml } = buildS2210XML(data)
     const evento = await insertEvento(client, {
@@ -120,7 +119,9 @@ export async function regenerateSstXml(eventoId: string) {
     if (ev.status === "enviado" || ev.status === "processado") {
       throw new HttpError(409, "Evento já enviado. Para corrigir, gere uma retificação.")
     }
-    const base = await loadVinculo(client, ev.empresa_id, ev.funcionario_id)
+    const tabela = ev.tipo_evento === "S-2220" ? "asos" : "cats"
+    const { rows: [origem] } = await client.query(`SELECT matricula FROM ${tabela} WHERE id = $1`, [ev.referencia_id])
+    const base = await loadVinculo(client, ev.empresa_id, ev.funcionario_id, origem?.matricula)
     const retif = { indRetif: ev.ind_retif ?? "1", nrRecibo: ev.nr_recibo_retif }
     let built: { id: string; xml: string }
     if (ev.tipo_evento === "S-2220") {

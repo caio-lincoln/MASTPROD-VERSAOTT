@@ -6,6 +6,7 @@ import { cleanInscricao, empregadorIde, onlyDigits } from "../events/common"
 import { buildS2240XML } from "../events/S-2240/builder"
 import { validateS2240 } from "../events/S-2240/validator"
 import { COD_AUSENCIA_AGENTE, type S2240Data } from "../events/S-2240/types"
+import { resolverVinculo } from "./vinculos"
 
 /** Payload enviado pela tela de criação do S-2240. */
 export interface S2240Input {
@@ -61,7 +62,10 @@ export async function loadS2240Data(
   retif?: { indRetif: "1" | "2"; nrRecibo?: string | null }
 ): Promise<S2240Data> {
   const { rows: [x] } = await client.query(
-    `SELECT x.*, e.cnpj, e.natureza_juridica, f.cpf, f.matricula_esocial, f.cod_categoria,
+    `SELECT x.*, e.cnpj, e.natureza_juridica, f.cpf,
+            COALESCE(x.matricula, f.matricula_esocial) AS matricula_vinculo,
+            COALESCE((SELECT v.cod_categoria FROM funcionario_vinculos v
+                       WHERE v.funcionario_id = f.id AND v.matricula = COALESCE(x.matricula, f.matricula_esocial)), f.cod_categoria) AS categ_vinculo,
             a.local_amb, a.dsc_setor, a.tp_insc AS amb_tp_insc, a.nr_insc AS amb_nr_insc
        FROM exposicoes_trabalhador x
        JOIN empresas e ON e.id = x.empresa_id
@@ -97,7 +101,7 @@ export async function loadS2240Data(
     empregador: empregadorIde(x.cnpj, x.natureza_juridica),
     indRetif: retif?.indRetif ?? "1",
     nrRecibo: retif?.nrRecibo ?? null,
-    trabalhador: { cpf: x.cpf, matricula: x.matricula_esocial, codCateg: x.cod_categoria },
+    trabalhador: { cpf: x.cpf, matricula: x.matricula_vinculo, codCateg: x.categ_vinculo },
     dtIniCondicao: toDate(x.dt_ini_condicao)!,
     dtFimCondicao: toDate(x.dt_fim_condicao),
     ambientes: [{ localAmb: x.local_amb, dscSetor: x.dsc_setor, tpInsc: x.amb_tp_insc, nrInsc: x.amb_nr_insc }],
@@ -153,12 +157,8 @@ export async function createS2240Event(userId: string, input: S2240Input) {
     if (!func || func.empresa_id !== input.empresaId) {
       throw new HttpError(400, "Funcionário não pertence à empresa selecionada.")
     }
-    if (input.matricula?.trim()) {
-      await client.query("UPDATE funcionarios SET matricula_esocial = $1 WHERE id = $2", [
-        input.matricula.trim(),
-        input.funcionarioId,
-      ])
-    }
+    // O S-2240 é por vínculo: usa a matrícula escolhida sem trocar a principal do trabalhador
+    const vinculo = await resolverVinculo(client, input.empresaId, input.funcionarioId, input.matricula)
 
     // Ambiente: existente ou novo
     let ambienteId = input.ambienteId || null
@@ -205,8 +205,8 @@ export async function createS2240Event(userId: string, input: S2240Input) {
 
     const { rows: [exposicao] } = await client.query(
       `INSERT INTO exposicoes_trabalhador
-         (empresa_id, funcionario_id, ambiente_id, dt_ini_condicao, dt_fim_condicao, dsc_ativ_des, obs_compl, status, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pronto', $8) RETURNING id`,
+         (empresa_id, funcionario_id, ambiente_id, dt_ini_condicao, dt_fim_condicao, dsc_ativ_des, obs_compl, status, created_by, matricula)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pronto', $8, $9) RETURNING id`,
       [
         input.empresaId,
         input.funcionarioId,
@@ -216,6 +216,7 @@ export async function createS2240Event(userId: string, input: S2240Input) {
         input.dscAtivDes ?? "",
         input.obsCompl || null,
         userId,
+        vinculo.matricula,
       ]
     )
 

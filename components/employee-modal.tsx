@@ -14,7 +14,7 @@ interface EmployeeModalProps {
   onSubmit: (data: any) => void
   initialData?: any
   mode: "create" | "edit"
-  companies: Array<{ id: number; name: string; cnpj: string }>
+  companies: Array<{ id: string; name: string; cnpj?: string }>
 }
 
 export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode, companies }: EmployeeModalProps) {
@@ -95,14 +95,8 @@ export function EmployeeModal({ open, onOpenChange, onSubmit, initialData, mode,
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Validate required fields if necessary or rely on HTML required attribute
-    // Here we ensure companyId is a valid number, default to 0 if invalid
-    const companyId = Number.parseInt(formData.companyId)
-    
-    onSubmit({
-      ...formData,
-      companyId: Number.isNaN(companyId) ? 0 : companyId,
-    })
+    // companyId é o UUID da empresa (texto)
+    onSubmit({ ...formData })
   }
 
   return (

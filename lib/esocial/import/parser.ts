@@ -249,6 +249,23 @@ export interface TrabalhadorImportado {
   afastamentoInicio: string | null // afastamento em aberto (S-2230 sem término)
   afastamentoMotivo: string | null // Tabela 18
   eventos: EventKind[]
+  /** Vínculos (matrículas) tocados pelos eventos do lote */
+  vinculos: VinculoImportado[]
+  /** Matrículas com remuneração (S-1200/S-1202), usadas quando não há S-2200 */
+  matriculasRemuneradas: Set<string>
+}
+
+export interface VinculoImportado {
+  matricula: string | null
+  codCategoria: string | null
+  cargo: string | null
+  cbo: string | null
+  dataAdmissao: string | null
+  dataDesligamento: string | null
+  /** O lote traz a admissão (S-2200/S-2300) deste vínculo */
+  temInicio: boolean
+  /** O lote traz o desligamento (S-2299/S-2399) deste vínculo */
+  temFim: boolean
 }
 
 export interface EmpregadorImportado {
@@ -387,6 +404,8 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         afastamentoInicio: null,
         afastamentoMotivo: null,
         eventos: [],
+        vinculos: [],
+        matriculasRemuneradas: new Set<string>(),
       }
       workers.set(cpf, w)
     }
@@ -405,6 +424,27 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
     w.cargo = opt(c.nmCargo) ?? opt(c.nmFuncao) ?? w.cargo
     w.cbo = opt(c.CBOCargo) ?? opt(c.CBOFuncao) ?? w.cbo
     w.codCategoria = opt(c.codCateg) ?? w.codCategoria
+  }
+
+  // Cada matrícula é um vínculo próprio: a mesma pessoa pode ter vínculos simultâneos
+  // e várias matrículas ao longo do tempo (readmissões)
+  const vinculosPorCpf = new Map<string, Map<string, VinculoImportado>>()
+  const vin = (cpf: string, matricula: string | null, codCateg: string | null): VinculoImportado => {
+    const chave = matricula ?? `categ:${codCateg ?? ""}`
+    let mapa = vinculosPorCpf.get(cpf)
+    if (!mapa) vinculosPorCpf.set(cpf, (mapa = new Map()))
+    let v = mapa.get(chave)
+    if (!v) {
+      v = { matricula, codCategoria: codCateg, cargo: null, cbo: null, dataAdmissao: null, dataDesligamento: null, temInicio: false, temFim: false }
+      mapa.set(chave, v)
+    }
+    return v
+  }
+  const contratoVinculo = (v: VinculoImportado, c: any) => {
+    if (!c) return
+    v.cargo = opt(c.nmCargo) ?? opt(c.nmFuncao) ?? v.cargo
+    v.cbo = opt(c.CBOCargo) ?? opt(c.CBOFuncao) ?? v.cbo
+    v.codCategoria = opt(c.codCateg) ?? v.codCategoria
   }
 
   let empregador: EmpregadorImportado | null = null
@@ -462,6 +502,11 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         w.dataDesligamento = null // nova admissão reabre o vínculo
         w.semVinculo = false
         contrato(w, n.vinculo?.infoContrato)
+        const v = vin(w.cpf, opt(n.vinculo?.matricula), opt(n.vinculo?.infoContrato?.codCateg))
+        v.dataAdmissao = eventDate(e) !== "0000" ? eventDate(e) : v.dataAdmissao
+        v.dataDesligamento = null
+        v.temInicio = true
+        contratoVinculo(v, n.vinculo?.infoContrato)
         break
       }
       case "S-2300": {
@@ -474,6 +519,11 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         w.dataDesligamento = null
         w.semVinculo = true
         contrato(w, n.infoTSVInicio?.infoComplementares?.cargoFuncao)
+        const v = vin(w.cpf, opt(n.infoTSVInicio?.matricula), opt(n.infoTSVInicio?.codCateg))
+        v.dataAdmissao = opt(n.infoTSVInicio?.dtInicio) ?? v.dataAdmissao
+        v.dataDesligamento = null
+        v.temInicio = true
+        contratoVinculo(v, n.infoTSVInicio?.infoComplementares?.cargoFuncao)
         break
       }
       case "S-2205": {
@@ -490,6 +540,7 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
           w.matricula = mat ?? w.matricula
           contrato(w, n.altContratual?.vinculo?.infoContrato)
         }
+        if (mat) contratoVinculo(vin(w.cpf, mat, null), n.altContratual?.vinculo?.infoContrato)
         break
       }
       case "S-2299": {
@@ -500,12 +551,20 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
           w.matricula = mat ?? w.matricula
           w.dataDesligamento = opt(n.infoDeslig?.dtDeslig)
         }
+        if (mat) {
+          const v = vin(w.cpf, mat, null)
+          v.dataDesligamento = opt(n.infoDeslig?.dtDeslig)
+          v.temFim = true
+        }
         break
       }
       case "S-2399": {
         const w = get(digits(n.ideTrabSemVinculo?.cpfTrab))
         w.eventos.push(e.kind)
         w.dataDesligamento = opt(n.infoTSVTermino?.dtTerm)
+        const v = vin(w.cpf, opt(n.ideTrabSemVinculo?.matricula), opt(n.ideTrabSemVinculo?.codCateg))
+        v.dataDesligamento = opt(n.infoTSVTermino?.dtTerm)
+        v.temFim = true
         break
       }
       case "S-2230": {
@@ -531,6 +590,14 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         w.dataNascimento = w.dataNascimento ?? opt(n.ideTrabalhador?.infoComplem?.dtNascto)
         const perApur = text(n.ideEvento?.perApur)
         if (perApur && (!w.ultimoPerApur || perApur > w.ultimoPerApur)) w.ultimoPerApur = perApur
+        for (const dm of arr<any>(n.dmDev)) {
+          for (const est of arr<any>(dm.infoPerApur?.ideEstabLot ?? dm.infoPerApur?.ideEstab)) {
+            for (const rem of arr<any>(est.remunPerApur)) {
+              const mat = opt(rem.matricula)
+              if (mat) w.matriculasRemuneradas.add(mat)
+            }
+          }
+        }
         if (!w.matricula) {
           for (const dm of arr<any>(n.dmDev)) {
             for (const est of arr<any>(dm.infoPerApur?.ideEstabLot ?? dm.infoPerApur?.ideEstab)) {
@@ -548,6 +615,8 @@ export function consolidate(events: ParsedEvent[], empregadorDoc: string): Conso
         break
     }
   }
+
+  for (const w of workers.values()) w.vinculos = [...(vinculosPorCpf.get(w.cpf)?.values() ?? [])]
 
   const trabalhadores = [...workers.values()]
     .filter((w) => w.cpf.length === 11)

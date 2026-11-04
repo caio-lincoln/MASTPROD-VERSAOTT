@@ -48,9 +48,9 @@ export async function importarHistoricoSst(client: PoolClient, empresaId: string
     if (e.kind === "S-2220") {
       const aso = asoDe(e.node)
       const { rows: [r] } = await client.query(
-        `INSERT INTO asos (empresa_id, funcionario_id, tp_exame_ocup, dt_aso, res_aso, medico_nome, dados, origem, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'esocial', $8) RETURNING id`,
-        [empresaId, funcId, aso.tpExameOcup, aso.dtAso, aso.resAso, aso.medico.nmMed || null, JSON.stringify(aso), userId]
+        `INSERT INTO asos (empresa_id, funcionario_id, tp_exame_ocup, dt_aso, res_aso, medico_nome, dados, origem, created_by, matricula)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'esocial', $8, $9) RETURNING id`,
+        [empresaId, funcId, aso.tpExameOcup, aso.dtAso, aso.resAso, aso.medico.nmMed || null, JSON.stringify(aso), userId, vinculo.matricula]
       )
       await registrarEvento(e, "S-2220", funcId, r.id)
       continue
@@ -59,9 +59,9 @@ export async function importarHistoricoSst(client: PoolClient, empresaId: string
     if (e.kind === "S-2210") {
       const cat = catDe(e.node)
       const { rows: [r] } = await client.query(
-        `INSERT INTO cats (empresa_id, funcionario_id, dt_acid, tp_acid, tp_cat, ind_obito, dados, origem, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, 'esocial', $8) RETURNING id`,
-        [empresaId, funcId, cat.dtAcid, cat.tpAcid, cat.tpCat, cat.indCatObito === "S", JSON.stringify(cat), userId]
+        `INSERT INTO cats (empresa_id, funcionario_id, dt_acid, tp_acid, tp_cat, ind_obito, dados, origem, created_by, matricula)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 'esocial', $8, $9) RETURNING id`,
+        [empresaId, funcId, cat.dtAcid, cat.tpAcid, cat.tpCat, cat.indCatObito === "S", JSON.stringify(cat), userId, vinculo.matricula]
       )
       await registrarEvento(e, "S-2210", funcId, r.id)
       continue
@@ -89,9 +89,9 @@ export async function importarHistoricoSst(client: PoolClient, empresaId: string
 
     const { rows: [exp] } = await client.query(
       `INSERT INTO exposicoes_trabalhador
-         (empresa_id, funcionario_id, ambiente_id, dt_ini_condicao, dt_fim_condicao, dsc_ativ_des, obs_compl, status, origem, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'importado', 'esocial', $8) RETURNING id`,
-      [empresaId, funcId, ambienteId, x.dtIniCondicao, x.dtFimCondicao, x.dscAtivDes, x.obsCompl, userId]
+         (empresa_id, funcionario_id, ambiente_id, dt_ini_condicao, dt_fim_condicao, dsc_ativ_des, obs_compl, status, origem, created_by, matricula)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'importado', 'esocial', $8, $9) RETURNING id`,
+      [empresaId, funcId, ambienteId, x.dtIniCondicao, x.dtFimCondicao, x.dscAtivDes, x.obsCompl, userId, vinculo.matricula]
     )
 
     for (const [i, a] of x.agentes.entries()) {

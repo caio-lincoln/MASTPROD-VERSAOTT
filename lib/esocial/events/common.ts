@@ -51,6 +51,11 @@ export function empregadorIde(cnpjOuCpf: string, naturezaJuridica?: string | nul
   return { tpInsc: "1", nrInsc: completo ? documento : documento.slice(0, 8), documento }
 }
 
+// Sequencial do Id dentro do mesmo segundo: crescente para não repetir em lotes rápidos
+// (um sorteio aleatório colidia ao gerar dezenas de eventos no mesmo segundo)
+let ultimoStamp = ""
+let ultimoSeq = 0
+
 /**
  * Id do evento: "ID" + tpInsc(1) + nrInsc(14, completado com zeros à direita)
  * + AAAAMMDDHHMMSS + sequencial(5) = 36 caracteres.
@@ -61,7 +66,16 @@ export function generateEventId(ide: EmpregadorIde, now = new Date(), seq?: numb
   const stamp =
     `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
     `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-  const sequencial = pad(seq ?? Math.floor(Math.random() * 99999) + 1, 5)
+  if (seq === undefined) {
+    if (stamp === ultimoStamp && ultimoSeq < 99999) ultimoSeq++
+    else {
+      // início aleatório reduz colisão entre processos diferentes no mesmo segundo
+      ultimoStamp = stamp
+      ultimoSeq = Math.floor(Math.random() * 50000) + 1
+    }
+    seq = ultimoSeq
+  }
+  const sequencial = pad(seq, 5)
   const id = `ID${ide.tpInsc}${nr}${stamp}${sequencial}`
   if (id.length !== 36) {
     throw new Error(`Id de evento com tamanho inválido (${id.length}).`)

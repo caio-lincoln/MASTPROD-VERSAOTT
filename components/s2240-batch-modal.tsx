@@ -15,7 +15,8 @@ interface Props {
 }
 
 interface Pendente {
-  id: string
+  id: string // vínculo
+  funcionarioId: string
   nome: string
   cpf: string
   matricula: string
@@ -43,7 +44,7 @@ interface Responsavel {
 
 interface Resultado {
   gerados: number
-  falhas: { funcionarioId: string; nome: string; erros: string[] }[]
+  falhas: { vinculoId: string; nome: string; erros: string[] }[]
 }
 
 const fmtData = (d: string | null) => (d ? d.split("-").reverse().join("/") : "-")
@@ -131,7 +132,7 @@ export default function S2240BatchModal({ isOpen, onClose, onCreated }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           empresaId,
-          funcionarioIds: selecionadosLista.map((p) => p.id),
+          vinculoIds: selecionadosLista.map((p) => p.id),
           copiarAnterior,
           modeloExposicaoId: modeloId || null,
           dataInicio: tipoData === "fixa" ? { tipo: "fixa", data: dataFixa } : { tipo: "admissao" },
@@ -188,8 +189,8 @@ export default function S2240BatchModal({ isOpen, onClose, onCreated }: Props) {
                 <AlertDescription className="text-sm">
                   <ul className="list-disc pl-4 mt-1 space-y-1 max-h-40 overflow-y-auto">
                     {resultado.falhas.map((f) => (
-                      <li key={f.funcionarioId}>
-                        <strong>{f.nome || f.funcionarioId}</strong>: {f.erros.join("; ")}
+                      <li key={f.vinculoId}>
+                        <strong>{f.nome || f.vinculoId}</strong>: {f.erros.join("; ")}
                       </li>
                     ))}
                   </ul>
